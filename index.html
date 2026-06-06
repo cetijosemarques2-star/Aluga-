@@ -63,30 +63,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <section id="habilidades">
 <h2>📚 Habilidades Disponíveis</h2><br>
 <div class="cards" id="habilidadesLista">
-<div class="card" data-nome="reforço de matemática">
-<div class="card-icon">📐</div>
-<h3>Reforço de Matemática</h3>
-<p>Prof: João Silva ⭐ 4.9</p>
-<p class="price">R$ 15 / hora</p>
-<button class="btn primary" onclick="solicitar('Reforço de Matemática', 'Contratar')">Contratar</button>
-</div>
-
-<div class="card" data-nome="inglês básico">
-<div class="card-icon">🗣️</div>
-<h3>Inglês Básico</h3>
-<p>Prof: Ana Costa ⭐ 4.8</p>
-<p class="price">R$ 20 / hora</p>
-<button class="btn primary" onclick="solicitar('Inglês Básico', 'Contratar')">Contratar</button>
-</div>
-
-<div class="card" data-nome="lógica de programação python">
-<div class="card-icon">🐍</div>
-<h3>Lógica de Programação (Python)</h3>
-<p>Prof: Carlos Melo ⭐ 5.0</p>
-<p class="price">R$ 25 / hora</p>
-<button class="btn primary" onclick="solicitar('Lógica de Programação (Python)', 'Contratar')">Contratar</button>
-</div>
-</div>
+    </div>
 </section>
 
 <hr style="border: 0; border-top: 1px solid #e2e8f0;">
@@ -94,27 +71,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <section id="objetos">
 <h2>🔧 Objetos para Alugar</h2><br>
 <div class="cards" id="objetosLista">
-<div class="card" data-nome="calculadora científica">
-<div class="card-icon">🧮</div>
-<h3>Calculadora Científica</h3>
-<p class="price">R$ 5 / dia</p>
-<button class="btn primary" onclick="solicitar('Calculadora Científica', 'Alugar')">Alugar</button>
-</div>
-
-<div class="card" data-nome="notebook">
-<div class="card-icon">💻</div>
-<h3>Notebook Intel i5</h3>
-<p class="price">R$ 20 / dia</p>
-<button class="btn primary" onclick="solicitar('Notebook', 'Alugar')">Alugar</button>
-</div>
-
-<div class="card" data-nome="microfone hyperx quadcast">
-<div class="card-icon">🎙️</div>
-<h3>Microfone HyperX QuadCast</h3>
-<p class="price">R$ 15 / dia</p>
-<button class="btn primary" onclick="solicitar('Microfone HyperX QuadCast', 'Alugar')">Alugar</button>
-</div>
-</div>
+    </div>
 </section>
 
 <section id="anunciar">
@@ -149,7 +106,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <div class="cards">
 <div class="perfil-card">
 <h3>📊 Estatísticas</h3>
-<p>Anúncios Ativos: <span id="anuncios">6</span></p>
+<p>Anúncios Ativos: <span id="anuncios">0</span></p>
 <p>Solicitações: <span id="sols">0</span></p>
 </div>
 
@@ -177,10 +134,122 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 © 2026 Aluga+ • Conectando Soluções
 </footer>
 
-<script>
-let contador = 0;
-let anuncios = 6;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getDatabase, ref, push, set, onChildAdded, update } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyD3jp-N19gnDIzCClGQohx_5crwfopM3uM",
+    authDomain: "aluga-a35b3.firebaseapp.com",
+    databaseURL: "https://aluga-a35b3-default-rtdb.firebaseio.com",
+    projectId: "aluga-a35b3",
+    storageBucket: "aluga-a35b3.firebasestorage.app",
+    messagingSenderId: "604833955818",
+    appId: "1:604833955818:web:ad0aa07aa264c52c143c93",
+    measurementId: "G-Y471JENWTG"
+  };
+
+  // Inicializa o Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let qtdAnuncios = 0;
+  let qtdSolicitacoes = 0;
+
+  // expor funções essenciais para o escopo global (para os botões onclick funcionarem)
+  window.criarAnuncio = function() {
+    let titulo = document.getElementById('titulo').value;
+    let tipo = document.getElementById('tipo').value;
+    let preco = document.getElementById('preco').value;
+    let periodo = document.getElementById('periodo').value;
+
+    if(!titulo || !preco){
+        window.aviso("Por favor, preencha todos os campos antes de publicar.");
+        return;
+    }
+
+    const listaRef = ref(db, 'anuncios');
+    const novoAnuncioRef = push(listaRef);
+    
+    set(novoAnuncioRef, {
+        titulo: titulo,
+        tipo: tipo,
+        preco: "R$ " + preco + " " + periodo
+    }).then(() => {
+        window.aviso("Seu anúncio de " + tipo + " foi publicado!");
+        document.getElementById('titulo').value = '';
+        document.getElementById('preco').value = '';
+    });
+  }
+
+  window.solicitar = function(item, tipoAcao) {
+    const listaSolsRef = ref(db, 'solicitacoes');
+    const novaSolRef = push(listaSolsRef);
+
+    set(novaSolRef, {
+        item: item,
+        tipoAcao: tipoAcao,
+        status: "🟡 Pendente"
+    }).then(() => {
+        window.aviso("Solicitação de " + tipoAcao + " enviada!");
+    });
+  }
+
+  window.mudarStatus = function(id, novoStatus) {
+    const statusRef = ref(db, 'solicitacoes/' + id);
+    update(statusRef, { status: novoStatus }).then(() => {
+        document.getElementById('span-' + id).innerText = novoStatus;
+    });
+  }
+
+  // Escutar novos anúncios do Firebase em tempo real
+  onChildAdded(ref(db, 'anuncios'), (snapshot) => {
+    const dados = snapshot.val();
+    qtdAnuncios++;
+    document.getElementById('anuncios').innerText = qtdAnuncios;
+
+    let textoBotao = (dados.tipo === 'Objeto') ? 'Alugar' : 'Contratar';
+    let containerId = (dados.tipo === 'Objeto') ? 'objetosLista' : 'habilidadesLista';
+    let icone = (dados.tipo === 'Objeto') ? '📦' : '💡';
+
+    let cardHtml = `
+    <div class="card" data-nome="${dados.titulo.toLowerCase()}">
+        <div class="card-icon">${icone}</div>
+        <h3>${dados.titulo}</h3>
+        <p class="price">${dados.preco}</p>
+        <button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}')">${textoBotao}</button>
+    </div>`;
+
+    document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
+  });
+
+  // Escutar novas solicitações do Firebase em tempo real
+  onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
+    const dados = snapshot.val();
+    const id = snapshot.key;
+    qtdSolicitacoes++;
+    
+    document.getElementById('notif').innerText = qtdSolicitacoes;
+    document.getElementById('sols').innerText = qtdSolicitacoes;
+
+    let solHtml = `
+    <div class="solicitacao" id="sol-${id}">
+        <h3>${dados.item}</h3>
+        <p>Solicitante: Usuário Demo</p>
+        <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
+        <button class="btn aceitar" onclick="mudarStatus('${id}','🟢 Aceita')">✅ Aceitar</button>
+        <button class="btn recusar" onclick="mudarStatus('${id}','🔴 Recusada')">❌ Recusar</button>
+        <button class="btn chat" onclick="chat()">💬 Conversar</button>
+        <button class="btn finalizar" onclick="mudarStatus('${id}','🔵 Finalizada')">🔵 Finalizar</button>
+    </div>`;
+
+    document.getElementById('lista').insertAdjacentHTML('beforeend', solHtml);
+  });
+
+</script>
+
+<script>
+// Funções utilitárias visuais mantidas em script padrão
 function aviso(msg){
     document.getElementById('texto').innerText = msg;
     document.getElementById('modal').style.display = 'block';
@@ -190,32 +259,6 @@ function fechar(){
     document.getElementById('modal').style.display = 'none';
 }
 
-function solicitar(item, tipoAcao){
-    contador++;
-    document.getElementById('notif').innerText = contador;
-    document.getElementById('sols').innerText = contador;
-
-    let id = 'status' + contador;
-
-    let novaSolicitacao = `
-    <div class="solicitacao">
-        <h3>${item}</h3>
-        <p>Solicitante: Usuário Demo</p>
-        <p style="margin: 5px 0;">Status: <span id="${id}">🟡 Pendente</span></p>
-        <button class="btn aceitar" onclick="mudar('${id}','🟢 Aceita')">✅ Aceitar</button>
-        <button class="btn recusar" onclick="mudar('${id}','🔴 Recusada')">❌ Recusar</button>
-        <button class="btn chat" onclick="chat()">💬 Conversar</button>
-        <button class="btn finalizar" onclick="mudar('${id}','🔵 Finalizada')">🔵 Finalizar</button>
-    </div>`;
-    
-    document.getElementById('lista').insertAdjacentHTML('beforeend', novaSolicitacao);
-    aviso("Solicitação de " + tipoAcao + " enviada ao vendedor!");
-}
-
-function mudar(id, status){
-    document.getElementById(id).innerText = status;
-}
-
 function chat(){
     let msg = prompt("Digite uma mensagem para o interessado:");
     if(msg){
@@ -223,47 +266,13 @@ function chat(){
     }
 }
 
-function criarAnuncio(){
-    let titulo = document.getElementById('titulo').value;
-    let tipo = document.getElementById('tipo').value;
-    let preco = document.getElementById('preco').value;
-    let periodo = document.getElementById('periodo').value;
-
-    if(!titulo || !preco){
-        aviso("Por favor, preencha todos os campos antes de publicar.");
-        return;
-    }
-
-    anuncios++;
-    document.getElementById('anuncios').innerText = anuncios;
-
-    let textoBotao = (tipo === 'Objeto') ? 'Alugar' : 'Contratar';
-    let containerId = (tipo === 'Objeto') ? 'objetosLista' : 'habilidadesLista';
-    let icone = (tipo === 'Objeto') ? '📦' : '💡';
-
-    let novoCard = `
-    <div class="card" data-nome="${titulo.toLowerCase()}">
-        <div class="card-icon">${icone}</div>
-        <h3>${titulo}</h3>
-        <p class="price">R$ ${preco} ${periodo}</p>
-        <button class="btn primary" onclick="solicitar('${titulo}', '${textoBotao}')">${textoBotao}</button>
-    </div>`;
-
-    document.getElementById(containerId).insertAdjacentHTML('beforeend', novoCard);
-    aviso("Seu anúncio de " + tipo + " foi publicado!");
-
-    document.getElementById('titulo').value = '';
-    document.getElementById('preco').value = '';
-}
-
-// Nova Função de Busca Dinâmica
 function filtrarItens() {
     let termo = document.getElementById('busca').value.toLowerCase();
     let cards = document.querySelectorAll('.card');
 
     cards.forEach(card => {
         let nomeItem = card.getAttribute('data-nome');
-        if(nomeItem.includes(termo)) {
+        if(nomeItem && nomeItem.includes(termo)) {
             card.style.display = "block";
         } else {
             card.style.display = "none";

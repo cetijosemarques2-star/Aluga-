@@ -144,6 +144,22 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 }
 .chat-item:hover { background: #f1f5f9; }
 .btn-logout { background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer; margin-top: 5px; }
+
+/* SEÇÃO DE FEEDBACKS E COMENTÁRIOS */
+.comments-section {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+    text-align: left;
+}
+.comments-title { font-size: 13px; font-weight: bold; color: #4b5563; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.comments-container { max-height: 120px; overflow-y: auto; margin-bottom: 8px; display: flex; flex-direction: column; gap: 5px; }
+.comment-item { font-size: 12px; background: #f1f5f9; padding: 8px; border-radius: 6px; border-left: 3px solid #10b981; word-break: break-word; }
+.comment-item strong { color: #1e3a8a; }
+.comment-form { display: flex; gap: 6px; margin-top: 5px; }
+.comment-form input { margin-top: 0; padding: 8px; font-size: 12px; border-radius: 6px; }
+.btn-comment { padding: 0 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background 0.2s; }
+.btn-comment:hover { background: #1d4ed8; }
 </style>
 </head>
 <body>
@@ -289,7 +305,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // --- MELHORIA 1: VERIFICAÇÃO DE SESSÃO JÁ EXISTENTE ---
+  // --- ESCUTADOR DE INICIALIZAÇÃO DE SESSÃO ---
   window.addEventListener('DOMContentLoaded', () => {
       const nomeSalvo = localStorage.getItem('aluga_nome');
       const emailSalvo = localStorage.getItem('aluga_email');
@@ -381,9 +397,43 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
-  // --- MELHORIA 2: GESTÃO DE OUVINTES DO CHAT ATIVOS ---
+  // --- NOVA FUNÇÃO: ADICIONAR FEEDBACK / COMENTÁRIO ---
+  window.adicionarComentario = function(anuncioId) {
+      let input = document.getElementById(`input-comment-${anuncioId}`);
+      let texto = input.value.trim();
+      if(!texto) return;
+
+      const comentariosRef = ref(db, `comentarios/${anuncioId}`);
+      const novoComentarioRef = push(comentariosRef);
+
+      set(novoComentarioRef, {
+          autor: usuarioAtual.nome,
+          texto: texto,
+          timestamp: Date.now()
+      }).then(() => {
+          input.value = "";
+      });
+  }
+
+  // --- NOVA FUNÇÃO: ESCUTAR COMENTÁRIOS DE CADA ANÚNCIO ---
+  function escutarComentarios(anuncioId) {
+      onChildAdded(ref(db, `comentarios/${anuncioId}`), (snapshot) => {
+          const comentario = snapshot.val();
+          let container = document.getElementById(`box-comments-${anuncioId}`);
+          
+          let itemHtml = `
+          <div class="comment-item">
+              <strong>${comentario.autor}:</strong> ${comentario.texto}
+          </div>`;
+          
+          if(container) {
+              container.insertAdjacentHTML('beforeend', itemHtml);
+              container.scrollTop = container.scrollHeight;
+          }
+      });
+  }
+
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
-    // Remove o ouvinte anterior antes de mudar de sala para evitar lixo de memória
     if (salaChatAtual) {
         off(ref(db, 'mensagens/' + salaChatAtual));
     }
@@ -450,8 +500,17 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
+    // Limpa os containers antes de carregar dados para evitar duplicidade
+    document.getElementById('habilidadesLista').innerHTML = "";
+    document.getElementById('objetosLista').innerHTML = "";
+    document.getElementById('lista').innerHTML = "";
+    document.getElementById('lista-conversas').innerHTML = "";
+    qtdAnuncios = 0;
+    qtdSolicitacoes = 0;
+
     onChildAdded(ref(db, 'anuncios'), (snapshot) => {
         const dados = snapshot.val();
+        const anuncioId = snapshot.key;
         
         if(dados.vendedorEmail === usuarioAtual.email) {
             qtdAnuncios++;
@@ -474,75 +533,12 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
             <p style="font-size:12px; color:#666;">Por: ${dados.vendedorNome}</p>
             <p class="price">${dados.preco}</p>
             ${botaoHTML}
-        </div>`;
-
-        document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
-    });
-
-    onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
-        const dados = snapshot.val();
-        const id = snapshot.key;
-
-        if(dados.vendedorAlvoEmail === usuarioAtual.email) {
-            qtdSolicitacoes++;
-            document.getElementById('notif').innerText = qtdSolicitacoes;
-            document.getElementById('sols').innerText = qtdSolicitacoes;
-
-            let solHtml = `
-            <div class="solicitacao" id="sol-${id}">
-                <h3>${dados.item}</h3>
-                <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
-                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
-                <button class="btn aceitar" onclick="mudarStatus('${id}','🟢 Aceita')">✅ Aceitar</button>
-                <button class="btn recusar" onclick="mudarStatus('${id}','🔴 Recusada')">❌ Recusar</button>
-                <button class="btn chat" onclick="abrirConversa('${dados.item}', '${usuarioAtual.email}', '${usuarioAtual.nome}', '${dados.solicitanteEmail}', '${dados.solicitanteNome}')">💬 Abrir Chat c/ Cliente</button>
-                <button class="btn finalizar" onclick="mudarStatus('${id}','🔵 Finalizada')">🔵 Finalizar</button>
-            </div>`;
-
-            document.getElementById('lista').insertAdjacentHTML('beforeend', solHtml);
-        }
-    });
-
-    onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
-        const chat = snapshot.val();
-        
-        if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
-            let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
-            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Cliente" : "Vendedor";
-
-            let itemChatHtml = `
-            <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
-                <h4>🤝 Negociação: ${chat.item}</h4>
-                <p style="font-size:13px; color:#555;">Conversando com (${tipoTag}): <strong>${outroNome}</strong></p>
-            </div>`;
-
-            document.getElementById('lista-conversas').insertAdjacentHTML('beforeend', itemChatHtml);
-        }
-    });
-  }
-</script>
-
-<script>
-function aviso(msg){
-    document.getElementById('texto').innerText = msg;
-    document.getElementById('modal').style.display = 'block';
-}
-
-function fechar(){
-    document.getElementById('modal').style.display = 'none';
-}
-
-function verificarEnterChat(e) {
-    if (e.key === 'Enter') {
-        enviarMensagem();
-    }
-}
-
-function filtrarItens() {
-    let termo = document.getElementById('busca').value.toLowerCase();
-    let cards = document.querySelectorAll('.card');
-
-    cards.forEach(card => {
-        let nomeItem = card.getAttribute('data-nome');
-        if(nomeItem && nomeItem.includes(termo)) {
-            card.style.display = "block";
+            
+            <div class="comments-section">
+                <p class="comments-title">💬 Feedbacks e Avaliações:</p>
+                <div class="comments-container" id="box-comments-${anuncioId}"></div>
+                <div class="comment-form">
+                    <input type="text" id="input-comment-${anuncioId}" placeholder="Escreva uma avaliação..." onkeypress="if(event.key==='Enter') window.adicionarComentario('${anuncioId}')">
+                    <button class="btn-comment" onclick="window.adicionarComentario('${anuncioId}')">Avaliar</button>
+                </div>
+            </

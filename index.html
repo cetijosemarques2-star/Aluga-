@@ -66,7 +66,7 @@ section{padding:35px 25px;max-width:1200px;margin:0 auto}
 input,select{width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
 footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:14px}
 
-/* JANELA DE CHAT FLUTUANTE */
+/* JANELA DE CHAT FLUTUANTE ADAPTÁVEL */
 .chat-window {
     display: none;
     position: fixed;
@@ -80,6 +80,15 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     z-index: 500;
     flex-direction: column;
 }
+@media (max-width: 400px) {
+    .chat-window {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+    }
+}
 .chat-header {
     background: #2563eb;
     color: white;
@@ -89,6 +98,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     justify-content: space-between;
     align-items: center;
 }
+@media (max-width: 400px) { .chat-header { border-radius: 0; } }
 .chat-messages {
     flex: 1;
     padding: 15px;
@@ -133,6 +143,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     border-left: 5px solid #2563eb;
 }
 .chat-item:hover { background: #f1f5f9; }
+.btn-logout { background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -140,7 +151,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <div id="tela-login">
     <div class="login-box">
         <h1>Aluga<span>+</span></h1>
-        <p>Bem-vindo! Identifique-se para acessar o painel de vendedores.</p>
+        <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
         <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
@@ -162,7 +173,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <h1>Compartilhe Conhecimento e Recursos</h1>
     <p>Aprenda, ensine e alugue objetos de forma simples.</p>
     <div class="search-container">
-    <input type="text" id="busca" class="search-input" placeholder="🔍 O que você está procurando hoje?" oninput="filtrarItens()">
+    <input type="text" id="busca" class="search-input" placeholder="🔍 O que procura hoje?" oninput="filtrarItens()">
     </div>
     </div>
 
@@ -203,7 +214,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <div>
     <h3 id="perf-nome">Carregando...</h3>
     <p id="perf-email">E-mail...</p>
-    <p class="avaliacao">⭐⭐⭐⭐⭐ (5.0) • Vendedor Autorizado</p>
+    <button class="btn-logout" onclick="logout()">Sair da Conta</button>
     </div>
     </div>
 
@@ -223,8 +234,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
     <br><br>
     <h3>💬 Minhas Conversas Ativas</h3><br>
-    <div id="lista-conversas">
-        </div>
+    <div id="lista-conversas"></div>
 
     <br><br>
     <h3>🔔 Minhas Solicitações Recebidas</h3><br>
@@ -239,7 +249,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
 <div id="janela-chat" class="chat-window">
     <div class="chat-header">
-        <span id="chat-titulo-item" style="font-weight: bold; font-size: 14px;">Chat</span>
+        <span id="chat-titulo-item" style="font-weight: bold; font-size: 13px; max-width: 85%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Chat</span>
         <button onclick="fecharChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold;">✕</button>
     </div>
     <div id="chat-mensagens" class="chat-messages"></div>
@@ -258,7 +268,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onChildAdded, update } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onChildAdded, update, off } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD3jp-N19gnDIzCClGQohx_5crwfopM3uM",
@@ -278,7 +288,15 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdAnuncios = 0;
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
-  let escutandoMensagens = false;
+
+  // --- MELHORIA 1: VERIFICAÇÃO DE SESSÃO JÁ EXISTENTE ---
+  window.addEventListener('DOMContentLoaded', () => {
+      const nomeSalvo = localStorage.getItem('aluga_nome');
+      const emailSalvo = localStorage.getItem('aluga_email');
+      if(nomeSalvo && emailSalvo) {
+          logarUsuario(nomeSalvo, emailSalvo);
+      }
+  });
 
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
@@ -288,7 +306,13 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         window.aviso("Por favor, digite seu nome e e-mail para continuar.");
         return;
     }
+    
+    localStorage.setItem('aluga_nome', nome);
+    localStorage.setItem('aluga_email', email);
+    logarUsuario(nome, email);
+  }
 
+  function logarUsuario(nome, email) {
     usuarioAtual.nome = nome;
     usuarioAtual.email = email;
 
@@ -300,6 +324,11 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     document.getElementById('conteudo-principal').style.display = 'block';
 
     inicializarEscutasBanco();
+  }
+
+  window.logout = function() {
+      localStorage.clear();
+      window.location.reload();
   }
 
   window.criarAnuncio = function() {
@@ -352,13 +381,16 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
-  // --- NOVA ESTRUTURA DE BATE-PAPO REALTIME ---
+  // --- MELHORIA 2: GESTÃO DE OUVINTES DO CHAT ATIVOS ---
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
-    // Cria um ID de sala padronizado baseado no item e participantes
+    // Remove o ouvinte anterior antes de mudar de sala para evitar lixo de memória
+    if (salaChatAtual) {
+        off(ref(db, 'mensagens/' + salaChatAtual));
+    }
+
     let idLimpo = (item + "_" + emailVendedor + "_" + emailCliente).replace(/[.#$\[\]]/g, "-");
     salaChatAtual = idLimpo;
 
-    // Registra ou atualiza metadados da conversa para aparecer no painel lateral
     const chatMetaRef = ref(db, 'chats_ativos/' + salaChatAtual);
     set(chatMetaRef, {
         item: item,
@@ -368,13 +400,13 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         clienteNome: nomeCliente
     });
 
-    // Configura o painel flutuante
     let interlocutor = (usuarioAtual.email === emailVendedor) ? nomeCliente : nomeVendedor;
-    document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor;
+    let tagContexto = (usuarioAtual.email === emailVendedor) ? " [Cliente]" : " [Vendedor]";
+    
+    document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor + tagContexto;
     document.getElementById('chat-mensagens').innerHTML = "";
     document.getElementById('janela-chat').style.display = 'flex';
 
-    // Começa a monitorar as mensagens desta sala específica
     escutarMensagensDaSala(salaChatAtual);
   }
 
@@ -397,27 +429,27 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function escutarMensagensDaSala(salaId) {
-    // Carrega mensagens em tempo real
     onChildAdded(ref(db, 'mensagens/' + salaId), (snapshot) => {
-        if (salaChatAtual !== salaId) return; // Segurança para não duplicar abas
+        if (salaChatAtual !== salaId) return; 
         const msg = snapshot.val();
         let classeRemetente = (msg.remetente === usuarioAtual.email) ? 'enviada' : 'recebida';
 
         let msgHtml = `<div class="msg ${classeRemetente}"><strong>${msg.nome}:</strong><br>${msg.texto}</div>`;
-        let box = document.getElementById('chat-messages');
         let container = document.getElementById('chat-mensagens');
         container.insertAdjacentHTML('beforeend', msgHtml);
-        container.scrollTop = container.scrollHeight; // Auto-scroll para a última mensagem
+        container.scrollTop = container.scrollHeight; 
     });
   }
 
   window.fecharChat = function() {
+    if (salaChatAtual) {
+        off(ref(db, 'mensagens/' + salaChatAtual));
+    }
     document.getElementById('janela-chat').style.display = 'none';
     salaChatAtual = "";
   }
 
   function inicializarEscutasBanco() {
-    // Escuta anúncios globais
     onChildAdded(ref(db, 'anuncios'), (snapshot) => {
         const dados = snapshot.val();
         
@@ -447,7 +479,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
     });
 
-    // Escuta as solicitações recebidas por este perfil
     onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
         const dados = snapshot.val();
         const id = snapshot.key;
@@ -472,11 +503,9 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         }
     });
 
-    // Escuta chats onde o usuário está envolvido para listar no painel de perfil
     onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
         const chat = snapshot.val();
         
-        // Verifica se o usuário logado faz parte dessa conversa (como cliente ou vendedor)
         if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
             let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
             let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Cliente" : "Vendedor";
@@ -494,7 +523,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 </script>
 
 <script>
-// Funções estéticas auxiliares
 function aviso(msg){
     document.getElementById('texto').innerText = msg;
     document.getElementById('modal').style.display = 'block';
@@ -518,12 +546,3 @@ function filtrarItens() {
         let nomeItem = card.getAttribute('data-nome');
         if(nomeItem && nomeItem.includes(termo)) {
             card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
-    });
-}
-</script>
-
-</body>
-</html>

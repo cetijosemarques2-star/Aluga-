@@ -120,7 +120,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         <p>Bem-vindo! Identifique-se para acessar o painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button id="btn-entrar" class="btn primary" style="margin-top:20px; padding:12px; background: #94a3b8; cursor: not-allowed;" onclick="realizarLogin()" disabled>A carregar sistema...</button>
+        <button id="btn-entrar" class="btn primary" style="margin-top:20px; padding:12px; background: #10b981; cursor: pointer;" onclick="realizarLogin()">Entrar no Painel</button>
     </div>
 </div>
 
@@ -247,6 +247,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     measurementId: "G-Y471JENWTG"
   };
 
+  // Inicializa o Firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
@@ -255,7 +256,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // EXPÕE AS FUNÇÕES DO MÓDULO DIRETAMENTE PARA O ESCOPO GLOBAL DO NAVEGADOR
+  // Amarra a função de login diretamente ao escopo global imediatamente
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -500,4 +501,4 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
             <div class="solicitacao" id="sol-${id}">
                 <h3>${dados.item}</h3>
                 <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
-                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dado
+                <p style="margin: 5px 0;">Status: <span id="span-${id}">${

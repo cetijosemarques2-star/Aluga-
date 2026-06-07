@@ -314,6 +314,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       }
   });
 
+  // EXPOSTA GLOBALMENTE PARA O HTML ENCONTRAR
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -397,7 +398,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
-  // --- NOVA FUNÇÃO: ADICIONAR FEEDBACK / COMENTÁRIO ---
+  // --- COMENTÁRIOS E FEEDBACKS ---
   window.adicionarComentario = function(anuncioId) {
       let input = document.getElementById(`input-comment-${anuncioId}`);
       let texto = input.value.trim();
@@ -415,7 +416,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       });
   }
 
-  // --- NOVA FUNÇÃO: ESCUTAR COMENTÁRIOS DE CADA ANÚNCIO ---
   function escutarComentarios(anuncioId) {
       onChildAdded(ref(db, `comentarios/${anuncioId}`), (snapshot) => {
           const comentario = snapshot.val();
@@ -460,6 +460,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     escutarMensagensDaSala(salaChatAtual);
   }
 
+  // EXPOSTA GLOBALMENTE PARA O BOTÃO ENVIAR DO CHAT FUNCIONAR
   window.enviarMensagem = function() {
     let input = document.getElementById('chat-input-msg');
     let texto = input.value.trim();
@@ -500,7 +501,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
-    // Limpa os containers antes de carregar dados para evitar duplicidade
     document.getElementById('habilidadesLista').innerHTML = "";
     document.getElementById('objetosLista').innerHTML = "";
     document.getElementById('lista').innerHTML = "";
@@ -541,4 +541,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
                     <input type="text" id="input-comment-${anuncioId}" placeholder="Escreva uma avaliação..." onkeypress="if(event.key==='Enter') window.adicionarComentario('${anuncioId}')">
                     <button class="btn-comment" onclick="window.adicionarComentario('${anuncioId}')">Avaliar</button>
                 </div>
-            </
+            </div>
+        </div>`;
+
+        document.getEleme

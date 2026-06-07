@@ -117,7 +117,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <div id="tela-login">
     <div class="login-box">
         <h1>Aluga<span>+</span></h1>
-        <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
+        <p>Bem-vindo! Identifique-se para acessar o painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
         <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
@@ -255,14 +255,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  window.addEventListener('DOMContentLoaded', () => {
-      const nomeSalvo = localStorage.getItem('aluga_nome');
-      const emailSalvo = localStorage.getItem('aluga_email');
-      if(nomeSalvo && emailSalvo) {
-          logarUsuario(nomeSalvo, emailSalvo);
-      }
-  });
-
+  // Mapeia as funções ao objeto 'window' global para estarem disponíveis no clique do HTML
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -346,7 +339,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
-  // --- SISTEMA DE COMENTÁRIOS E FEEDBACK NO FIREBASE ---
   window.adicionarComentario = function(anuncioId) {
       let input = document.getElementById(`input-comment-${anuncioId}`);
       let texto = input.value.trim();
@@ -381,7 +373,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       });
   }
 
-  // --- ESTRUTURA DE BATE-PAPO REALTIME ---
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
     if (salaChatAtual) {
         off(ref(db, 'mensagens/' + salaChatAtual));
@@ -449,6 +440,14 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
+    // Evita duplicar elementos na tela ao logar
+    document.getElementById('habilidadesLista').innerHTML = "";
+    document.getElementById('objetosLista').innerHTML = "";
+    document.getElementById('lista').innerHTML = "";
+    document.getElementById('lista-conversas').innerHTML = "";
+    qtdAnuncios = 0;
+    qtdSolicitacoes = 0;
+
     onChildAdded(ref(db, 'anuncios'), (snapshot) => {
         const dados = snapshot.val();
         const anuncioId = snapshot.key;
@@ -486,8 +485,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         </div>`;
 
         document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
-        
-        // Ativa a escuta de comentários em tempo real para este card específico
         escutarComentarios(anuncioId);
     });
 
@@ -504,4 +501,5 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
             <div class="solicitacao" id="sol-${id}">
                 <h3>${dados.item}</h3>
                 <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
-                <p style="margin: 5px 0;">Status: <span id="s
+                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
+  

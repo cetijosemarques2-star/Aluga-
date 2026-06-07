@@ -44,7 +44,7 @@ nav a{color:white;text-decoration:none;margin-left:20px;font-weight:500}
 .search-input{padding:12px;border:none;border-radius:8px;width:100%;font-size:16px}
 section{padding:35px 25px;max-width:1200px;margin:0 auto}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
-.card,.perfil-card,.solicitacao{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s}
+.card,.perfil-card,.solicitacao,.chat-item{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s}
 .card:hover{transform:translateY(-5px)}
 .card-icon{font-size:40px;margin-bottom:10px}
 .price{font-weight:bold;color:#2563eb;font-size:18px;margin:8px 0}
@@ -65,6 +65,74 @@ section{padding:35px 25px;max-width:1200px;margin:0 auto}
 .modal-box{background:white;max-width:400px;margin:150px auto;padding:25px;border-radius:12px;text-align:center}
 input,select{width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
 footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:14px}
+
+/* JANELA DE CHAT FLUTUANTE */
+.chat-window {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    z-index: 500;
+    flex-direction: column;
+}
+.chat-header {
+    background: #2563eb;
+    color: white;
+    padding: 15px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #f8fafc;
+}
+.msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    max-width: 80%;
+    font-size: 14px;
+    word-break: break-word;
+}
+.msg.enviada {
+    background: #2563eb;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+.msg.recebida {
+    background: #e2e8f0;
+    color: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+.chat-input-area {
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #e2e8f0;
+}
+.chat-input-area input {
+    margin-top: 0;
+    padding: 8px;
+}
+.chat-item {
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-left: 5px solid #2563eb;
+}
+.chat-item:hover { background: #f1f5f9; }
 </style>
 </head>
 <body>
@@ -154,6 +222,11 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     </div>
 
     <br><br>
+    <h3>💬 Minhas Conversas Ativas</h3><br>
+    <div id="lista-conversas">
+        </div>
+
+    <br><br>
     <h3>🔔 Minhas Solicitações Recebidas</h3><br>
     <div id="lista"></div>
     </div>
@@ -162,6 +235,18 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <footer>
     © 2026 Aluga+ • Conectando Soluções
     </footer>
+</div>
+
+<div id="janela-chat" class="chat-window">
+    <div class="chat-header">
+        <span id="chat-titulo-item" style="font-weight: bold; font-size: 14px;">Chat</span>
+        <button onclick="fecharChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold;">✕</button>
+    </div>
+    <div id="chat-mensagens" class="chat-messages"></div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input-msg" placeholder="Digite sua proposta..." onkeypress="verificarEnterChat(event)">
+        <button class="btn primary" style="width: auto; margin-top: 0; padding: 8px 15px;" onclick="enviarMensagem()">Enviar</button>
+    </div>
 </div>
 
 <div id="modal" class="modal">
@@ -189,12 +274,12 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Informações do Vendedor Atual logado
   let usuarioAtual = { nome: "", email: "" };
   let qtdAnuncios = 0;
   let qtdSolicitacoes = 0;
+  let salaChatAtual = ""; 
+  let escutandoMensagens = false;
 
-  // Função disparada no botão de Login
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -207,16 +292,13 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     usuarioAtual.nome = nome;
     usuarioAtual.email = email;
 
-    // Atualiza a área visual do perfil do vendedor
     document.getElementById('perf-nome').innerText = nome;
     document.getElementById('perf-email').innerText = email;
     document.getElementById('perf-avatar').innerText = nome.substring(0, 2);
 
-    // Esconde tela de login e exibe a plataforma
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('conteudo-principal').style.display = 'block';
 
-    // Inicia a escuta dos dados em tempo real após saber quem é o usuário
     inicializarEscutasBanco();
   }
 
@@ -234,7 +316,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     const listaRef = ref(db, 'anuncios');
     const novoAnuncioRef = push(listaRef);
     
-    // Salva o anúncio atrelando ao e-mail do criador
     set(novoAnuncioRef, {
         titulo: titulo,
         tipo: tipo,
@@ -252,7 +333,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     const listaSolsRef = ref(db, 'solicitacoes');
     const novaSolRef = push(listaSolsRef);
 
-    // Envia a solicitação marcando quem é o dono do produto (quem vai receber a notificação)
     set(novaSolRef, {
         item: item,
         tipoAcao: tipoAcao,
@@ -272,12 +352,75 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
+  // --- NOVA ESTRUTURA DE BATE-PAPO REALTIME ---
+  window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
+    // Cria um ID de sala padronizado baseado no item e participantes
+    let idLimpo = (item + "_" + emailVendedor + "_" + emailCliente).replace(/[.#$\[\]]/g, "-");
+    salaChatAtual = idLimpo;
+
+    // Registra ou atualiza metadados da conversa para aparecer no painel lateral
+    const chatMetaRef = ref(db, 'chats_ativos/' + salaChatAtual);
+    set(chatMetaRef, {
+        item: item,
+        vendedorEmail: emailVendedor,
+        vendedorNome: nomeVendedor,
+        clienteEmail: emailCliente,
+        clienteNome: nomeCliente
+    });
+
+    // Configura o painel flutuante
+    let interlocutor = (usuarioAtual.email === emailVendedor) ? nomeCliente : nomeVendedor;
+    document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor;
+    document.getElementById('chat-mensagens').innerHTML = "";
+    document.getElementById('janela-chat').style.display = 'flex';
+
+    // Começa a monitorar as mensagens desta sala específica
+    escutarMensagensDaSala(salaChatAtual);
+  }
+
+  window.enviarMensagem = function() {
+    let input = document.getElementById('chat-input-msg');
+    let texto = input.value.trim();
+    if(!texto || !salaChatAtual) return;
+
+    const msgsRef = ref(db, 'mensagens/' + salaChatAtual);
+    const novaMsgRef = push(msgsRef);
+
+    set(novaMsgRef, {
+        remetente: usuarioAtual.email,
+        nome: usuarioAtual.nome,
+        texto: texto,
+        timestamp: Date.now()
+    }).then(() => {
+        input.value = "";
+    });
+  }
+
+  function escutarMensagensDaSala(salaId) {
+    // Carrega mensagens em tempo real
+    onChildAdded(ref(db, 'mensagens/' + salaId), (snapshot) => {
+        if (salaChatAtual !== salaId) return; // Segurança para não duplicar abas
+        const msg = snapshot.val();
+        let classeRemetente = (msg.remetente === usuarioAtual.email) ? 'enviada' : 'recebida';
+
+        let msgHtml = `<div class="msg ${classeRemetente}"><strong>${msg.nome}:</strong><br>${msg.texto}</div>`;
+        let box = document.getElementById('chat-messages');
+        let container = document.getElementById('chat-mensagens');
+        container.insertAdjacentHTML('beforeend', msgHtml);
+        container.scrollTop = container.scrollHeight; // Auto-scroll para a última mensagem
+    });
+  }
+
+  window.fecharChat = function() {
+    document.getElementById('janela-chat').style.display = 'none';
+    salaChatAtual = "";
+  }
+
   function inicializarEscutasBanco() {
-    // Escuta todos os anúncios globais para listar na tela
+    // Escuta anúncios globais
     onChildAdded(ref(db, 'anuncios'), (snapshot) => {
         const dados = snapshot.val();
         
-        // Se o anúncio pertence ao usuário logado, incrementa o contador dele
         if(dados.vendedorEmail === usuarioAtual.email) {
             qtdAnuncios++;
             document.getElementById('anuncios').innerText = qtdAnuncios;
@@ -287,10 +430,10 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         let containerId = (dados.tipo === 'Objeto') ? 'objetosLista' : 'habilidadesLista';
         let icone = (dados.tipo === 'Objeto') ? '📦' : '💡';
 
-        // Desabilita o botão se o item for do próprio usuário logado para evitar auto-aluguel
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
             ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
-            : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>`;
+            : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
+               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar com Vendedor</button>`;
 
         let cardHtml = `
         <div class="card" data-nome="${dados.titulo.toLowerCase()}">
@@ -304,15 +447,13 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
     });
 
-    // Escuta as solicitações, exibindo APENAS as que pertencem ao usuário logado
+    // Escuta as solicitações recebidas por este perfil
     onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
         const dados = snapshot.val();
         const id = snapshot.key;
 
-        // Filtro estrito: Só mostra no painel se a solicitação foi enviada para este vendedor específico
         if(dados.vendedorAlvoEmail === usuarioAtual.email) {
             qtdSolicitacoes++;
-            
             document.getElementById('notif').innerText = qtdSolicitacoes;
             document.getElementById('sols').innerText = qtdSolicitacoes;
 
@@ -323,17 +464,37 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
                 <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
                 <button class="btn aceitar" onclick="mudarStatus('${id}','🟢 Aceita')">✅ Aceitar</button>
                 <button class="btn recusar" onclick="mudarStatus('${id}','🔴 Recusada')">❌ Recusar</button>
-                <button class="btn chat" onclick="chat('${dados.solicitanteNome}')">💬 Conversar</button>
+                <button class="btn chat" onclick="abrirConversa('${dados.item}', '${usuarioAtual.email}', '${usuarioAtual.nome}', '${dados.solicitanteEmail}', '${dados.solicitanteNome}')">💬 Abrir Chat c/ Cliente</button>
                 <button class="btn finalizar" onclick="mudarStatus('${id}','🔵 Finalizada')">🔵 Finalizar</button>
             </div>`;
 
             document.getElementById('lista').insertAdjacentHTML('beforeend', solHtml);
         }
     });
+
+    // Escuta chats onde o usuário está envolvido para listar no painel de perfil
+    onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
+        const chat = snapshot.val();
+        
+        // Verifica se o usuário logado faz parte dessa conversa (como cliente ou vendedor)
+        if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
+            let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
+            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Cliente" : "Vendedor";
+
+            let itemChatHtml = `
+            <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
+                <h4>🤝 Negociação: ${chat.item}</h4>
+                <p style="font-size:13px; color:#555;">Conversando com (${tipoTag}): <strong>${outroNome}</strong></p>
+            </div>`;
+
+            document.getElementById('lista-conversas').insertAdjacentHTML('beforeend', itemChatHtml);
+        }
+    });
   }
 </script>
 
 <script>
+// Funções estéticas auxiliares
 function aviso(msg){
     document.getElementById('texto').innerText = msg;
     document.getElementById('modal').style.display = 'block';
@@ -343,10 +504,9 @@ function fechar(){
     document.getElementById('modal').style.display = 'none';
 }
 
-function chat(nome){
-    let msg = prompt("Digite uma mensagem para " + nome + ":");
-    if(msg){
-        aviso("Mensagem enviada com sucesso!");
+function verificarEnterChat(e) {
+    if (e.key === 'Enter') {
+        enviarMensagem();
     }
 }
 

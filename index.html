@@ -120,7 +120,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         <p>Bem-vindo! Identifique-se para acessar o painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
+        <button id="btn-entrar" class="btn primary" style="margin-top:20px; padding:12px; background: #94a3b8; cursor: not-allowed;" onclick="realizarLogin()" disabled>A carregar sistema...</button>
     </div>
 </div>
 
@@ -255,7 +255,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // Mapeia as funções ao objeto 'window' global para estarem disponíveis no clique do HTML
+  // EXPÕE AS FUNÇÕES DO MÓDULO DIRETAMENTE PARA O ESCOPO GLOBAL DO NAVEGADOR
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -440,7 +440,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
-    // Evita duplicar elementos na tela ao logar
     document.getElementById('habilidadesLista').innerHTML = "";
     document.getElementById('objetosLista').innerHTML = "";
     document.getElementById('lista').innerHTML = "";
@@ -478,8 +477,8 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
                 <p class="comments-title">💬 Feedbacks e Avaliações:</p>
                 <div class="comments-container" id="box-comments-${anuncioId}"></div>
                 <div class="comment-form">
-                    <input type="text" id="input-comment-${anuncioId}" placeholder="Diga se vale a pena..." onkeypress="if(event.key==='Enter') adicionarComentario('${anuncioId}')">
-                    <button class="btn-comment" onclick="adicionarComentario('${anuncioId}')">Avaliar</button>
+                    <input type="text" id="input-comment-${anuncioId}" placeholder="Diga se vale a pena..." onkeypress="if(event.key==='Enter') window.adicionarComentario('${anuncioId}')">
+                    <button class="btn-comment" onclick="window.adicionarComentario('${anuncioId}')">Avaliar</button>
                 </div>
             </div>
         </div>`;
@@ -501,5 +500,4 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
             <div class="solicitacao" id="sol-${id}">
                 <h3>${dados.item}</h3>
                 <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
-                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
-  
+                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dado

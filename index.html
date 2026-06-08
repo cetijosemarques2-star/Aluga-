@@ -451,8 +451,10 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     escutarMensagensDaSala(salaChatAtual);
   }
 
+  /* REVISADO E ACESSADO GLOBALMENTE: FUNÇÃO DE ENVIAR MENSAGEM NO LUGAR CORRETO */
   window.enviarMensagem = function() {
     let input = document.getElementById('chat-input-msg');
+    if(!input) return;
     let texto = input.value.trim();
     if(!texto || !salaChatAtual) return;
 
@@ -490,7 +492,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     salaChatAtual = "";
   }
 
-  /* FUNÇÃO GLOBALIZADA SEGURO PARA ADICIONAR COMENTÁRIOS NO FIREBASE SEM CONFLITO DE MÓDULO */
   window.adicionarComentarioFirebase = function(anuncioId) {
       let inputTexto = document.getElementById(`input-txt-${anuncioId}`);
       let selectNota = document.getElementById(`select-nota-${anuncioId}`);
@@ -520,7 +521,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       });
   }
 
-  /* ATUALIZADOR INTERNO CONFIÁVEL PARA CALCULAR MÉDIAS E DESENHAR OPINIÕES */
   function gerenciarAtualizacaoComentarios(anuncioId, dadosAnuncio) {
       let containerMedia = document.getElementById(`media-${anuncioId}`);
       let containerLista = document.getElementById(`lista-coment-${anuncioId}`);
@@ -567,4 +567,4 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
             ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
             : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
-               <button class=
+               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConvers

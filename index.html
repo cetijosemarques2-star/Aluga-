@@ -198,7 +198,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
+        <button id="btn-entrar-painel" class="btn primary" style="margin-top:20px; padding:12px;">Entrar no Painel</button>
     </div>
 </div>
 
@@ -333,6 +333,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
+  // Força verificação local assim que as tags HTML carregam
   window.addEventListener('DOMContentLoaded', () => {
       const nomeSalvo = localStorage.getItem('aluga_nome');
       const emailSalvo = localStorage.getItem('aluga_email');
@@ -341,7 +342,8 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       }
   });
 
-  window.realizarLogin = function() {
+  // SISTEMA EXCLUSIVO DE CAPTURA DO BOTÃO DE ENTRAR SEM FALHA DE ESCOPO 
+  document.getElementById('btn-entrar-painel').addEventListener('click', () => {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
 
@@ -353,7 +355,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     localStorage.setItem('aluga_nome', nome);
     localStorage.setItem('aluga_email', email);
     logarUsuario(nome, email);
-  }
+  });
 
   function logarUsuario(nome, email) {
     usuarioAtual.nome = nome;
@@ -451,7 +453,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     escutarMensagensDaSala(salaChatAtual);
   }
 
-  /* REVISADO E ACESSADO GLOBALMENTE: FUNÇÃO DE ENVIAR MENSAGEM NO LUGAR CORRETO */
   window.enviarMensagem = function() {
     let input = document.getElementById('chat-input-msg');
     if(!input) return;
@@ -567,4 +568,4 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
             ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
             : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
-               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConvers
+    

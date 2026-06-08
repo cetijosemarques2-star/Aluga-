@@ -170,7 +170,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="window.realizarLogin()">Entrar no Panel</button>
+        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
     </div>
 </div>
 
@@ -189,7 +189,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <h1>Compartilhe Conhecimento e Recursos</h1>
     <p>Aprenda, ensine e alugue objetos de forma simples.</p>
     <div class="search-container">
-    <input type="text" id="busca" class="search-input" placeholder="🔍 O que procura hoje?" oninput="window.filtrarItens()">
+    <input type="text" id="busca" class="search-input" placeholder="🔍 O que procura hoje?" oninput="filtrarItens()">
     </div>
     </div>
 
@@ -218,7 +218,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <option value="/ hora">por Hora</option>
     <option value="/ dia">por Dia</option>
     </select>
-    <button class="btn primary" onclick="window.criarAnuncio()">Publicar Anúncio</button>
+    <button class="btn primary" onclick="criarAnuncio()">Publicar Anúncio</button>
     </div>
     </section>
 
@@ -230,7 +230,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     <div>
     <h3 id="perf-nome">Carregando...</h3>
     <p id="perf-email">E-mail...</p>
-    <button class="btn-logout" onclick="window.logout()">Sair da Conta</button>
+    <button class="btn-logout" onclick="logout()">Sair da Conta</button>
     </div>
     </div>
 
@@ -266,19 +266,19 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 <div id="janela-chat" class="chat-window">
     <div class="chat-header">
         <span id="chat-titulo-item" style="font-weight: bold; font-size: 13px; max-width: 85%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Chat</span>
-        <button onclick="window.fecharChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold;">✕</button>
+        <button onclick="fecharChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold;">✕</button>
     </div>
     <div id="chat-mensagens" class="chat-messages"></div>
     <div class="chat-input-area">
-        <input type="text" id="chat-input-msg" placeholder="Digite sua proposta..." onkeypress="window.verificarEnterChat(event)">
-        <button class="btn primary" style="width: auto; margin-top: 0; padding: 8px 15px;" onclick="window.enviarMensagem()">Enviar</button>
+        <input type="text" id="chat-input-msg" placeholder="Digite sua proposta..." onkeypress="verificarEnterChat(event)">
+        <button class="btn primary" style="width: auto; margin-top: 0; padding: 8px 15px;" onclick="enviarMensagem()">Enviar</button>
     </div>
 </div>
 
 <div id="modal" class="modal">
 <div class="modal-box">
 <p id="texto"></p><br>
-<button class="btn primary" style="width: auto; padding: 10px 30px;" onclick="window.fechar()">Fechar</button>
+<button class="btn primary" style="width: auto; padding: 10px 30px;" onclick="fechar()">Fechar</button>
 </div>
 </div>
 
@@ -305,17 +305,16 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // --- ESCUTADOR DE INTERFACE DO USUÁRIO (SISTEMA DE MODAL/AVISO) ---
-  window.aviso = function(msg) {
-      document.getElementById('texto').innerText = msg;
-      document.getElementById('modal').style.display = 'block';
-  }
+  // --- ESCUTADOR DE INICIALIZAÇÃO DE SESSÃO ---
+  window.addEventListener('DOMContentLoaded', () => {
+      const nomeSalvo = localStorage.getItem('aluga_nome');
+      const emailSalvo = localStorage.getItem('aluga_email');
+      if(nomeSalvo && emailSalvo) {
+          logarUsuario(nomeSalvo, emailSalvo);
+      }
+  });
 
-  window.fechar = function() {
-      document.getElementById('modal').style.display = 'none';
-  }
-
-  // --- SESSÃO E LOGIN ---
+  // EXPOSTA GLOBALMENTE PARA O HTML ENCONTRAR
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
@@ -349,11 +348,10 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       window.location.reload();
   }
 
-  // --- ANÚNCIOS E SOLICITAÇÕES ---
   window.criarAnuncio = function() {
-    let titulo = document.getElementById('titulo').value.trim();
+    let titulo = document.getElementById('titulo').value;
     let tipo = document.getElementById('tipo').value;
-    let preco = document.getElementById('preco').value.trim();
+    let preco = document.getElementById('preco').value;
     let periodo = document.getElementById('periodo').value;
 
     if(!titulo || !preco){
@@ -400,7 +398,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
-  // --- COMENTÁRIOS / AVALIAÇÕES ---
+  // --- COMENTÁRIOS E FEEDBACKS ---
   window.adicionarComentario = function(anuncioId) {
       let input = document.getElementById(`input-comment-${anuncioId}`);
       let texto = input.value.trim();
@@ -435,7 +433,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       });
   }
 
-  // --- CHAT EM TEMPO REAL ---
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
     if (salaChatAtual) {
         off(ref(db, 'mensagens/' + salaChatAtual));
@@ -463,6 +460,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     escutarMensagensDaSala(salaChatAtual);
   }
 
+  // EXPOSTA GLOBALMENTE PARA O BOTÃO ENVIAR DO CHAT FUNCIONAR
   window.enviarMensagem = function() {
     let input = document.getElementById('chat-input-msg');
     let texto = input.value.trim();
@@ -502,28 +500,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     salaChatAtual = "";
   }
 
-  window.verificarEnterChat = function(e) {
-      if (e.key === 'Enter') {
-          window.enviarMensagem();
-      }
-  }
-
-  // --- FILTRO DE PESQUISA ---
-  window.filtrarItens = function() {
-      let termo = document.getElementById('busca').value.toLowerCase();
-      let cards = document.querySelectorAll('.card');
-
-      cards.forEach(card => {
-          let nomeItem = card.getAttribute('data-nome');
-          if(nomeItem && nomeItem.includes(termo)) {
-              card.style.display = "block";
-          } else {
-              card.style.display = "none";
-          }
-      });
-  }
-
-  // --- ESCUTAS PRINCIPAIS DO BANCO ---
   function inicializarEscutasBanco() {
     document.getElementById('habilidadesLista').innerHTML = "";
     document.getElementById('objetosLista').innerHTML = "";
@@ -547,12 +523,25 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
             ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
-            : `<button class="btn primary" onclick="window.solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
-               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="window.abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar com Vendedor</button>`;
+            : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
+               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar com Vendedor</button>`;
 
         let cardHtml = `
         <div class="card" data-nome="${dados.titulo.toLowerCase()}">
             <div class="card-icon">${icone}</div>
             <h3>${dados.titulo}</h3>
             <p style="font-size:12px; color:#666;">Por: ${dados.vendedorNome}</p>
-            <p c
+            <p class="price">${dados.preco}</p>
+            ${botaoHTML}
+            
+            <div class="comments-section">
+                <p class="comments-title">💬 Feedbacks e Avaliações:</p>
+                <div class="comments-container" id="box-comments-${anuncioId}"></div>
+                <div class="comment-form">
+                    <input type="text" id="input-comment-${anuncioId}" placeholder="Escreva uma avaliação..." onkeypress="if(event.key==='Enter') window.adicionarComentario('${anuncioId}')">
+                    <button class="btn-comment" onclick="window.adicionarComentario('${anuncioId}')">Avaliar</button>
+                </div>
+            </div>
+        </div>`;
+
+        document.getEleme

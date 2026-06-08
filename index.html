@@ -144,50 +144,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 }
 .chat-item:hover { background: #f1f5f9; }
 .btn-logout { background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer; margin-top: 5px; }
-
-/* ESTILOS DA SEÇÃO DE AVALIAÇÃO E COMENTÁRIOS ESTILO MERCADO LIVRE */
-.container-avaliacao {
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
-    color: #b45309;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 13px;
-    margin: 6px 0 10px 0;
-    display: inline-block;
-}
-.secao-comentarios {
-    margin-top: 15px;
-    padding-top: 12px;
-    border-top: 1px dashed #e2e8f0;
-    text-align: left;
-}
-.secao-comentarios h4 {
-    font-size: 13px;
-    color: #4b5563;
-    margin-bottom: 6px;
-}
-.lista-comentarios {
-    max-height: 110px;
-    overflow-y: auto;
-    background: #f8fafc;
-    border-radius: 6px;
-    padding: 6px;
-    margin-bottom: 8px;
-}
-.item-comentario {
-    font-size: 12px;
-    border-bottom: 1px solid #f1f5f9;
-    padding: 4px 0;
-}
-.item-comentario:last-child { border-bottom: none; }
-.estrelas-comentario { color: #f59e0b; font-weight: bold; margin-right: 4px; }
-.formulario-comentario { display: flex; gap: 4px; margin-top: 6px; }
-.select-nota { width: auto; padding: 6px; margin-top: 0; font-size: 12px; border-radius: 6px; }
-.input-comentario { padding: 6px; margin-top: 0; font-size: 12px; border-radius: 6px; flex: 1; }
-.btn-comentar { width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; background: #4b5563; color: white; border-radius: 6px; border: none; cursor: pointer; }
-.btn-comentar:hover { background: #374151; }
 </style>
 </head>
 <body>
@@ -198,7 +154,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button id="btn-entrar-painel" class="btn primary" style="margin-top:20px; padding:12px;">Entrar no Painel</button>
+        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
     </div>
 </div>
 
@@ -312,7 +268,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onChildAdded, onChildChanged, update, off } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onChildAdded, update, off } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD3jp-N19gnDIzCClGQohx_5crwfopM3uM",
@@ -333,7 +289,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // Força verificação local assim que as tags HTML carregam
+  // --- MELHORIA 1: VERIFICAÇÃO DE SESSÃO JÁ EXISTENTE ---
   window.addEventListener('DOMContentLoaded', () => {
       const nomeSalvo = localStorage.getItem('aluga_nome');
       const emailSalvo = localStorage.getItem('aluga_email');
@@ -342,8 +298,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
       }
   });
 
-  // SISTEMA EXCLUSIVO DE CAPTURA DO BOTÃO DE ENTRAR SEM FALHA DE ESCOPO 
-  document.getElementById('btn-entrar-painel').addEventListener('click', () => {
+  window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
     let email = document.getElementById('login-email').value.trim();
 
@@ -355,7 +310,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     localStorage.setItem('aluga_nome', nome);
     localStorage.setItem('aluga_email', email);
     logarUsuario(nome, email);
-  });
+  }
 
   function logarUsuario(nome, email) {
     usuarioAtual.nome = nome;
@@ -377,9 +332,9 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   window.criarAnuncio = function() {
-    let titulo = document.getElementById('titulo').value.trim();
+    let titulo = document.getElementById('titulo').value;
     let tipo = document.getElementById('tipo').value;
-    let preco = document.getElementById('preco').value.trim();
+    let preco = document.getElementById('preco').value;
     let periodo = document.getElementById('periodo').value;
 
     if(!titulo || !preco){
@@ -426,7 +381,9 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
   }
 
+  // --- MELHORIA 2: GESTÃO DE OUVINTES DO CHAT ATIVOS ---
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
+    // Remove o ouvinte anterior antes de mudar de sala para evitar lixo de memória
     if (salaChatAtual) {
         off(ref(db, 'mensagens/' + salaChatAtual));
     }
@@ -455,7 +412,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
   window.enviarMensagem = function() {
     let input = document.getElementById('chat-input-msg');
-    if(!input) return;
     let texto = input.value.trim();
     if(!texto || !salaChatAtual) return;
 
@@ -493,68 +449,9 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     salaChatAtual = "";
   }
 
-  window.adicionarComentarioFirebase = function(anuncioId) {
-      let inputTexto = document.getElementById(`input-txt-${anuncioId}`);
-      let selectNota = document.getElementById(`select-nota-${anuncioId}`);
-      
-      if (!inputTexto || !selectNota) return;
-      
-      let texto = inputTexto.value.trim();
-      let nota = parseInt(selectNota.value, 10);
-
-      if(!texto) {
-          window.aviso("Por favor, digite o seu comentário antes de enviar.");
-          return;
-      }
-
-      const comentariosRef = ref(db, `anuncios/${anuncioId}/comentarios`);
-      const novoComentarioRef = push(comentariosRef);
-
-      set(novoComentarioRef, {
-          autor: usuarioAtual.nome,
-          texto: texto,
-          nota: nota,
-          timestamp: Date.now()
-      }).then(() => {
-          inputTexto.value = "";
-      }).catch((erro) => {
-          console.error("Erro ao salvar comentário: ", erro);
-      });
-  }
-
-  function gerenciarAtualizacaoComentarios(anuncioId, dadosAnuncio) {
-      let containerMedia = document.getElementById(`media-${anuncioId}`);
-      let containerLista = document.getElementById(`lista-coment-${anuncioId}`);
-      
-      if(!containerMedia || !containerLista) return;
-
-      containerLista.innerHTML = "";
-      
-      if(dadosAnuncio && dadosAnuncio.comentarios) {
-          let totalNotas = 0;
-          let qtd = 0;
-          let htmlComentarios = "";
-
-          Object.keys(dadosAnuncio.comentarios).forEach(chave => {
-              let c = dadosAnuncio.comentarios[chave];
-              totalNotas += c.nota;
-              qtd++;
-              htmlComentarios = `<div class="item-comentario"><span class="estrelas-comentario">${"★".repeat(c.nota)}${"☆".repeat(5-c.nota)}</span><strong>${c.autor}:</strong> ${c.texto}</div>` + htmlComentarios;
-          });
-
-          let media = (totalNotas / qtd).toFixed(1);
-          containerMedia.innerText = `⭐ ${media} (${qtd} opiniões)`;
-          containerLista.innerHTML = htmlComentarios;
-      } else {
-          containerMedia.innerText = "⭐ Sem avaliações";
-          containerLista.innerHTML = `<p style="color:#888; font-size:12px; font-style:italic; margin:0;">Nenhum comentário ainda. Seja o primeiro!</p>`;
-      }
-  }
-
   function inicializarEscutasBanco() {
     onChildAdded(ref(db, 'anuncios'), (snapshot) => {
         const dados = snapshot.val();
-        const id = snapshot.key;
         
         if(dados.vendedorEmail === usuarioAtual.email) {
             qtdAnuncios++;
@@ -568,4 +465,84 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
             ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
             : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
-    
+               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar com Vendedor</button>`;
+
+        let cardHtml = `
+        <div class="card" data-nome="${dados.titulo.toLowerCase()}">
+            <div class="card-icon">${icone}</div>
+            <h3>${dados.titulo}</h3>
+            <p style="font-size:12px; color:#666;">Por: ${dados.vendedorNome}</p>
+            <p class="price">${dados.preco}</p>
+            ${botaoHTML}
+        </div>`;
+
+        document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
+    });
+
+    onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
+        const dados = snapshot.val();
+        const id = snapshot.key;
+
+        if(dados.vendedorAlvoEmail === usuarioAtual.email) {
+            qtdSolicitacoes++;
+            document.getElementById('notif').innerText = qtdSolicitacoes;
+            document.getElementById('sols').innerText = qtdSolicitacoes;
+
+            let solHtml = `
+            <div class="solicitacao" id="sol-${id}">
+                <h3>${dados.item}</h3>
+                <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
+                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
+                <button class="btn aceitar" onclick="mudarStatus('${id}','🟢 Aceita')">✅ Aceitar</button>
+                <button class="btn recusar" onclick="mudarStatus('${id}','🔴 Recusada')">❌ Recusar</button>
+                <button class="btn chat" onclick="abrirConversa('${dados.item}', '${usuarioAtual.email}', '${usuarioAtual.nome}', '${dados.solicitanteEmail}', '${dados.solicitanteNome}')">💬 Abrir Chat c/ Cliente</button>
+                <button class="btn finalizar" onclick="mudarStatus('${id}','🔵 Finalizada')">🔵 Finalizar</button>
+            </div>`;
+
+            document.getElementById('lista').insertAdjacentHTML('beforeend', solHtml);
+        }
+    });
+
+    onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
+        const chat = snapshot.val();
+        
+        if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
+            let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
+            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Cliente" : "Vendedor";
+
+            let itemChatHtml = `
+            <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
+                <h4>🤝 Negociação: ${chat.item}</h4>
+                <p style="font-size:13px; color:#555;">Conversando com (${tipoTag}): <strong>${outroNome}</strong></p>
+            </div>`;
+
+            document.getElementById('lista-conversas').insertAdjacentHTML('beforeend', itemChatHtml);
+        }
+    });
+  }
+</script>
+
+<script>
+function aviso(msg){
+    document.getElementById('texto').innerText = msg;
+    document.getElementById('modal').style.display = 'block';
+}
+
+function fechar(){
+    document.getElementById('modal').style.display = 'none';
+}
+
+function verificarEnterChat(e) {
+    if (e.key === 'Enter') {
+        enviarMensagem();
+    }
+}
+
+function filtrarItens() {
+    let termo = document.getElementById('busca').value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        let nomeItem = card.getAttribute('data-nome');
+        if(nomeItem && nomeItem.includes(termo)) {
+            card.style.display = "block";

@@ -221,8 +221,8 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // COLOQUE SEU E-MAIL EXATO AQUI PARA QUE AS SOLICITAÇÕES CHEGUEM NO SEU PAINEL
-  const EMAIL_DONO_VITRINE = agusttavo697@gmail.com; 
+  // E-mail configurado para tratamento em caixa baixa (evita erros de digitação)
+  const EMAIL_DONO_VITRINE = "agusttavo697@gmail.com"; 
 
   let usuarioAtual = { nome: "", email: "" };
   let salaChatAtual = ""; 
@@ -297,7 +297,6 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('conteudo-principal').style.display = 'block';
 
-    // Se quem logou for você (o dono), mostra a aba de notificações recebidas
     if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
         document.getElementById('area-notificacoes-vendedor').style.display = 'block';
     }
@@ -320,18 +319,17 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
 
       containers.Aprender.innerHTML = "";
       containers.Habilidade.innerHTML = "";
-      containers.Objetos?.innerHTML || (document.getElementById('objetosLista').innerHTML = "");
+      containers.Objeto.innerHTML = "";
 
       itensFixos.forEach(item => {
           let botaoHTML = "";
           
-          // Se o usuário logado for o dono da vitrine, desativa o botão de compra dele mesmo
           if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
               botaoHTML = `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`;
           } else {
               botaoHTML = `
                 <button class="btn primary" onclick="solicitarServico('${item.titulo}', '${item.acao}')">✨ ${item.acao}</button>
-                <button class="btn chat" onclick="abrirConversa('${item.titulo}', '${EMAIL_DONO_VITRINE}', 'Dono da Vitrine', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar</button>
+                <button class="btn chat" onclick="abrirConversa('${item.titulo}', '${EMAIL_DONO_VITRINE}', 'Administrador', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar</button>
               `;
           }
 
@@ -433,11 +431,9 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
-    // Escuta novas contratações/solicitações enviadas pelos clientes
     onChildAdded(ref(db, 'solicitacoes_vitrine'), (snapshot) => {
         const dados = snapshot.val();
         
-        // Só exibe e conta no painel se o usuário logado for você (o dono)
         if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
             contagemNotificacoes++;
             const badge = document.getElementById('notif-badge');
@@ -449,16 +445,21 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
                 <h4>🔔 Nova Solicitação de: ${dados.acao}</h4>
                 <p style="margin-top:5px;"><strong>Item/Serviço:</strong> ${dados.item}</p>
                 <p><strong>Cliente:</strong> ${dados.clienteNome} (${dados.clienteEmail})</p>
-                <button class="btn chat" style="width:auto; padding:6px 12px; margin-top:10px;" onclick="abrirConversa('${dados.item}', '${EMAIL_DONO_VITRINE}', 'Dono da Vitrine', '${dados.clienteEmail}', '${dados.clienteNome}')">💬 Abrir Chat com Cliente</button>
+                <button class="btn chat" style="width:auto; padding:6px 12px; margin-top:10px;" onclick="abrirConversa('${dados.item}', '${EMAIL_DONO_VITRINE}', 'Administrador', '${dados.clienteEmail}', '${dados.clienteNome}')">💬 Abrir Chat com Cliente</button>
             </div>`;
 
             document.getElementById('lista-solicitacoes').insertAdjacentHTML('beforeend', solHtml);
         }
     });
 
-    // Escuta chats ativos para carregar no histórico do painel
     onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
         const chat = snapshot.val();
         
         if(chat.vendedorEmail.toLowerCase() === usuarioAtual.email || chat.clienteEmail.toLowerCase() === usuarioAtual.email) {
-            let outroNome = (usuarioAtual.email === chat.vendedorEmai
+            let outroNome = (usuarioAtual.email === chat.vendedorEmail.toLowerCase()) ? chat.clienteNome : chat.vendedorNome;
+            let tipoTag = (usuarioAtual.email === chat.vendedorEmail.toLowerCase()) ? "Cliente" : "Atendente";
+
+            let itemChatHtml = `
+            <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
+                <h4>🤝 Item: ${chat.item}</h4>
+                <p s

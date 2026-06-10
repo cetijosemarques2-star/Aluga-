@@ -45,21 +45,22 @@ nav a{color:white;text-decoration:none;margin-left:20px;font-weight:500}
 section{padding:30px 25px;max-width:1200px;margin:0 auto}
 h2 { color: #312e81; display: flex; align-items: center; gap: 10px; font-size: 22px; }
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:15px}
-.card,.perfil-card{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s;display:flex;flex-direction:column;justify-content:space-between}
+.card,.perfil-card,.solicitacao{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s;display:flex;flex-direction:column;justify-content:space-between}
 .card:hover{transform:translateY(-5px)}
 .card-icon{font-size:36px;margin-bottom:10px}
-.price{font-weight:bold;color:#6366f1;font-size:18px;margin:8px 0}
+.price{font-weight:bold;color:#10b981;font-size:16px;margin:8px 0}
 .btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:opacity 0.2s}
 .btn:hover{opacity:0.9}
 .primary{background:#10b981;color:white;width:100%;margin-top:10px}
 .chat{background:#6366f1;color:white;width:100%;margin-top:5px}
-.badge{background:red;color:white;padding:3px 8px;border-radius:50%;font-size:12px;vertical-align:middle}
+.badge{background:red;color:white;padding:3px 8px;border-radius:50%;font-size:12px;vertical-align:middle;margin-left:5px}
 #perfil{background:#f0f2ff;max-width:100%}
 .perfil-content{max-width:1200px;margin:0 auto}
 .perfil-topo{display:flex;align-items:center;gap:20px;margin-bottom:20px}
 .avatar{width:80px;height:80px;border-radius:50%;background:#6366f1;color:white;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;text-transform:uppercase}
-input,select{width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
+input{width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
 footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:14px}
+.solicitacao{margin-bottom:15px;border-left:5px solid #10b981}
 
 /* JANELA DE CHAT */
 .chat-window {
@@ -110,7 +111,7 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
 <div id="tela-login">
     <div class="login-box">
         <h1>Vitrine<span>+</span></h1>
-        <p>Bem-vindo à Vitrine de Habilidades! Identifique-se para acessar o painel.</p>
+        <p>Bem-vindo à Vitrine de Habilidades! Identifique-se para entrar.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
         <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar na Vitrine</button>
@@ -124,16 +125,15 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
             <a href="#aprender">Aprender</a>
             <a href="#habilidades">Habilidades</a>
             <a href="#objetos">Objetos</a>
-            <a href="#anunciar">Anunciar</a>
-            <a href="#perfil">Meu Painel</a>
+            <a href="#perfil">Meu Painel <span id="notif-badge" class="badge" style="display:none;">0</span></a>
         </nav>
     </header>
 
     <div class="hero">
-        <h1>Conectando Talentos e Recursos</h1>
-        <p>Encontre mentorias, serviços especializados e objetos para locação.</p>
+        <h1>Vitrine Exclusiva de Habilidades</h1>
+        <p>Encontre soluções educacionais, serviços especializados e locações diretamente comigo.</p>
         <div class="search-container">
-            <input type="text" id="busca" class="search-input" placeholder="🔍 O que você está procurando?" oninput="filtrarItens()">
+            <input type="text" id="busca" class="search-input" placeholder="🔍 O que você precisa hoje?" oninput="filtrarItens()">
         </div>
     </div>
 
@@ -145,36 +145,15 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     <hr style="border: 0; border-top: 1px solid #e2e8f0;">
 
     <section id="habilidades">
-        <h2>🛠️ Habilidades Profissionais e Serviços</h2>
+        <h2>🛠️ Habilidades e Serviços Disponíveis</h2>
         <div class="cards" id="habilidadesLista"></div>
     </section>
 
     <hr style="border: 0; border-top: 1px solid #e2e8f0;">
 
     <section id="objetos">
-        <h2>📦 Objetos e Equipamentos para Alugar</h2>
+        <h2>📦 Objetos para Alugar</h2>
         <div class="cards" id="objetosLista"></div>
-    </section>
-
-    <section id="anunciar" style="background: #f0f2ff; max-width: 100%;">
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <h2>➕ Publicar Novo Anúncio na Vitrine</h2>
-            <div class="perfil-card" style="margin-top: 15px;">
-                <input id="titulo" placeholder="Ex: Mentoria para ENEM, Edição de Vídeo, Microfone...">
-                <select id="tipo">
-                    <option value="Aprender">📚 Aprender (Aulas, Mentorias, Reforço)</option>
-                    <option value="Habilidade">🛠️ Habilidade (Design, Vídeos, Programação)</option>
-                    <option value="Objeto">📦 Objeto (Equipamentos, Materiais, Locação)</option>
-                </select>
-                <input type="number" id="preco" placeholder="Preço/Valor cobrado (Apenas números)">
-                <select id="periodo">
-                    <option value="/ hora">por Hora</option>
-                    <option value="/ dia">por Dia</option>
-                    <option value="/ serviço">por Serviço / Único</option>
-                </select>
-                <button class="btn primary" onclick="criarAnuncio()">Publicar na Vitrine</button>
-            </div>
-        </div>
     </section>
 
     <section id="perfil">
@@ -189,19 +168,13 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
                 </div>
             </div>
 
-            <div class="cards">
-                <div class="perfil-card">
-                    <h3>📊 Minhas Estatísticas</h3>
-                    <p style="margin-top:10px;">Seus Anúncios Ativos: <span id="anuncios" style="font-weight:bold; color:#6366f1;">0</span></p>
-                </div>
-                <div class="perfil-card">
-                    <h3>⭐ Avaliações da Vitrine</h3>
-                    <p style="font-style: italic; margin-top:5px;">"Profissional excelente e muito pontual!"</p>
-                </div>
+            <div id="area-notificacoes-vendedor" style="display: none; margin-top: 20px;">
+                <h3 style="color: #312e81; margin-bottom: 15px;">🔔 Solicitações de Clientes Recebidas</h3>
+                <div id="lista-solicitacoes"></div>
             </div>
 
             <br><br>
-            <h3>💬 Minhas Mensagens e Negociações</h3><br>
+            <h3>💬 Minhas Mensagens Ativas</h3><br>
             <div id="lista-conversas"></div>
         </div>
     </section>
@@ -248,9 +221,48 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // COLOQUE SEU E-MAIL EXATO AQUI PARA QUE AS SOLICITAÇÕES CHEGUEM NO SEU PAINEL
+  const EMAIL_DONO_VITRINE = "seu-email@gmail.com"; 
+
   let usuarioAtual = { nome: "", email: "" };
-  let qtdAnuncios = 0;
   let salaChatAtual = ""; 
+  let contagemNotificacoes = 0;
+
+  // Lista Fixa de Itens com Seus Respectivos Emojis Personalizados
+  const itensFixos = [
+    // 1. Aprender
+    { tipo: "Aprender", titulo: "Mentoria para organização dos estudos", emoji: "📅", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Mentoria para o ENEM", emoji: "📝", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Aulas de reforço de Matemática", emoji: "📐", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Aulas de reforço de Português", emoji: "📖", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Aulas de reforço de Inglês", emoji: "🇺🇸", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Ajuda em redação", emoji: "✍️", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Correção de redações", emoji: "🔍", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Técnicas de memorização", emoji: "🧠", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Resolução de exercícios", emoji: "🧮", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Grupo de estudos guiado", emoji: "👥", acao: "Contratar" },
+    { tipo: "Aprender", titulo: "Preparação para apresentações escolares", emoji: "🎤", acao: "Contratar" },
+    
+    // 2. Habilidades
+    { tipo: "Habilidade", titulo: "Criação de slides", emoji: "📊", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Edição de vídeos", emoji: "🎬", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Design no Canva", emoji: "🎨", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Criação de currículos", emoji: "💼", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Programação básica", emoji: "💻", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Montagem de sites simples", emoji: "🌐", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Digitação de trabalhos", emoji: "⌨️", acao: "Contratar" },
+    { tipo: "Habilidade", titulo: "Formatação de documentos", emoji: "📄", acao: "Contratar" },
+    
+    // 3. Objetos
+    { tipo: "Objeto", titulo: "Pendrive", emoji: "💾", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Fone de ouvido", emoji: "🎧", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Microfone", emoji: "🎙️", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Régua", emoji: "📏", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Compasso", emoji: "🧭", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Transferidor", emoji: "📐", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Dicionário", emoji: "📕", acao: "Alugar" },
+    { tipo: "Objeto", titulo: "Rádio portátil", emoji: "📻", acao: "Alugar" }
+  ];
 
   window.addEventListener('DOMContentLoaded', () => {
       const nomeSalvo = localStorage.getItem('vitrine_nome');
@@ -262,7 +274,7 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
 
   window.realizarLogin = function() {
     let nome = document.getElementById('login-nome').value.trim();
-    let email = document.getElementById('login-email').value.trim();
+    let email = document.getElementById('login-email').value.trim().toLowerCase();
 
     if(!nome || !email) {
         window.aviso("Por favor, preencha seu nome e e-mail para entrar.");
@@ -285,6 +297,12 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('conteudo-principal').style.display = 'block';
 
+    // Se quem logou for você (o dono), mostra a aba de notificações recebidas
+    if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
+        document.getElementById('area-notificacoes-vendedor').style.display = 'block';
+    }
+
+    renderizarVitrineFixa();
     inicializarEscutasBanco();
   }
 
@@ -293,31 +311,60 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
       window.location.reload();
   }
 
-  window.criarAnuncio = function() {
-    let titulo = document.getElementById('titulo').value.trim();
-    let tipo = document.getElementById('tipo').value;
-    let preco = document.getElementById('preco').value.trim();
-    let periodo = document.getElementById('periodo').value;
+  function renderizarVitrineFixa() {
+      const containers = {
+          Aprender: document.getElementById('aprenderLista'),
+          Habilidade: document.getElementById('habilidadesLista'),
+          Objeto: document.getElementById('objetosLista')
+      };
 
-    if(!titulo || !preco){
-        window.aviso("Por favor, preencha todos os campos antes de publicar.");
-        return;
-    }
+      containers.Aprender.innerHTML = "";
+      containers.Habilidade.innerHTML = "";
+      containers.Objetos?.innerHTML || (document.getElementById('objetosLista').innerHTML = "");
 
-    const listaRef = ref(db, 'anuncios');
-    const novoAnuncioRef = push(listaRef);
-    
-    set(novoAnuncioRef, {
-        titulo: titulo,
-        tipo: tipo,
-        preco: "R$ " + preco + " " + periodo,
-        vendedorNome: usuarioAtual.nome,
-        vendedorEmail: usuarioAtual.email
-    }).then(() => {
-        window.aviso("Seu anúncio foi publicado com sucesso na Vitrine!");
-        document.getElementById('titulo').value = '';
-        document.getElementById('preco').value = '';
-    });
+      itensFixos.forEach(item => {
+          let botaoHTML = "";
+          
+          // Se o usuário logado for o dono da vitrine, desativa o botão de compra dele mesmo
+          if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
+              botaoHTML = `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`;
+          } else {
+              botaoHTML = `
+                <button class="btn primary" onclick="solicitarServico('${item.titulo}', '${item.acao}')">✨ ${item.acao}</button>
+                <button class="btn chat" onclick="abrirConversa('${item.titulo}', '${EMAIL_DONO_VITRINE}', 'Dono da Vitrine', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar</button>
+              `;
+          }
+
+          let cardHtml = `
+            <div class="card" data-nome="${item.titulo.toLowerCase()}">
+                <div>
+                    <div class="card-icon">${item.emoji}</div>
+                    <h3>${item.titulo}</h3>
+                    <p style="font-size:12px; color:#666; margin-top:4px;">Disponível por: Administrador</p>
+                </div>
+                <div style="margin-top:15px;">
+                    <p class="price">Consulte Valores</p>
+                    ${botaoHTML}
+                </div>
+            </div>`;
+
+          containers[item.tipo].insertAdjacentHTML('beforeend', cardHtml);
+      });
+  }
+
+  window.solicitarServico = function(tituloItem, acao) {
+      const solicitacoesRef = ref(db, 'solicitacoes_vitrine');
+      const novaSolRef = push(solicitacoesRef);
+
+      set(novaSolRef, {
+          item: tituloItem,
+          acao: acao,
+          clienteNome: usuarioAtual.nome,
+          clienteEmail: usuarioAtual.email,
+          timestamp: Date.now()
+      }).then(() => {
+          window.aviso(`Solicitação de ${acao} enviada com sucesso! O administrador foi notificado.`);
+      });
   }
 
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
@@ -337,10 +384,9 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
         clienteNome: nomeCliente
     });
 
-    let interlocutor = (usuarioAtual.email === emailVendedor) ? nomeCliente : nomeVendedor;
-    let tagContexto = (usuarioAtual.email === emailVendedor) ? " [Interessado]" : " [Anunciante]";
+    let interlocutor = (usuarioAtual.email === emailVendedor.toLowerCase()) ? nomeCliente : nomeVendedor;
     
-    document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor + tagContexto;
+    document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor;
     document.getElementById('chat-mensagens').innerHTML = "";
     document.getElementById('janela-chat').style.display = 'flex';
 
@@ -387,94 +433,32 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
   }
 
   function inicializarEscutasBanco() {
-    onChildAdded(ref(db, 'anuncios'), (snapshot) => {
+    // Escuta novas contratações/solicitações enviadas pelos clientes
+    onChildAdded(ref(db, 'solicitacoes_vitrine'), (snapshot) => {
         const dados = snapshot.val();
         
-        if(dados.vendedorEmail === usuarioAtual.email) {
-            qtdAnuncios++;
-            document.getElementById('anuncios').innerText = qtdAnuncios;
+        // Só exibe e conta no painel se o usuário logado for você (o dono)
+        if(usuarioAtual.email === EMAIL_DONO_VITRINE.toLowerCase()) {
+            contagemNotificacoes++;
+            const badge = document.getElementById('notif-badge');
+            badge.innerText = contagemNotificacoes;
+            badge.style.display = "inline-block";
+
+            let solHtml = `
+            <div class="solicitacao">
+                <h4>🔔 Nova Solicitação de: ${dados.acao}</h4>
+                <p style="margin-top:5px;"><strong>Item/Serviço:</strong> ${dados.item}</p>
+                <p><strong>Cliente:</strong> ${dados.clienteNome} (${dados.clienteEmail})</p>
+                <button class="btn chat" style="width:auto; padding:6px 12px; margin-top:10px;" onclick="abrirConversa('${dados.item}', '${EMAIL_DONO_VITRINE}', 'Dono da Vitrine', '${dados.clienteEmail}', '${dados.clienteNome}')">💬 Abrir Chat com Cliente</button>
+            </div>`;
+
+            document.getElementById('lista-solicitacoes').insertAdjacentHTML('beforeend', solHtml);
         }
-
-        let containerId = "habilidadesLista";
-        let icone = "🛠️";
-
-        if (dados.tipo === 'Objeto') {
-            containerId = 'objetosLista';
-            icone = '📦';
-        } else if (dados.tipo === 'Aprender') {
-            containerId = 'aprenderLista';
-            icone = '📚';
-        }
-
-        let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
-            ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Anúncio</button>`
-            : `<button class="btn chat" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Tenho Interesse</button>`;
-
-        let cardHtml = `
-        <div class="card" data-nome="${dados.titulo.toLowerCase()}">
-            <div>
-                <div class="card-icon">${icone}</div>
-                <h3>${dados.titulo}</h3>
-                <p style="font-size:12px; color:#666; margin-top:4px;">Por: ${dados.vendedorNome}</p>
-            </div>
-            <div>
-                <p class="price">${dados.preco}</p>
-                ${botaoHTML}
-            </div>
-        </div>`;
-
-        document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
     });
 
+    // Escuta chats ativos para carregar no histórico do painel
     onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
         const chat = snapshot.val();
         
-        if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
-            let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
-            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Interessado" : "Anunciante";
-
-            let itemChatHtml = `
-            <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
-                <h4>🤝 Item: ${chat.item}</h4>
-                <p style="font-size:13px; color:#555;">Conversando com (${tipoTag}): <strong>${outroNome}</strong></p>
-            </div>`;
-
-            document.getElementById('lista-conversas').insertAdjacentHTML('beforeend', itemChatHtml);
-        }
-    });
-  }
-</script>
-
-<script>
-function aviso(msg){
-    document.getElementById('texto').innerText = msg;
-    document.getElementById('modal').style.display = 'block';
-}
-
-function fechar(){
-    document.getElementById('modal').style.display = 'none';
-}
-
-function verificarEnterChat(e) {
-    if (e.key === 'Enter') {
-        enviarMensagem();
-    }
-}
-
-function filtrarItens() {
-    let termo = document.getElementById('busca').value.toLowerCase();
-    let cards = document.querySelectorAll('.card');
-
-    cards.forEach(card => {
-        let nomeItem = card.getAttribute('data-nome');
-        if(nomeItem && nomeItem.includes(termo)) {
-            card.style.display = "flex";
-        } else {
-            card.style.display = "none";
-        }
-    });
-}
-</script>
-
-</body>
-</html>
+        if(chat.vendedorEmail.toLowerCase() === usuarioAtual.email || chat.clienteEmail.toLowerCase() === usuarioAtual.email) {
+            let outroNome = (usuarioAtual.email === chat.vendedorEmai

@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aluga+ Premium</title>
+<title>Vitrine de Habilidades</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#f5f7fb;color:#333}
 
-/* Tela de Login / Boas-vindas */
+/* Tela de Login */
 #tela-login {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #2563eb, #10b981);
+    background: linear-gradient(135deg, #6366f1, #10b981);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,46 +27,41 @@ body{background:#f5f7fb;color:#333}
     max-width: 400px;
     width: 90%;
 }
-.login-box h1 { font-size: 32px; margin-bottom: 10px; color: #2563eb; }
+.login-box h1 { font-size: 32px; margin-bottom: 10px; color: #6366f1; }
 .login-box h1 span { color: #10b981; }
 .login-box p { color: #666; margin-bottom: 20px; }
 
-/* Conteúdo Principal (Escondido antes do login) */
+/* Conteúdo Principal */
 #conteudo-principal { display: none; }
 
-header{background:#2563eb;color:white;padding:15px 25px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
-.logo{font-size:30px;font-weight:bold}
+header{background:#6366f1;color:white;padding:15px 25px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.logo{font-size:26px;font-weight:bold}
 .logo span{color:#10b981}
 nav a{color:white;text-decoration:none;margin-left:20px;font-weight:500}
-.hero{background:linear-gradient(135deg,#2563eb,#10b981);padding:60px 20px;color:white;text-align:center}
-.hero h1{font-size:40px;margin-bottom:10px}
+.hero{background:linear-gradient(135deg,#6366f1,#10b981);padding:50px 20px;color:white;text-align:center}
+.hero h1{font-size:36px;margin-bottom:10px}
 .search-container{max-width:500px;margin:20px auto 0 auto;display:flex;gap:10px}
 .search-input{padding:12px;border:none;border-radius:8px;width:100%;font-size:16px}
-section{padding:35px 25px;max-width:1200px;margin:0 auto}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
-.card,.perfil-card,.solicitacao,.chat-item{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s}
+section{padding:30px 25px;max-width:1200px;margin:0 auto}
+h2 { color: #312e81; display: flex; align-items: center; gap: 10px; font-size: 22px; }
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:15px}
+.card,.perfil-card{background:white;padding:20px;border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.05);transition:transform 0.2s;display:flex;flex-direction:column;justify-content:space-between}
 .card:hover{transform:translateY(-5px)}
-.card-icon{font-size:40px;margin-bottom:10px}
-.price{font-weight:bold;color:#2563eb;font-size:18px;margin:8px 0}
-.btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;margin:4px;font-weight:bold;transition:opacity 0.2s}
+.card-icon{font-size:36px;margin-bottom:10px}
+.price{font-weight:bold;color:#6366f1;font-size:18px;margin:8px 0}
+.btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:opacity 0.2s}
 .btn:hover{opacity:0.9}
 .primary{background:#10b981;color:white;width:100%;margin-top:10px}
-.aceitar{background:#16a34a;color:white}
-.recusar{background:#dc2626;color:white}
-.chat{background:#2563eb;color:white}
-.finalizar{background:#7c3aed;color:white}
+.chat{background:#6366f1;color:white;width:100%;margin-top:5px}
 .badge{background:red;color:white;padding:3px 8px;border-radius:50%;font-size:12px;vertical-align:middle}
-#perfil{background:#eef2ff;max-width:100%}
+#perfil{background:#f0f2ff;max-width:100%}
 .perfil-content{max-width:1200px;margin:0 auto}
 .perfil-topo{display:flex;align-items:center;gap:20px;margin-bottom:20px}
-.avatar{width:90px;height:90px;border-radius:50%;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:bold;text-transform:uppercase}
-.avaliacao{color:#f59e0b;font-size:18px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200}
-.modal-box{background:white;max-width:400px;margin:150px auto;padding:25px;border-radius:12px;text-align:center}
+.avatar{width:80px;height:80px;border-radius:50%;background:#6366f1;color:white;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;text-transform:uppercase}
 input,select{width:100%;padding:12px;margin-top:10px;border:1px solid #ccc;border-radius:8px;font-size:14px}
-footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:14px}
+footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:14px}
 
-/* JANELA DE CHAT FLUTUANTE ADAPTÁVEL */
+/* JANELA DE CHAT */
 .chat-window {
     display: none;
     position: fixed;
@@ -80,17 +75,8 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     z-index: 500;
     flex-direction: column;
 }
-@media (max-width: 400px) {
-    .chat-window {
-        width: 100%;
-        height: 100%;
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
-    }
-}
 .chat-header {
-    background: #2563eb;
+    background: #6366f1;
     color: white;
     padding: 15px;
     border-radius: 12px 12px 0 0;
@@ -98,7 +84,6 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     justify-content: space-between;
     align-items: center;
 }
-@media (max-width: 400px) { .chat-header { border-radius: 0; } }
 .chat-messages {
     flex: 1;
     padding: 15px;
@@ -108,142 +93,121 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     gap: 8px;
     background: #f8fafc;
 }
-.msg {
-    padding: 10px 14px;
-    border-radius: 12px;
-    max-width: 80%;
-    font-size: 14px;
-    word-break: break-word;
-}
-.msg.enviada {
-    background: #2563eb;
-    color: white;
-    align-self: flex-end;
-    border-bottom-right-radius: 2px;
-}
-.msg.recebida {
-    background: #e2e8f0;
-    color: #333;
-    align-self: flex-start;
-    border-bottom-left-radius: 2px;
-}
-.chat-input-area {
-    padding: 10px;
-    display: flex;
-    gap: 8px;
-    border-top: 1px solid #e2e8f0;
-}
-.chat-input-area input {
-    margin-top: 0;
-    padding: 8px;
-}
-.chat-item {
-    cursor: pointer;
-    margin-bottom: 10px;
-    border-left: 5px solid #2563eb;
-}
-.chat-item:hover { background: #f1f5f9; }
+.msg { padding: 10px 14px; border-radius: 12px; max-width: 80%; font-size: 14px; word-break: break-word; }
+.msg.enviada { background: #6366f1; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+.msg.recebida { background: #e2e8f0; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+.chat-input-area { padding: 10px; display: flex; gap: 8px; border-top: 1px solid #e2e8f0; }
+.chat-input-area input { margin-top: 0; padding: 8px; }
+.chat-item { cursor: pointer; margin-bottom: 10px; padding: 12px; background:#f8fafc; border-radius:8px; border-left: 5px solid #6366f1; }
+.chat-item:hover { background: #eef2ff; }
 .btn-logout { background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; border: none; cursor: pointer; margin-top: 5px; }
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200}
+.modal-box{background:white;max-width:400px;margin:150px auto;padding:25px;border-radius:12px;text-align:center}
 </style>
 </head>
 <body>
 
 <div id="tela-login">
     <div class="login-box">
-        <h1>Aluga<span>+</span></h1>
-        <p>Bem-vindo! Identifique-se para aceder ao painel de vendedores.</p>
+        <h1>Vitrine<span>+</span></h1>
+        <p>Bem-vindo à Vitrine de Habilidades! Identifique-se para acessar o painel.</p>
         <input type="text" id="login-nome" placeholder="Seu Nome Completo">
         <input type="email" id="login-email" placeholder="Seu E-mail ou Gmail">
-        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar no Painel</button>
+        <button class="btn primary" style="margin-top:20px; padding:12px;" onclick="realizarLogin()">Entrar na Vitrine</button>
     </div>
 </div>
 
 <div id="conteudo-principal">
     <header>
-    <div class="logo">Aluga<span>+</span></div>
-    <nav>
-    <a href="#habilidades">Habilidades</a>
-    <a href="#objetos">Objetos</a>
-    <a href="#anunciar">Anunciar</a>
-    <a href="#perfil">Perfil <span id="notif" class="badge">0</span></a>
-    </nav>
+        <div class="logo">Vitrine<span>de Habilidades</span></div>
+        <nav>
+            <a href="#aprender">Aprender</a>
+            <a href="#habilidades">Habilidades</a>
+            <a href="#objetos">Objetos</a>
+            <a href="#anunciar">Anunciar</a>
+            <a href="#perfil">Meu Painel</a>
+        </nav>
     </header>
 
     <div class="hero">
-    <h1>Compartilhe Conhecimento e Recursos</h1>
-    <p>Aprenda, ensine e alugue objetos de forma simples.</p>
-    <div class="search-container">
-    <input type="text" id="busca" class="search-input" placeholder="🔍 O que procura hoje?" oninput="filtrarItens()">
-    </div>
+        <h1>Conectando Talentos e Recursos</h1>
+        <p>Encontre mentorias, serviços especializados e objetos para locação.</p>
+        <div class="search-container">
+            <input type="text" id="busca" class="search-input" placeholder="🔍 O que você está procurando?" oninput="filtrarItens()">
+        </div>
     </div>
 
+    <section id="aprender">
+        <h2>📚 Aprender (Aulas e Mentorias)</h2>
+        <div class="cards" id="aprenderLista"></div>
+    </section>
+
+    <hr style="border: 0; border-top: 1px solid #e2e8f0;">
+
     <section id="habilidades">
-    <h2>📚 Habilidades Disponíveis</h2><br>
-    <div class="cards" id="habilidadesLista"></div>
+        <h2>🛠️ Habilidades Profissionais e Serviços</h2>
+        <div class="cards" id="habilidadesLista"></div>
     </section>
 
     <hr style="border: 0; border-top: 1px solid #e2e8f0;">
 
     <section id="objetos">
-    <h2>🔧 Objetos para Alugar</h2><br>
-    <div class="cards" id="objetosLista"></div>
+        <h2>📦 Objetos e Equipamentos para Alugar</h2>
+        <div class="cards" id="objetosLista"></div>
     </section>
 
-    <section id="anunciar">
-    <h2>➕ Criar Novo Anúncio</h2>
-    <div class="perfil-card">
-    <input id="titulo" placeholder="Nome do anúncio (Ex: Aula de Violão, Câmera DSLR...)">
-    <select id="tipo">
-    <option value="Objeto">📦 Objeto</option>
-    <option value="Habilidade">💡 Habilidade</option>
-    </select>
-    <input type="number" id="preco" placeholder="Preço cobrado (Apenas números)">
-    <select id="periodo">
-    <option value="/ hora">por Hora</option>
-    <option value="/ dia">por Dia</option>
-    </select>
-    <button class="btn primary" onclick="criarAnuncio()">Publicar Anúncio</button>
-    </div>
+    <section id="anunciar" style="background: #f0f2ff; max-width: 100%;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2>➕ Publicar Novo Anúncio na Vitrine</h2>
+            <div class="perfil-card" style="margin-top: 15px;">
+                <input id="titulo" placeholder="Ex: Mentoria para ENEM, Edição de Vídeo, Microfone...">
+                <select id="tipo">
+                    <option value="Aprender">📚 Aprender (Aulas, Mentorias, Reforço)</option>
+                    <option value="Habilidade">🛠️ Habilidade (Design, Vídeos, Programação)</option>
+                    <option value="Objeto">📦 Objeto (Equipamentos, Materiais, Locação)</option>
+                </select>
+                <input type="number" id="preco" placeholder="Preço/Valor cobrado (Apenas números)">
+                <select id="periodo">
+                    <option value="/ hora">por Hora</option>
+                    <option value="/ dia">por Dia</option>
+                    <option value="/ serviço">por Serviço / Único</option>
+                </select>
+                <button class="btn primary" onclick="criarAnuncio()">Publicar na Vitrine</button>
+            </div>
+        </div>
     </section>
 
     <section id="perfil">
-    <div class="perfil-content">
-    <h2>👤 Meu Perfil Individual</h2><br>
-    <div class="perfil-topo">
-    <div class="avatar" id="perf-avatar">--</div>
-    <div>
-    <h3 id="perf-nome">Carregando...</h3>
-    <p id="perf-email">E-mail...</p>
-    <button class="btn-logout" onclick="logout()">Sair da Conta</button>
-    </div>
-    </div>
+        <div class="perfil-content">
+            <h2>👤 Meu Painel Individual</h2><br>
+            <div class="perfil-topo">
+                <div class="avatar" id="perf-avatar">--</div>
+                <div>
+                    <h3 id="perf-nome">Carregando...</h3>
+                    <p id="perf-email">E-mail...</p>
+                    <button class="btn-logout" onclick="logout()">Sair da Conta</button>
+                </div>
+            </div>
 
-    <div class="cards">
-    <div class="perfil-card">
-    <h3>📊 Minhas Estatísticas</h3>
-    <p>Meus Anúncios Ativos: <span id="anuncios">0</span></p>
-    <p>Solicitações Recebidas: <span id="sols">0</span></p>
-    </div>
+            <div class="cards">
+                <div class="perfil-card">
+                    <h3>📊 Minhas Estatísticas</h3>
+                    <p style="margin-top:10px;">Seus Anúncios Ativos: <span id="anuncios" style="font-weight:bold; color:#6366f1;">0</span></p>
+                </div>
+                <div class="perfil-card">
+                    <h3>⭐ Avaliações da Vitrine</h3>
+                    <p style="font-style: italic; margin-top:5px;">"Profissional excelente e muito pontual!"</p>
+                </div>
+            </div>
 
-    <div class="perfil-card">
-    <h3>⭐ Avaliações Recentes</h3>
-    <p>"Ótimo atendimento!"</p>
-    <p>"Muito prestativo e pontual."</p>
-    </div>
-    </div>
-
-    <br><br>
-    <h3>💬 Minhas Conversas Ativas</h3><br>
-    <div id="lista-conversas"></div>
-
-    <br><br>
-    <h3>🔔 Minhas Solicitações Recebidas</h3><br>
-    <div id="lista"></div>
-    </div>
+            <br><br>
+            <h3>💬 Minhas Mensagens e Negociações</h3><br>
+            <div id="lista-conversas"></div>
+        </div>
     </section>
 
     <footer>
-    © 2026 Aluga+ • Conectando Soluções
+        © 2026 Vitrine de Habilidades • Conectando Soluções Inteligentes
     </footer>
 </div>
 
@@ -260,15 +224,15 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 </div>
 
 <div id="modal" class="modal">
-<div class="modal-box">
-<p id="texto"></p><br>
-<button class="btn primary" style="width: auto; padding: 10px 30px;" onclick="fechar()">Fechar</button>
-</div>
+    <div class="modal-box">
+        <p id="texto"></p><br>
+        <button class="btn primary" style="width: auto; padding: 10px 30px;" onclick="fechar()">Fechar</button>
+    </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getDatabase, ref, push, set, onChildAdded, update, off } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+  import { getDatabase, ref, push, set, onChildAdded, off } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD3jp-N19gnDIzCClGQohx_5crwfopM3uM",
@@ -286,13 +250,11 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
 
   let usuarioAtual = { nome: "", email: "" };
   let qtdAnuncios = 0;
-  let qtdSolicitacoes = 0;
   let salaChatAtual = ""; 
 
-  // --- MELHORIA 1: VERIFICAÇÃO DE SESSÃO JÁ EXISTENTE ---
   window.addEventListener('DOMContentLoaded', () => {
-      const nomeSalvo = localStorage.getItem('aluga_nome');
-      const emailSalvo = localStorage.getItem('aluga_email');
+      const nomeSalvo = localStorage.getItem('vitrine_nome');
+      const emailSalvo = localStorage.getItem('vitrine_email');
       if(nomeSalvo && emailSalvo) {
           logarUsuario(nomeSalvo, emailSalvo);
       }
@@ -303,12 +265,12 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     let email = document.getElementById('login-email').value.trim();
 
     if(!nome || !email) {
-        window.aviso("Por favor, digite seu nome e e-mail para continuar.");
+        window.aviso("Por favor, preencha seu nome e e-mail para entrar.");
         return;
     }
     
-    localStorage.setItem('aluga_nome', nome);
-    localStorage.setItem('aluga_email', email);
+    localStorage.setItem('vitrine_nome', nome);
+    localStorage.setItem('vitrine_email', email);
     logarUsuario(nome, email);
   }
 
@@ -332,9 +294,9 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
   }
 
   window.criarAnuncio = function() {
-    let titulo = document.getElementById('titulo').value;
+    let titulo = document.getElementById('titulo').value.trim();
     let tipo = document.getElementById('tipo').value;
-    let preco = document.getElementById('preco').value;
+    let preco = document.getElementById('preco').value.trim();
     let periodo = document.getElementById('periodo').value;
 
     if(!titulo || !preco){
@@ -352,38 +314,13 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         vendedorNome: usuarioAtual.nome,
         vendedorEmail: usuarioAtual.email
     }).then(() => {
-        window.aviso("Seu anúncio foi publicado com sucesso!");
+        window.aviso("Seu anúncio foi publicado com sucesso na Vitrine!");
         document.getElementById('titulo').value = '';
         document.getElementById('preco').value = '';
     });
   }
 
-  window.solicitar = function(item, tipoAcao, emailDonoDoItem) {
-    const listaSolsRef = ref(db, 'solicitacoes');
-    const novaSolRef = push(listaSolsRef);
-
-    set(novaSolRef, {
-        item: item,
-        tipoAcao: tipoAcao,
-        status: "🟡 Pendente",
-        solicitanteNome: usuarioAtual.nome,
-        solicitanteEmail: usuarioAtual.email,
-        vendedorAlvoEmail: emailDonoDoItem
-    }).then(() => {
-        window.aviso("Solicitação enviada ao proprietário!");
-    });
-  }
-
-  window.mudarStatus = function(id, novoStatus) {
-    const statusRef = ref(db, 'solicitacoes/' + id);
-    update(statusRef, { status: novoStatus }).then(() => {
-        document.getElementById('span-' + id).innerText = novoStatus;
-    });
-  }
-
-  // --- MELHORIA 2: GESTÃO DE OUVINTES DO CHAT ATIVOS ---
   window.abrirConversa = function(item, emailVendedor, nomeVendedor, emailCliente, nomeCliente) {
-    // Remove o ouvinte anterior antes de mudar de sala para evitar lixo de memória
     if (salaChatAtual) {
         off(ref(db, 'mensagens/' + salaChatAtual));
     }
@@ -401,7 +338,7 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
     });
 
     let interlocutor = (usuarioAtual.email === emailVendedor) ? nomeCliente : nomeVendedor;
-    let tagContexto = (usuarioAtual.email === emailVendedor) ? " [Cliente]" : " [Vendedor]";
+    let tagContexto = (usuarioAtual.email === emailVendedor) ? " [Interessado]" : " [Anunciante]";
     
     document.getElementById('chat-titulo-item').innerText = item + " c/ " + interlocutor + tagContexto;
     document.getElementById('chat-mensagens').innerHTML = "";
@@ -458,49 +395,35 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
             document.getElementById('anuncios').innerText = qtdAnuncios;
         }
 
-        let textoBotao = (dados.tipo === 'Objeto') ? 'Alugar' : 'Contratar';
-        let containerId = (dados.tipo === 'Objeto') ? 'objetosLista' : 'habilidadesLista';
-        let icone = (dados.tipo === 'Objeto') ? '📦' : '💡';
+        let containerId = "habilidadesLista";
+        let icone = "🛠️";
+
+        if (dados.tipo === 'Objeto') {
+            containerId = 'objetosLista';
+            icone = '📦';
+        } else if (dados.tipo === 'Aprender') {
+            containerId = 'aprenderLista';
+            icone = '📚';
+        }
 
         let botaoHTML = dados.vendedorEmail === usuarioAtual.email 
-            ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Item</button>`
-            : `<button class="btn primary" onclick="solicitar('${dados.titulo}', '${textoBotao}', '${dados.vendedorEmail}')">${textoBotao}</button>
-               <button class="btn chat" style="width:100%; margin-top:5px;" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Conversar com Vendedor</button>`;
+            ? `<button class="btn" style="width:100%; background:#ccc; cursor:not-allowed;" disabled>Seu Anúncio</button>`
+            : `<button class="btn chat" onclick="abrirConversa('${dados.titulo}', '${dados.vendedorEmail}', '${dados.vendedorNome}', '${usuarioAtual.email}', '${usuarioAtual.nome}')">💬 Tenho Interesse</button>`;
 
         let cardHtml = `
         <div class="card" data-nome="${dados.titulo.toLowerCase()}">
-            <div class="card-icon">${icone}</div>
-            <h3>${dados.titulo}</h3>
-            <p style="font-size:12px; color:#666;">Por: ${dados.vendedorNome}</p>
-            <p class="price">${dados.preco}</p>
-            ${botaoHTML}
+            <div>
+                <div class="card-icon">${icone}</div>
+                <h3>${dados.titulo}</h3>
+                <p style="font-size:12px; color:#666; margin-top:4px;">Por: ${dados.vendedorNome}</p>
+            </div>
+            <div>
+                <p class="price">${dados.preco}</p>
+                ${botaoHTML}
+            </div>
         </div>`;
 
         document.getElementById(containerId).insertAdjacentHTML('beforeend', cardHtml);
-    });
-
-    onChildAdded(ref(db, 'solicitacoes'), (snapshot) => {
-        const dados = snapshot.val();
-        const id = snapshot.key;
-
-        if(dados.vendedorAlvoEmail === usuarioAtual.email) {
-            qtdSolicitacoes++;
-            document.getElementById('notif').innerText = qtdSolicitacoes;
-            document.getElementById('sols').innerText = qtdSolicitacoes;
-
-            let solHtml = `
-            <div class="solicitacao" id="sol-${id}">
-                <h3>${dados.item}</h3>
-                <p><strong>Interessado:</strong> ${dados.solicitanteNome} (${dados.solicitanteEmail})</p>
-                <p style="margin: 5px 0;">Status: <span id="span-${id}">${dados.status}</span></p>
-                <button class="btn aceitar" onclick="mudarStatus('${id}','🟢 Aceita')">✅ Aceitar</button>
-                <button class="btn recusar" onclick="mudarStatus('${id}','🔴 Recusada')">❌ Recusar</button>
-                <button class="btn chat" onclick="abrirConversa('${dados.item}', '${usuarioAtual.email}', '${usuarioAtual.nome}', '${dados.solicitanteEmail}', '${dados.solicitanteNome}')">💬 Abrir Chat c/ Cliente</button>
-                <button class="btn finalizar" onclick="mudarStatus('${id}','🔵 Finalizada')">🔵 Finalizar</button>
-            </div>`;
-
-            document.getElementById('lista').insertAdjacentHTML('beforeend', solHtml);
-        }
     });
 
     onChildAdded(ref(db, 'chats_ativos'), (snapshot) => {
@@ -508,11 +431,11 @@ footer{background:#2563eb;color:white;text-align:center;padding:20px;font-size:1
         
         if(chat.vendedorEmail === usuarioAtual.email || chat.clienteEmail === usuarioAtual.email) {
             let outroNome = (usuarioAtual.email === chat.vendedorEmail) ? chat.clienteNome : chat.vendedorNome;
-            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Cliente" : "Vendedor";
+            let tipoTag = (usuarioAtual.email === chat.vendedorEmail) ? "Interessado" : "Anunciante";
 
             let itemChatHtml = `
             <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
-                <h4>🤝 Negociação: ${chat.item}</h4>
+                <h4>🤝 Item: ${chat.item}</h4>
                 <p style="font-size:13px; color:#555;">Conversando com (${tipoTag}): <strong>${outroNome}</strong></p>
             </div>`;
 
@@ -545,4 +468,13 @@ function filtrarItens() {
     cards.forEach(card => {
         let nomeItem = card.getAttribute('data-nome');
         if(nomeItem && nomeItem.includes(termo)) {
-            card.style.display = "block";
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
+
+</body>
+</html>

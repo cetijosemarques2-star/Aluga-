@@ -131,7 +131,7 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
 
     <div class="hero">
         <h1>Vitrine Exclusiva de Habilidades</h1>
-        <p>Encontre soluções educacionais, serviços especializados e locações diretamente comigo.</p>
+        <p>Encontre soluções educacionais, services especializados e locações diretamente comigo.</p>
         <div class="search-container">
             <input type="text" id="busca" class="search-input" placeholder="🔍 O que você precisa hoje?" oninput="filtrarItens()">
         </div>
@@ -221,16 +221,13 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // E-mail configurado para tratamento em caixa baixa (evita erros de digitação)
   const EMAIL_DONO_VITRINE = "agusttavo697@gmail.com"; 
 
   let usuarioAtual = { nome: "", email: "" };
   let salaChatAtual = ""; 
   let contagemNotificacoes = 0;
 
-  // Lista Fixa de Itens com Seus Respectivos Emojis Personalizados
   const itensFixos = [
-    // 1. Aprender
     { tipo: "Aprender", titulo: "Mentoria para organização dos estudos", emoji: "📅", acao: "Contratar" },
     { tipo: "Aprender", titulo: "Mentoria para o ENEM", emoji: "📝", acao: "Contratar" },
     { tipo: "Aprender", titulo: "Aulas de reforço de Matemática", emoji: "📐", acao: "Contratar" },
@@ -243,7 +240,6 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     { tipo: "Aprender", titulo: "Grupo de estudos guiado", emoji: "👥", acao: "Contratar" },
     { tipo: "Aprender", titulo: "Preparação para apresentações escolares", emoji: "🎤", acao: "Contratar" },
     
-    // 2. Habilidades
     { tipo: "Habilidade", titulo: "Criação de slides", emoji: "📊", acao: "Contratar" },
     { tipo: "Habilidade", titulo: "Edição de vídeos", emoji: "🎬", acao: "Contratar" },
     { tipo: "Habilidade", titulo: "Design no Canva", emoji: "🎨", acao: "Contratar" },
@@ -253,7 +249,6 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     { tipo: "Habilidade", titulo: "Digitação de trabalhos", emoji: "⌨️", acao: "Contratar" },
     { tipo: "Habilidade", titulo: "Formatação de documentos", emoji: "📄", acao: "Contratar" },
     
-    // 3. Objetos
     { tipo: "Objeto", titulo: "Pendrive", emoji: "💾", acao: "Alugar" },
     { tipo: "Objeto", titulo: "Fone de ouvido", emoji: "🎧", acao: "Alugar" },
     { tipo: "Objeto", titulo: "Microfone", emoji: "🎙️", acao: "Alugar" },
@@ -294,6 +289,7 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
     document.getElementById('perf-email').innerText = email;
     document.getElementById('perf-avatar').innerText = nome.substring(0, 2);
 
+    // Esconde a tela de login e mostra o site principal de imediato
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('conteudo-principal').style.display = 'block';
 
@@ -301,6 +297,7 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
         document.getElementById('area-notificacoes-vendedor').style.display = 'block';
     }
 
+    // Renderiza a interface e só depois puxa os dados assíncronos do banco
     renderizarVitrineFixa();
     inicializarEscutasBanco();
   }
@@ -462,4 +459,4 @@ footer{background:#312e81;color:white;text-align:center;padding:20px;font-size:1
             let itemChatHtml = `
             <div class="chat-item" onclick="abrirConversa('${chat.item}', '${chat.vendedorEmail}', '${chat.vendedorNome}', '${chat.clienteEmail}', '${chat.clienteNome}')">
                 <h4>🤝 Item: ${chat.item}</h4>
-                <p s
+                <p style="margin-top: 5px; font-size: 13px; color: #555;"><strong>${

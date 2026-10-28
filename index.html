@@ -1,1089 +1,1190 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Museu Literário Digital</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        instGreen: '#236A4A',
-                        bgLight: '#F0F6FC',
-                        cardWhite: '#FFFFFF',
-                        softGreen: '#E4EFE7',
-                        darkGreen: '#24382D',
-                        goldLit: '#D9A441'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap');
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #F0F6FC;
-            color: #24382D;
-        }
-        h1, h2, h3, .serif-font {
-            font-family: 'Playfair Display', serif;
-        }
-        /* Custom Scrollbar for Bookshelves */
-        .shelf-scroll::-webkit-scrollbar {
-            height: 8px;
-        }
-        .shelf-scroll::-webkit-scrollbar-track {
-            background: #E4EFE7;
-            border-radius: 4px;
-        }
-        .shelf-scroll::-webkit-scrollbar-thumb {
-            background: #236A4A;
-            border-radius: 4px;
-        }
-        .wooden-shelf {
-            border-bottom: 12px solid #236A4A;
-            box-shadow: 0 10px 15px -3px rgba(35, 106, 74, 0.15);
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  BookOpen,
+  Library,
+  Image as ImageIcon,
+  Video,
+  Info,
+  Shield,
+  Search,
+  Filter,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  Sun,
+  Moon,
+  BookMarked,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Menu,
+  CheckCircle,
+  ExternalLink,
+  Settings,
+  Layers,
+  FileText,
+  UserCheck,
+  Eye
+} from 'lucide-react';
 
-    <!-- HEADER / NAVIGATION -->
-    <header class="bg-instGreen text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="router('home')">
-                <div class="w-12 h-12 rounded-full bg-goldLit flex items-center justify-center text-darkGreen shadow-inner">
-                    <i class="fa-solid fa-book-open-reader text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide">Museu Literário Digital</h1>
-                    <p class="text-xs text-softGreen opacity-90">Preservando histórias &middot; Inspirando gerações</p>
-                </div>
+// ==========================================
+// DADOS INICIAIS DE EXEMPLO
+// ==========================================
+const INITIAL_BOOKS = [
+  {
+    id: '1',
+    title: 'Crônicas da Terra Vermelha',
+    subtitle: 'Memórias e paisagens do interior',
+    author: 'Mariana Silva',
+    synopsis: 'Uma coletânea sensível de crônicas sobre a infância no interior, os cheiros da terra molhada, as tardes de outono e a sabedoria dos antigos.',
+    category: 'Crônica',
+    year: '2025',
+    turma: 'Turma 3º Ano A',
+    credits: 'Edição: Museu Literário | Ilustração: Acervo Escolar',
+    coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    status: 'published',
+    featured: true,
+    shelf: 'Crônicas'
+  },
+  {
+    id: '2',
+    title: 'Versos do Sertão Verde',
+    subtitle: 'Poesia popular e contemporânea',
+    author: 'Antônio Bezerra',
+    synopsis: 'Poemas que cantam a força da caatinga, a resiliência do povo nordestino e a beleza das chuvas que transformam a paisagem.',
+    category: 'Poesia',
+    year: '2026',
+    turma: 'Projeto Literário 2026',
+    credits: 'Revisão: Coordenação Pedagógica',
+    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    status: 'published',
+    featured: true,
+    shelf: 'Literatura nordestina'
+  },
+  {
+    id: '3',
+    title: 'Lendas e Mistérios da Mata',
+    subtitle: 'Contos folclóricos reescritos',
+    author: 'Estudantes do Ensino Fundamental',
+    synopsis: 'Uma viagem mágica pelas lendas do folclore brasileiro sob o olhar criativo e inovador dos jovens autores.',
+    category: 'Conto',
+    year: '2026',
+    turma: 'Ensino Fundamental II',
+    credits: 'Ilustrações dos Alunos',
+    coverUrl: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=600',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    status: 'published',
+    featured: true,
+    shelf: 'Histórias e contos'
+  },
+  {
+    id: '4',
+    title: 'Cordel do Amanhã',
+    subtitle: 'Tecnologia, ecologia e futuro',
+    author: 'Mestre João Cordelista',
+    synopsis: 'Cordéis tradicionais que abordam a preservação ambiental, as novas tecnologias e o respeito à natureza.',
+    category: 'Cordel',
+    year: '2025',
+    turma: 'Oficina de Cordel',
+    credits: 'Xilogravuras Digitais',
+    coverUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=600',
+    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    status: 'published',
+    featured: true,
+    shelf: 'Cordel e cultura popular'
+  }
+];
+
+const INITIAL_CATEGORIES = [
+  'Romance', 'Conto', 'Crônica', 'Poesia', 'Cordel', 'História', 'Biografia', 'Literatura infantil', 'Literatura nordestina', 'Produção escolar'
+];
+
+const INITIAL_GALLERY = [
+  {
+    id: '1',
+    title: 'Oficina de Contação de Histórias',
+    description: 'Alunos reunidos na biblioteca ao ar livre para leitura de clássicos regionais.',
+    imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800',
+    date: '12 de Agosto, 2026',
+    project: 'Festival Literário'
+  },
+  {
+    id: '2',
+    title: 'Exposição de Xilogravuras e Cordéis',
+    description: 'Mostra de trabalhos artísticos produzidos pelos estudantes durante a oficina de cordel.',
+    imageUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=800',
+    date: '28 de Setembro, 2026',
+    project: 'Cultura Popular'
+  }
+];
+
+const INITIAL_VIDEOS = [
+  {
+    id: '1',
+    title: 'Documentário: Vozes da Terra',
+    description: 'Um panorama sobre a literatura oral e as memórias contadas pelos mestres populares.',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    category: 'Documentário',
+    date: 'Outubro de 2026'
+  }
+];
+
+// ==========================================
+// COMPONENTE PRINCIPAL
+// ==========================================
+export default function App() {
+  // Navegação por abas no menu lateral esquerdo
+  const [activeTab, setActiveTab] = useState('home'); // home, catalog, book-detail, gallery, audiovisual, about, admin
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Estados dos Dados
+  const [books, setBooks] = useState(INITIAL_BOOKS);
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES);
+  const [gallery, setGallery] = useState(INITIAL_GALLERY);
+  const [videos, setVideos] = useState(INITIAL_VIDEOS);
+  
+  // Objeto selecionado para leitura ou detalhes
+  const [selectedBook, setSelectedBook] = useState(null);
+  
+  // Leitor Imersivo em Tela Cheia
+  const [isReading, setIsReading] = useState(false);
+  const [readTheme, setReadTheme] = useState('sepia'); // sepia, dark, light
+  const [readZoom, setReadZoom] = useState(100);
+  const [readPage, setReadPage] = useState(1);
+
+  // Estados do Painel Administrativo
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminPass, setAdminPass] = useState('');
+  const [adminSection, setAdminSection] = useState('dashboard'); // dashboard, books, categories, gallery, videos, settings
+  
+  // Filtros do Acervo
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+
+  // Formulário de Livros (Admin)
+  const [editingBookId, setEditingBookId] = useState(null);
+  const [bookForm, setBookForm] = useState({
+    title: '', subtitle: '', author: '', synopsis: '', category: INITIAL_CATEGORIES[0],
+    year: '2026', turma: '', credits: '', coverUrl: '', pdfUrl: '', shelf: 'Novas publicações', status: 'published', featured: false
+  });
+
+  // Prateleiras da Página Inicial
+  const shelvesConfig = [
+    { title: 'Autores clássicos brasileiros', shelfName: 'Autores clássicos brasileiros' },
+    { title: 'Literatura nordestina', shelfName: 'Literatura nordestina' },
+    { title: 'Histórias e contos', shelfName: 'Histórias e contos' },
+    { title: 'Crônicas', shelfName: 'Crônicas' },
+    { title: 'Poemas e poesias', shelfName: 'Poemas e poesias' },
+    { title: 'Cordel e cultura popular', shelfName: 'Cordel e cultura popular' },
+    { title: 'Novas publicações', shelfName: 'Novas publicações' },
+    { title: 'Obras em destaque', shelfName: 'Obras em destaque' }
+  ];
+
+  // Referências para rolagem horizontal das prateleiras
+  const shelfRefs = useRef({});
+
+  const scrollShelf = (shelfName, direction) => {
+    const container = shelfRefs.current[shelfName];
+    if (container) {
+      const scrollAmount = direction === 'left' ? -350 : 350;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  // Funções de CRUD de Livros
+  const handleSaveBook = (e) => {
+    e.preventDefault();
+    if (!bookForm.title || !bookForm.author) {
+      alert('Preencha pelo menos o Título e o Autor.');
+      return;
+    }
+    if (editingBookId) {
+      setBooks(books.map(b => b.id === editingBookId ? { ...b, ...bookForm } : b));
+      alert('Livro atualizado com sucesso!');
+    } else {
+      const newBook = { id: Date.now().toString(), ...bookForm };
+      setBooks([newBook, ...books]);
+      alert('Livro cadastrado com sucesso!');
+    }
+    setEditingBookId(null);
+    setBookForm({
+      title: '', subtitle: '', author: '', synopsis: '', category: categories[0] || 'Romance',
+      year: '2026', turma: '', credits: '', coverUrl: '', pdfUrl: '', shelf: 'Novas publicações', status: 'published', featured: false
+    });
+  };
+
+  const handleEditBook = (book) => {
+    setEditingBookId(book.id);
+    setBookForm(book);
+    setAdminSection('books');
+  };
+
+  const handleDeleteBook = (id) => {
+    if (confirm('Tem certeza que deseja excluir esta obra?')) {
+      setBooks(books.filter(b => b.id !== id));
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-[#E5D7C4] text-[#102820] font-sans overflow-hidden">
+      
+      {/* ==========================================
+          MENU LATERAL ESQUERDO (APP SHELL)
+          ========================================== */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#102820] text-[#E5D7C4] transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl`}>
+        {/* Topo do Menu */}
+        <div className="p-6 border-b border-[#4C6444]/40 flex items-center justify-between">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
+            <div className="w-10 h-10 rounded-lg bg-[#4C6444] flex items-center justify-center shadow-md">
+              <BookOpen className="w-6 h-6 text-[#E5D7C4]" />
             </div>
-            
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <button onclick="router('home')" class="hover:text-goldLit transition"><i class="fa-solid fa-house mr-1"></i> Início</button>
-                <button onclick="router('catalog')" class="hover:text-goldLit transition"><i class="fa-solid fa-book-bookmark mr-1"></i> Acervo</button>
-                <button onclick="router('gallery')" class="hover:text-goldLit transition"><i class="fa-solid fa-images mr-1"></i> Exposições</button>
-                <button onclick="router('admin')" class="bg-goldLit text-darkGreen px-4 py-2 rounded-lg font-semibold hover:bg-amber-400 transition shadow flex items-center space-x-2">
-                    <i class="fa-solid fa-lock text-xs"></i>
-                    <span>Área Administrativa</span>
-                </button>
-            </nav>
+            <div>
+              <h1 className="font-serif text-lg font-bold tracking-wide text-white">Museu Literário</h1>
+              <p className="text-xs text-[#B3B792] tracking-wider uppercase">Digital & Cultural</p>
+            </div>
+          </div>
+          <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden text-[#B3B792] hover:text-white">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
 
-            <!-- Mobile Menu Button -->
-            <button onclick="toggleMobileMenu()" class="md:hidden text-2xl focus:outline-none">
-                <i class="fa-solid fa-bars"></i>
+        {/* Links de Navegação */}
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {[
+            { id: 'home', label: 'Início', icon: BookMarked },
+            { id: 'catalog', label: 'Acervo Literário', icon: Library },
+            { id: 'gallery', label: 'Galeria Fotográfica', icon: ImageIcon },
+            { id: 'audiovisual', label: 'Área Audiovisual', icon: Video },
+            { id: 'about', label: 'Sobre o Museu', icon: Info },
+            { id: 'admin', label: 'Painel Administrativo', icon: Shield },
+          ].map((item) => {
+            const IconComp = item.icon;
+            const isActive = activeTab === item.id || (activeTab === 'book-detail' && item.id === 'catalog');
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-[#4C6444] text-white shadow-lg translate-x-1' 
+                    : 'text-[#B3B792] hover:bg-[#15352a] hover:text-white'
+                }`}
+              >
+                <IconComp className={`w-5 h-5 ${isActive ? 'text-[#CFBB99]' : 'text-[#889063]'}`} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Rodapé do Menu Lateral */}
+        <div className="p-4 border-t border-[#4C6444]/40 bg-[#0c1f18] text-xs text-[#B3B792] text-center">
+          <p>© 2026 Museu Literário Digital</p>
+          <p className="mt-1 text-[10px] text-[#889063]">Preservando memórias e histórias</p>
+        </div>
+      </aside>
+
+      {/* Overlay para dispositivos móveis */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)} 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+        />
+      )}
+
+      {/* ==========================================
+          CONTEÚDO PRINCIPAL (DIREITA)
+          ========================================== */}
+      <main className="flex-1 flex flex-col lg:pl-72 h-screen overflow-hidden bg-[#E5D7C4]">
+        
+        {/* Barra Superior */}
+        <header className="h-16 bg-[#102820] text-[#E5D7C4] px-6 flex items-center justify-between shadow-md z-30 shrink-0">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg bg-[#4C6444] text-white hover:bg-[#5d7954] transition"
+            >
+              <Menu className="w-5 h-5" />
             </button>
-        </div>
+            <span className="font-serif text-lg font-medium text-white hidden sm:inline">
+              {activeTab === 'home' && 'Página Inicial'}
+              {activeTab === 'catalog' && 'Acervo Completo de Obras'}
+              {activeTab === 'book-detail' && 'Detalhes da Obra'}
+              {activeTab === 'gallery' && 'Exposição Fotográfica'}
+              {activeTab === 'audiovisual' && 'Acervo Audiovisual'}
+              {activeTab === 'about' && 'Sobre o Projeto'}
+              {activeTab === 'admin' && 'Painel de Gestão Administrativa'}
+            </span>
+          </div>
 
-        <!-- Mobile Nav Drawer -->
-        <div id="mobileMenu" class="hidden md:hidden bg-darkGreen px-4 pt-2 pb-4 space-y-2 border-t border-instGreen">
-            <button onclick="router('home'); toggleMobileMenu();" class="block w-full text-left py-2 hover:text-goldLit"><i class="fa-solid fa-house mr-2"></i> Início</button>
-            <button onclick="router('catalog'); toggleMobileMenu();" class="block w-full text-left py-2 hover:text-goldLit"><i class="fa-solid fa-book-bookmark mr-2"></i> Acervo</button>
-            <button onclick="router('gallery'); toggleMobileMenu();" class="block w-full text-left py-2 hover:text-goldLit"><i class="fa-solid fa-images mr-2"></i> Exposições</button>
-            <button onclick="router('admin'); toggleMobileMenu();" class="block w-full text-left py-2 text-goldLit font-semibold"><i class="fa-solid fa-lock mr-2"></i> Área Administrativa</button>
-        </div>
-    </header>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setActiveTab('catalog')}
+              className="flex items-center space-x-2 bg-[#4C6444] hover:bg-[#5d7954] text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow"
+            >
+              <Search className="w-4 h-4" />
+              <span className="hidden md:inline">Pesquisar Acervo</span>
+            </button>
+          </div>
+        </header>
 
-    <!-- MAIN APP CONTAINER -->
-    <main class="flex-grow">
-        <!-- VIEW: HOME -->
-        <div id="view-home" class="view-section">
-            <!-- Hero Banner -->
-            <section class="bg-gradient-to-r from-instGreen to-darkGreen text-white py-14 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#D9A441_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                <div class="max-w-4xl mx-auto relative z-10">
-                    <span class="bg-goldLit text-darkGreen text-xs font-bold uppercase px-3 py-1 rounded-full tracking-wider mb-4 inline-block">Plataforma Escolar de Preservação Literária</span>
-                    <h2 class="text-3xl sm:text-5xl font-bold mb-4">Um universo de histórias e memórias</h2>
-                    <p class="text-lg text-softGreen mb-8 max-w-2xl mx-auto">Descubra histórias, crônicas, poemas e obras inesquecíveis produzidas por alunos, professores e turmas.</p>
-                    
-                    <!-- Search Bar -->
-                    <div class="bg-white p-2 rounded-xl shadow-lg max-w-xl mx-auto flex items-center">
-                        <i class="fa-solid fa-magnifying-glass text-instGreen ml-3 mr-2 text-lg"></i>
-                        <input type="text" id="homeSearchInput" placeholder="Buscar livros, autores e histórias..." class="w-full py-2 px-2 text-darkGreen focus:outline-none text-sm sm:text-base">
-                        <button onclick="executeSearchFromHome()" class="bg-instGreen text-white px-6 py-2.5 rounded-lg font-medium hover:bg-darkGreen transition text-sm">Pesquisar</button>
-                    </div>
-
-                    <!-- Category Pills -->
-                    <div class="flex flex-wrap justify-center gap-2 mt-6 text-xs sm:text-sm">
-                        <span class="text-softGreen font-medium self-center mr-2">Filtros rápidos:</span>
-                        <button onclick="filterByCategory('Todos')" class="bg-softGreen/20 hover:bg-softGreen/45 text-white px-3 py-1 rounded-full transition border border-white/20">Todos</button>
-                        <button onclick="filterByCategory('Histórias')" class="bg-softGreen/20 hover:bg-softGreen/45 text-white px-3 py-1 rounded-full transition border border-white/20">Histórias</button>
-                        <button onclick="filterByCategory('Crônicas')" class="bg-softGreen/20 hover:bg-softGreen/45 text-white px-3 py-1 rounded-full transition border border-white/20">Crônicas</button>
-                        <button onclick="filterByCategory('Poemas')" class="bg-softGreen/20 hover:bg-softGreen/45 text-white px-3 py-1 rounded-full transition border border-white/20">Poemas</button>
-                        <button onclick="filterByCategory('Cordel')" class="bg-softGreen/20 hover:bg-softGreen/45 text-white px-3 py-1 rounded-full transition border border-white/20">Cordel</button>
-                    </div>
+        {/* Área Rolável de Conteúdo */}
+        <div className="flex-1 overflow-y-auto">
+          
+          {/* ================= TAB: INÍCIO ================= */}
+          {activeTab === 'home' && (
+            <div className="min-h-full flex flex-col">
+              {/* Banner Principal */}
+              <div className="relative bg-[#102820] text-white py-20 px-8 lg:px-16 flex flex-col items-center justify-center text-center overflow-hidden shadow-xl">
+                <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay">
+                  <img 
+                    src="https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&q=80&w=1600" 
+                    alt="Natureza e Livros" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-            </section>
+                <div className="relative z-10 max-w-3xl space-y-6">
+                  <span className="inline-block bg-[#889063]/30 text-[#CFBB99] border border-[#889063]/50 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase">
+                    Patrimônio Cultural & Literário
+                  </span>
+                  <h1 className="text-4xl lg:text-6xl font-serif font-bold text-[#E5D7C4] leading-tight">
+                    “Um lugar para as histórias viverem.”
+                  </h1>
+                  <p className="text-lg lg:text-xl text-[#B3B792] font-light max-w-2xl mx-auto">
+                    Explore livros, poemas, crônicas e memórias que atravessam gerações.
+                  </p>
+                  <div className="pt-4 flex flex-wrap justify-center gap-4">
+                    <button 
+                      onClick={() => setActiveTab('catalog')}
+                      className="bg-[#4C6444] hover:bg-[#5d7954] text-white px-8 py-3.5 rounded-xl font-medium shadow-lg transition transform hover:-translate-y-0.5"
+                    >
+                      Explorar o acervo
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('about')}
+                      className="bg-transparent hover:bg-white/10 text-[#CFBB99] border border-[#CFBB99]/40 px-8 py-3.5 rounded-xl font-medium transition"
+                    >
+                      Conhecer o Museu
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-            <!-- Bookshelves Dynamic Sections -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-                <!-- Shelf 1: Autores Clássicos Brasileiros -->
-                <section>
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <span class="text-xs font-bold text-instGreen uppercase tracking-wider">Acervo Selecionado</span>
-                            <h3 class="text-2xl font-bold text-darkGreen">Autores Clássicos Brasileiros</h3>
+              {/* Prateleiras Literárias (Inspirado no portal MEC Livros) */}
+              <div className="py-12 px-6 lg:px-12 space-y-12 max-w-7xl mx-auto w-full">
+                {shelvesConfig.map((shelf) => {
+                  const shelfBooks = books.filter(b => b.status === 'published' && (b.shelf === shelf.shelfName || (shelf.shelfName === 'Obras em destaque' && b.featured)));
+                  if (shelfBooks.length === 0) return null;
+
+                  return (
+                    <div key={shelf.shelfName} className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#889063]/30 pb-2">
+                        <h2 className="text-2xl font-serif font-bold text-[#102820] flex items-center space-x-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#4C6444]"></span>
+                          <span>{shelf.title}</span>
+                        </h2>
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={() => scrollShelf(shelf.shelfName, 'left')}
+                            className="p-2 rounded-lg bg-[#D3C1A5] hover:bg-[#bfae92] text-[#102820] transition shadow-sm"
+                            aria-label="Rolar para esquerda"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button 
+                            onClick={() => scrollShelf(shelf.shelfName, 'right')}
+                            className="p-2 rounded-lg bg-[#D3C1A5] hover:bg-[#bfae92] text-[#102820] transition shadow-sm"
+                            aria-label="Rolar para direita"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
                         </div>
-                        <button onclick="router('catalog'); setCatalogCategory('Clássicos');" class="text-instGreen hover:text-darkGreen font-semibold text-sm flex items-center">
-                            Ver mais <i class="fa-solid fa-chevron-right ml-1 text-xs"></i>
-                        </button>
-                    </div>
-                    <div id="shelf-classicos" class="shelf-scroll flex space-x-6 overflow-x-auto pb-4 pt-2 wooden-shelf px-4 bg-cardWhite rounded-xl">
-                        <!-- Loaded dynamically -->
-                    </div>
-                </section>
+                      </div>
 
-                <!-- Shelf 2: Literatura Nordestina -->
-                <section>
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <span class="text-xs font-bold text-instGreen uppercase tracking-wider">Cultura & Raízes</span>
-                            <h3 class="text-2xl font-bold text-darkGreen">Literatura Nordestina</h3>
-                        </div>
-                        <button onclick="router('catalog'); setCatalogCategory('Nordestina');" class="text-instGreen hover:text-darkGreen font-semibold text-sm flex items-center">
-                            Ver mais <i class="fa-solid fa-chevron-right ml-1 text-xs"></i>
-                        </button>
-                    </div>
-                    <div id="shelf-nordestina" class="shelf-scroll flex space-x-6 overflow-x-auto pb-4 pt-2 wooden-shelf px-4 bg-cardWhite rounded-xl">
-                        <!-- Loaded dynamically -->
-                    </div>
-                </section>
-
-                <!-- Shelf 3: Produções da Nossa Escola -->
-                <section>
-                    <div class="flex justify-between items-end mb-4">
-                        <div>
-                            <span class="text-xs font-bold text-instGreen uppercase tracking-wider">Orgulho Estudantil</span>
-                            <h3 class="text-2xl font-bold text-darkGreen">Produções da Nossa Escola</h3>
-                        </div>
-                        <button onclick="router('catalog'); setCatalogCategory('Escolar');" class="text-instGreen hover:text-darkGreen font-semibold text-sm flex items-center">
-                            Ver mais <i class="fa-solid fa-chevron-right ml-1 text-xs"></i>
-                        </button>
-                    </div>
-                    <div id="shelf-escolar" class="shelf-scroll flex space-x-6 overflow-x-auto pb-4 pt-2 wooden-shelf px-4 bg-cardWhite rounded-xl">
-                        <!-- Loaded dynamically -->
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        <!-- VIEW: CATALOG -->
-        <div id="view-catalog" class="view-section hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div class="bg-cardWhite rounded-2xl p-6 shadow-sm mb-8">
-                    <h2 class="text-3xl font-bold text-darkGreen mb-2">Catálogo Literário Completo</h2>
-                    <p class="text-gray-600 text-sm mb-6">Explore todas as obras cadastradas, filtre por categoria ou pesquise pelo título e autor desejado.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="md:col-span-2 relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
-                            <input type="text" id="catalogSearch" oninput="renderCatalog()" placeholder="Filtrar por título, autor ou turma..." class="w-full pl-11 pr-4 py-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen text-sm">
-                        </div>
-                        <div>
-                            <select id="catalogCategoryFilter" onchange="renderCatalog()" class="w-full py-3 px-4 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen text-sm font-medium text-darkGreen">
-                                <option value="Todos">Todas as Categorias</option>
-                                <option value="Clássicos">Clássicos</option>
-                                <option value="Nordestina">Literatura Nordestina</option>
-                                <option value="Escolar">Produções Escolares</option>
-                                <option value="Poemas">Poemas</option>
-                                <option value="Crônicas">Crônicas</option>
-                                <option value="Cordel">Cordel</option>
-                                <option value="Contos">Contos</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Catalog Grid -->
-                <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Dynamic Books Cards -->
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW: BOOK READER & DETAILS -->
-        <div id="view-reader" class="view-section hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <!-- Back Button -->
-                <button onclick="router('catalog')" class="mb-6 inline-flex items-center text-sm font-semibold text-instGreen hover:text-darkGreen bg-softGreen px-4 py-2 rounded-lg transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Voltar ao Acervo
-                </button>
-
-                <div id="readerContentContainer">
-                    <!-- Dynamically injected book details & reader -->
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW: GALLERY & EXHIBITIONS -->
-        <div id="view-gallery" class="view-section hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div class="bg-cardWhite rounded-2xl p-6 shadow-sm mb-8 text-center max-w-3xl mx-auto">
-                    <span class="text-xs font-bold text-instGreen uppercase tracking-wider">Memória & Imagens</span>
-                    <h2 class="text-3xl font-bold text-darkGreen mt-1 mb-3">Galeria e Exposições</h2>
-                    <p class="text-gray-600 text-sm">Fotografias organizadas por projetos, exposições, eventos e bastidores das atividades literárias da escola.</p>
-                </div>
-
-                <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Dynamic Gallery Photos -->
-                </div>
-            </div>
-        </div>
-
-        <!-- VIEW: ADMIN DASHBOARD -->
-        <div id="view-admin" class="view-section hidden">
-            <div class="flex min-h-[calc(100vh-5rem)]">
-                <!-- Admin Sidebar -->
-                <aside class="w-64 bg-darkGreen text-white flex flex-col hidden sm:flex shrink-0">
-                    <div class="p-6 border-b border-instGreen/30">
-                        <span class="text-xs text-goldLit font-bold tracking-wider uppercase">Painel Restrito</span>
-                        <h3 class="text-lg font-bold">Administração</h3>
-                    </div>
-                    <nav class="flex-1 px-4 py-6 space-y-2 text-sm font-medium">
-                        <button onclick="switchAdminTab('dashboard')" id="tab-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-instGreen text-white transition"><i class="fa-solid fa-chart-pie w-5"></i><span>Visão Geral</span></button>
-                        <button onclick="switchAdminTab('books')" id="tab-books" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-instGreen/50 text-softGreen transition"><i class="fa-solid fa-book w-5"></i><span>Livros e Obras</span></button>
-                        <button onclick="switchAdminTab('gallery')" id="tab-gallery" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-instGreen/50 text-softGreen transition"><i class="fa-solid fa-images w-5"></i><span>Imagens e Capas</span></button>
-                        <button onclick="switchAdminTab('videos')" id="tab-videos" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-instGreen/50 text-softGreen transition"><i class="fa-solid fa-video w-5"></i><span>Vídeos e Mídia</span></button>
-                    </nav>
-                    <div class="p-4 border-t border-instGreen/30">
-                        <button onclick="router('home')" class="w-full bg-instGreen hover:bg-instGreen/80 text-white py-2 rounded-lg text-sm font-medium transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-globe"></i><span>Ver Site Público</span>
-                        </button>
-                    </div>
-                </aside>
-
-                <!-- Admin Main Workspace -->
-                <div class="flex-1 bg-bgLight p-6 sm:p-10 overflow-y-auto">
-                    <!-- Mobile Admin Tabs -->
-                    <div class="sm:hidden flex space-x-2 mb-6 overflow-x-auto pb-2">
-                        <button onclick="switchAdminTab('dashboard')" class="px-3 py-2 bg-instGreen text-white rounded-lg text-xs font-semibold whitespace-nowrap">Visão Geral</button>
-                        <button onclick="switchAdminTab('books')" class="px-3 py-2 bg-darkGreen text-white rounded-lg text-xs font-semibold whitespace-nowrap">Livros</button>
-                        <button onclick="switchAdminTab('gallery')" class="px-3 py-2 bg-darkGreen text-white rounded-lg text-xs font-semibold whitespace-nowrap">Imagens</button>
-                        <button onclick="switchAdminTab('videos')" class="px-3 py-2 bg-darkGreen text-white rounded-lg text-xs font-semibold whitespace-nowrap">Vídeos</button>
-                    </div>
-
-                    <!-- TAB 1: DASHBOARD -->
-                    <div id="admin-dashboard" class="admin-tab-content space-y-6">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h2 class="text-2xl font-bold text-darkGreen">Painel Estatístico</h2>
-                                <p class="text-gray-600 text-sm">Resumo geral das publicações e acervo do museu.</p>
+                      {/* Container Horizontal da Prateleira */}
+                      <div 
+                        ref={el => shelfRefs.current[shelf.shelfName] = el}
+                        className="flex space-x-6 overflow-x-auto pb-4 pt-2 scrollbar-thin scrollbar-thumb-[#889063] scrollbar-track-transparent snap-x"
+                      >
+                        {shelfBooks.map((book) => (
+                          <div 
+                            key={book.id}
+                            className="w-56 shrink-0 bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99]/60 flex flex-col group snap-start transition transform hover:-translate-y-1 hover:shadow-xl"
+                          >
+                            <div className="relative h-72 overflow-hidden bg-[#d3c1a5]">
+                              <img 
+                                src={book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600'} 
+                                alt={book.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                              />
+                              <div className="absolute top-3 left-3 bg-[#102820]/80 backdrop-blur-md text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                                {book.category}
+                              </div>
                             </div>
-                            <button onclick="resetDefaultData()" class="bg-amber-100 text-amber-800 border border-amber-300 text-xs px-3 py-2 rounded-lg font-semibold hover:bg-amber-200 transition"><i class="fa-solid fa-rotate mr-1"></i> Restaurar Dados Padrão</button>
-                        </div>
-
-                        <!-- Stats Cards -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div class="bg-cardWhite p-6 rounded-2xl shadow-sm border-l-4 border-instGreen flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase text-gray-500">Total de Livros</p>
-                                    <h3 id="stat-books-count" class="text-3xl font-bold text-darkGreen mt-1">0</h3>
-                                </div>
-                                <div class="w-12 h-12 rounded-xl bg-softGreen flex items-center justify-center text-instGreen text-xl">
-                                    <i class="fa-solid fa-book"></i>
-                                </div>
-                            </div>
-                            <div class="bg-cardWhite p-6 rounded-2xl shadow-sm border-l-4 border-goldLit flex items-center justify-between">
-                                <div>
-                                              <div class="bg-cardWhite p-6 rounded-2xl shadow-sm border-l-4 border-goldLit flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase text-gray-500">Fotografias & Galerias</p>
-                                    <h3 id="stat-photos-count" class="text-3xl font-bold text-darkGreen mt-1">0</h3>
-                                </div>
-                                <div class="w-12 h-12 rounded-xl bg-amber-100 text-goldLit text-xl">
-                                    <i class="fa-solid fa-images"></i>
-                                </div>
-                            </div>
-                            <div class="bg-cardWhite p-6 rounded-2xl shadow-sm border-l-4 border-darkGreen flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase text-gray-500">Vídeos Vinculados</p>
-                                    <h3 id="stat-videos-count" class="text-3xl font-bold text-darkGreen mt-1">0</h3>
-                                </div>
-                                <div class="w-12 h-12 rounded-xl bg-gray-200 text-darkGreen text-xl">
-                                    <i class="fa-solid fa-video"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-cardWhite p-6 rounded-2xl shadow-sm">
-                            <h3 class="text-lg font-bold text-darkGreen mb-4">Ações Rápidas</h3>
-                            <div class="flex flex-wrap gap-4">
-                                <button onclick="switchAdminTab('books'); openBookModal();" class="bg-instGreen text-white px-4 py-2.5 rounded-xl font-medium hover:bg-darkGreen transition text-sm flex items-center space-x-2">
-                                    <i class="fa-solid fa-plus"></i><span>Cadastrar Novo Livro</span>
+                            <div className="p-4 flex-1 flex flex-col justify-between">
+                              <div>
+                                <h3 className="font-serif font-bold text-base text-[#102820] line-clamp-1">{book.title}</h3>
+                                <p className="text-xs text-[#8A6240] font-medium mt-0.5 line-clamp-1">{book.author}</p>
+                                <p className="text-xs text-[#4C6444] mt-2 line-clamp-2">{book.synopsis}</p>
+                              </div>
+                                                 <div className="mt-4 pt-3 border-t border-[#CFBB99]/40 flex items-center justify-between">
+                                <span className="text-[11px] text-[#889063] font-semibold">{book.year}</span>
+                                <button
+                                  onClick={() => {
+                                    setSelectedBook(book);
+                                    setActiveTab('book-detail');
+                                  }}
+                                  className="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow"
+                                >
+                                  Ver mais
                                 </button>
-                                <button onclick="switchAdminTab('gallery'); openGalleryModal();" class="bg-goldLit text-darkGreen px-4 py-2.5 rounded-xl font-medium hover:bg-amber-400 transition text-sm flex items-center space-x-2">
-                                    <i class="fa-solid fa-camera"></i><span>Enviar Foto / Galeria</span>
-                                </button>
+                              </div>
                             </div>
-                        </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-
-                    <!-- TAB 2: BOOKS MANAGEMENT -->
-                    <div id="admin-books" class="admin-tab-content space-y-6 hidden">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h2 class="text-2xl font-bold text-darkGreen">Gerenciamento de Livros</h2>
-                                <p class="text-gray-600 text-sm">Cadastre, edite capas, envie PDFs e organize o acervo literário.</p>
-                            </div>
-                            <button onclick="openBookModal()" class="bg-instGreen text-white px-4 py-2 rounded-xl font-medium hover:bg-darkGreen transition text-sm flex items-center space-x-2">
-                                <i class="fa-solid fa-plus"></i><span>Novo Livro</span>
-                            </button>
-                        </div>
-
-                        <!-- Books Table -->
-                        <div class="bg-cardWhite rounded-2xl shadow-sm overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr class="bg-bgLight text-xs font-bold text-darkGreen uppercase tracking-wider border-b border-gray-200">
-                                            <th class="p-4">Capa</th>
-                                            <th class="p-4">Título / Obra</th>
-                                            <th class="p-4">Autor / Turma</th>
-                                            <th class="p-4">Categoria / Prateleira</th>
-                                            <th class="p-4 text-right">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="adminBooksTableBody" class="divide-y divide-gray-100 text-sm">
-                                        <!-- Dynamic Rows -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 3: GALLERY MANAGEMENT -->
-                    <div id="admin-gallery" class="admin-tab-content space-y-6 hidden">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h2 class="text-2xl font-bold text-darkGreen">Gerenciamento de Imagens e Galerias</h2>
-                                <p class="text-gray-600 text-sm">Adicione fotografias de eventos, projetos e bastidores.</p>
-                            </div>
-                            <button onclick="openGalleryModal()" class="bg-instGreen text-white px-4 py-2 rounded-xl font-medium hover:bg-darkGreen transition text-sm flex items-center space-x-2">
-                                <i class="fa-solid fa-plus"></i><span>Adicionar Foto</span>
-                            </button>
-                        </div>
-
-                        <div class="bg-cardWhite rounded-2xl shadow-sm p-6">
-                            <div id="adminGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <!-- Dynamic Admin Gallery Cards -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 4: VIDEOS MANAGEMENT -->
-                    <div id="admin-videos" class="admin-tab-content space-y-6 hidden">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h2 class="text-2xl font-bold text-darkGreen">Gerenciamento de Vídeos e Mídia</h2>
-                                <p class="text-gray-600 text-sm">Vincule vídeos do YouTube, entrevistas ou recitais às obras do museu.</p>
-                            </div>
-                            <button onclick="openVideoModal()" class="bg-instGreen text-white px-4 py-2 rounded-xl font-medium hover:bg-darkGreen transition text-sm flex items-center space-x-2">
-                                <i class="fa-solid fa-plus"></i><span>Vincular Vídeo</span>
-                            </button>
-                        </div>
-
-                        <div class="bg-cardWhite rounded-2xl shadow-sm p-6">
-                            <div id="adminVideosList" class="space-y-4">
-                                <!-- Dynamic Videos List -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                  );
+                })}
+              </div>
             </div>
-        </div>
-    </main>
+          )}
 
-    <!-- MODAL: BOOK FORM (CREATE / EDIT) -->
-    <div id="bookModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardWhite rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 id="bookModalTitle" class="text-xl font-bold text-darkGreen">Cadastrar Novo Livro</h3>
-                <button onclick="closeBookModal()" class="text-gray-400 hover:text-darkGreen text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="bookForm" onsubmit="saveBookForm(event)" class="space-y-4 text-sm">
-                <input type="hidden" id="bookId">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-darkGreen mb-1">Título da Obra</label>
-                        <input type="text" id="bookTitle" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-darkGreen mb-1">Autor / Responsável</label>
-                        <input type="text" id="bookAuthor" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-semibold text-darkGreen mb-1">Categoria (Prateleira)</label>
-                        <select id="bookCategory" class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen font-medium">
-                            <option value="Clássicos">Clássicos</option>
-                            <option value="Nordestina">Literatura Nordestina</option>
-                            <option value="Escolar">Produções Escolares</option>
-                            <option value="Poemas">Poemas</option>
-                            <option value="Crônicas">Crônicas</option>
-                            <option value="Cordel">Cordel</option>
-                            <option value="Contos">Contos</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-darkGreen mb-1">Ano de Publicação</label>
-                        <input type="text" id="bookYear" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-darkGreen mb-1">Turma / Série</label>
-                        <input type="text" id="bookClass" placeholder="Ex: 3º Ano A" class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                    </div>
-                </div>
+          {/* ================= TAB: ACERVO LITERÁRIO ================= */}
+          {activeTab === 'catalog' && (
+            <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <label class="block font-semibold text-darkGreen mb-1">URL da Capa (Imagem)</label>
-                    <input type="url" id="bookCover" placeholder="https://exemplo.com/capa.jpg" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                    <p class="text-xs text-gray-500 mt-1">Insira o link direto de uma imagem para a capa do livro.</p>
+                  <h1 className="text-3xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
+                  <p className="text-sm text-[#4D2D18] mt-1">Explore todas as obras, pesquisas e produções catalogadas.</p>
                 </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Link do Arquivo PDF (Leitura e Download)</label>
-                    <input type="url" id="bookPdf" placeholder="https://exemplo.com/livro.pdf" class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Sinopse / Descrição Completa</label>
-                    <textarea id="bookSynopsis" rows="4" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen"></textarea>
-                </div>
-                <div class="flex justify-end space-x-3 pt-3 border-t">
-                    <button type="button" onclick="closeBookModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 font-semibold text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-instGreen text-white font-semibold hover:bg-darkGreen transition">Salvar Obra</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: GALLERY FORM -->
-    <div id="galleryModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardWhite rounded-2xl max-w-lg w-full p-6">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-xl font-bold text-darkGreen">Adicionar Fotografia à Galeria</h3>
-                <button onclick="closeGalleryModal()" class="text-gray-400 hover:text-darkGreen text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="galleryForm" onsubmit="saveGalleryForm(event)" class="space-y-4 text-sm">
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Título da Foto / Evento</label>
-                    <input type="text" id="galleryTitle" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">URL da Imagem</label>
-                    <input type="url" id="galleryUrl" placeholder="https://exemplo.com/foto.jpg" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Projeto / Exposição Associada</label>
-                    <input type="text" id="galleryProject" placeholder="Ex: Feira Literária 2026" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div class="flex justify-end space-x-3 pt-3 border-t">
-                    <button type="button" onclick="closeGalleryModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 font-semibold text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-instGreen text-white font-semibold hover:bg-darkGreen transition">Salvar Foto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: VIDEO FORM -->
-    <div id="videoModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-cardWhite rounded-2xl max-w-lg w-full p-6">
-            <div class="flex justify-between items-center mb-4 border-b pb-3">
-                <h3 class="text-xl font-bold text-darkGreen">Vincular Vídeo / Recital</h3>
-                <button onclick="closeVideoModal()" class="text-gray-400 hover:text-darkGreen text-xl"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="videoForm" onsubmit="saveVideoForm(event)" class="space-y-4 text-sm">
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Título do Vídeo</label>
-                    <input type="text" id="videoTitle" required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Link do YouTube (Embed ou Watch)</label>
-                    <input type="url" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none focus:border-instGreen">
-                </div>
-                <div>
-                    <label class="block font-semibold text-darkGreen mb-1">Obra Relacionada</label>
-                    <select id="videoBookId" class="w-full p-3 bg-bgLight rounded-xl border border-gray-200 focus:outline-none font-medium">
-                        <!-- Loaded dynamically -->
-                    </select>
-                </div>
-                <div class="flex justify-end space-x-3 pt-3 border-t">
-                    <button type="button" onclick="closeVideoModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 font-semibold text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-instGreen text-white font-semibold hover:bg-darkGreen transition">Vincular Vídeo</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="bg-darkGreen text-white py-12 border-t border-instGreen mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div>
-                <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 rounded-full bg-goldLit flex items-center justify-center text-darkGreen">
-                        <i class="fa-solid fa-book-open-reader"></i>
-                    </div>
-                    <h3 class="text-xl font-bold">Museu Literário Digital</h3>
-                </div>
-                <p class="text-sm text-softGreen opacity-80">Preservando histórias, crônicas, poemas e produções audiovisuais da nossa comunidade escolar.</p>
-            </div>
-            <div>
-                <h4 class="font-bold text-goldLit mb-3">Navegação</h4>
-                <ul class="space-y-2 text-sm text-softGreen">
-                    <li><button onclick="router('home')" class="hover:underline">Início & Prateleiras</button></li>
-                    <li><button onclick="router('catalog')" class="hover:underline">Acervo Literário</button></li>
-                    <li><button onclick="router('gallery')" class="hover:underline">Exposições e Galerias</button></li>
-                    <li><button onclick="router('admin')" class="hover:underline">Painel Administrativo</button></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold text-goldLit mb-3">Compromisso Cultural</h4>
-                <p class="text-sm text-softGreen opacity-80">Espaço dedicado à preservação da memória literária, estimulando a leitura, a escrita criativa e o protagonismo estudantil.</p>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 border-t border-instGreen/30 text-center text-xs text-softGreen opacity-60">
-            &copy; 2026 Museu Literário Digital &middot; Todos os direitos reservados.
-        </div>
-    </footer>
-
-    <!-- JAVASCRIPT APP LOGIC -->
-    <script>
-        const defaultBooks = [
-            {
-                id: "1",
-                title: "Dom Casmurro (Edição Especial)",
-                author: "Machado de Assis",
-                category: "Clássicos",
-                year: "1899",
-                class: "Literatura Brasileira",
-                cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "A clássica obra de Machado de Assis acompanhada de anotações e estudos críticos desenvolvidos pelos alunos do ensino médio."
-            },
-            {
-                id: "2",
-                title: "Memórias Póstumas de Brás Cubas",
-                author: "Machado de Assis",
-                category: "Clássicos",
-                year: "1881",
-                class: "Literatura Brasileira",
-                cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "Narrado por um defunto autor, o romance traz uma visão irônica e perspicaz da sociedade carioca do século XIX."
-            },
-            {
-                id: "3",
-                title: "Cantos de Cordel e Cidadania",
-                author: "Mestre Severino & Turma do 9º Ano",
-                category: "Nordestina",
-                year: "2025",
-                class: "9º Ano A",
-                cover: "https://images.unsplash.com/photo-1532012197267-da8            {
-                id: "3",
-                title: "Cantos de Cordel e Cidadania",
-                author: "Mestre Severino & Turma do 9º Ano",
-                category: "Nordestina",
-                year: "2025",
-                class: "9º Ano A",
-                cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "Cordéis inéditos compostos por estudantes inspirados na literatura de cordel nordestina e nas raízes culturais do sertão."
-            },
-            {
-                id: "4",
-                title: "Ventos do Agreste: Crônicas e Causos",
-                author: "Profª. Maria Helena",
-                category: "Nordestina",
-                year: "2024",
-                class: "Corpo Docente",
-                cover: "https://images.unsplash.com/photo-1495640388908-05fa85288e61?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "Coletânea de crônicas afetivas que retratam a culinária, as festas populares e as tradições do Nordeste brasileiro."
-            },
-            {
-                id: "5",
-                title: "Versos Juvenis: A Poesia nos Muros da Escola",
-                author: "Estudantes do Ensino Médio",
-                category: "Escolar",
-                year: "2026",
-                class: "Ensino Médio",
-                cover: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "Antologia poética contendo os melhores poemas premiados no concurso literário anual da instituição."
-            },
-            {
-                id: "6",
-                title: "Crônicas do Intervalo",
-                author: "Turma do 2º Ano B",
-                category: "Escolar",
-                year: "2026",
-                class: "2º Ano B",
-                cover: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&q=80&w=600",
-                pdf: "",
-                synopsis: "Histórias bem-humoradas e reflexivas sobre o cotidiano escolar, amizades e descobertas da juventude."
-            }
-        ];
-
-        const defaultGallery = [
-            { id: "g1", title: "Feira Literária Anual 2026", url: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800", project: "Feira de Livros" },
-            { id: "g2", title: "Oficina de Cordel com Autores", url: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=800", project: "Cultura Nordestina" },
-            { id: "g3", title: "Recital de Poesias no auditório", url: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&q=80&w=800", project: "Produções Escolares" }
-        ];
-
-        const defaultVideos = [
-            { id: "v1", title: "Recital Poético: Dom Casmurro em Cena", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", bookId: "1" },
-            { id: "v2", title: "Documentário: Raízes da Literatura Nordestina", url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", bookId: "3" }
-        ];
-
-        let appData = {
-            books: JSON.parse(localStorage.getItem('mld_books')) || defaultBooks,
-            gallery: JSON.parse(localStorage.getItem('mld_gallery')) || defaultGallery,
-            videos: JSON.parse(localStorage.getItem('mld_videos')) || defaultVideos
-        };
-
-        function saveData() {
-            localStorage.setItem('mld_books', JSON.stringify(appData.books));
-            localStorage.setItem('mld_gallery', JSON.stringify(appData.gallery));
-            localStorage.setItem('mld_videos', JSON.stringify(appData.videos));
-        }
-
-        function resetDefaultData() {
-            if (confirm("Deseja realmente restaurar os dados padrão do museu?")) {
-                appData.books = [...defaultBooks];
-                appData.gallery = [...defaultGallery];
-                appData.videos = [...defaultVideos];
-                saveData();
-                initApp();
-                alert("Dados restaurados com sucesso!");
-            }
-        }
-
-        function router(viewName, param) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById(`view-${viewName}`);
-            if (target) {
-                target.classList.remove('hidden');
-                window.scrollTo(0, 0);
-            }
-
-            if (viewName === 'home') renderHomeShelves();
-            if (viewName === 'catalog') renderCatalog();
-            if (viewName === 'gallery') renderGallery();
-            if (viewName === 'admin') {
-                switchAdminTab('dashboard');
-                renderAdminDashboard();
-            }
-            if (viewName === 'reader' && param) {
-                renderBookReader(param);
-            }
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-        }
-
-        function initApp() {
-            renderHomeShelves();
-            renderCatalog();
-            renderGallery();
-        }
-
-        function renderHomeShelves() {
-            renderShelf('shelf-classicos', appData.books.filter(b => b.category === 'Clássicos'));
-            renderShelf('shelf-nordestina', appData.books.filter(b => b.category === 'Nordestina'));
-            renderShelf('shelf-escolar', appData.books.filter(b => b.category === 'Escolar' || b.category === 'Poemas' || b.category === 'Crônicas' || b.category === 'Cordel'));
-        }
-
-        function renderShelf(containerId, booksArray) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            if (booksArray.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-500 py-4 italic">Nenhum livro nesta prateleira no momento.</p>`;
-                return;
-            }
-
-            container.innerHTML = booksArray.map(book => `
-                <div onclick="router('reader', '${book.id}')" class="min-w-[160px] max-w-[160px] cursor-pointer group flex-shrink-0 bg-white rounded-lg p-2 shadow hover:shadow-lg transition border border-gray-100 flex flex-col">
-                    <div class="h-44 w-full rounded overflow-hidden bg-gray-100 mb-2 relative">
-                        <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-2 left-2 bg-goldLit text-darkGreen text-[10px] font-bold px-2 py-0.5 rounded shadow">${book.category}</span>
-                    </div>
-                    <h4 class="font-bold text-darkGreen text-xs line-clamp-1 group-hover:text-instGreen">${book.title}</h4>
-                    <p class="text-[11px] text-gray-500 line-clamp-1">${book.author}</p>
-                </div>
-            `).join('');
-        }
-
-        function executeSearchFromHome() {
-            const query = document.getElementById('homeSearchInput').value;
-            router('catalog');
-            document.getElementById('catalogSearch').value = query;
-            renderCatalog();
-        }
-
-        function filterByCategory(category) {
-            router('catalog');
-            document.getElementById('catalogCategoryFilter').value = category;
-            renderCatalog();
-        }
-
-        function setCatalogCategory(category) {
-            document.getElementById('catalogCategoryFilter').value = category;
-            renderCatalog();
-        }
-
-        function renderCatalog() {
-            const search = document.getElementById('catalogSearch').value.toLowerCase();
-            const category = document.getElementById('catalogCategoryFilter').value;
-            const grid = document.getElementById('catalogGrid');
-
-            let filtered = appData.books.filter(b => {
-                const matchSearch = b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search) || (b.class && b.class.toLowerCase().includes(search));
-                const matchCategory = (category === 'Todos' || b.category === category);
-                return matchSearch && matchCategory;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500"><i class="fa-solid fa-book-open text-4xl mb-2 text-instGreen opacity-40"></i><p>Nenhuma obra encontrada com esses critérios.</p></div>`;
-                return;
-            }
-
-            grid.innerHTML = filtered.map(book => `
-                <div onclick="router('reader', '${book.id}')" class="bg-cardWhite rounded-2xl p-4 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col border border-gray-100 group">
-                    <div class="h-60 rounded-xl overflow-hidden mb-4 bg-gray-100 relative">
-                        <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-3 left-3 bg-instGreen text-white text-xs font-semibold px-2.5 py-1 rounded-lg shadow">${book.category}</span>
-                    </div>
-                    <h3 class="font-bold text-darkGreen text-base mb-1 line-clamp-1 group-hover:text-instGreen">${book.title}</h3>
-                    <p class="text-xs text-gray-600 mb-2"><i class="fa-solid fa-pen-nib mr-1 text-instGreen"></i> ${book.author}</p>
-                    <p class="text-xs text-gray-500 line-clamp-2 mb-4 flex-grow">${book.synopsis}</p>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100 text-xs text-gray-500 font-medium">
-                        <span><i class="fa-regular fa-calendar mr-1"></i> ${book.year}</span>
-                        <span class="text-instGreen font-semibold group-hover:underline">Ler obra &rarr;</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderBookReader(bookId) {
-            const book = appData.books.find(b => b.id === bookId);
-            const container = document.getElementById('readerContentContainer');
-            if (!book) {
-                container.innerHTML = `<p class="text-center py-10 text-gray-500">Livro não encontrado.</p>`;
-                return;
-            }
-
-            const relatedVideos = appData.videos.filter(v => v.bookId === book.id);
-
-            container.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                    <div class="bg-cardWhite rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-                        <div class="w-48 h-72 rounded-xl overflow-hidden shadow-md mb-6 bg-gray-100">
-                            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover">
-                        </div>
-                        <span class="bg-softGreen text-darkGreen text-xs font-bold px-3 py-1 rounded-full mb-3">${book.category} &middot; ${book.year}</span>
-                        <h2 class="text-xl font-bold text-darkGreen mb-1">${book.title}</h2>
-                        <p class="text-sm text-gray-600 mb-4">${book.author} ${book.class ? `(${book.class})` : ''}</p>
-                        
-                        <div class="w-full space-y-3">
-                            <a href="${book.pdf || '#'}" target="_blank" class="w-full bg-instGreen text-white py-3 rounded-xl font-semibold hover:bg-darkGreen transition flex items-center justify-center space-x-2 text-sm shadow">
-                                <i class="fa-solid fa-download"></i><span>Baixar PDF Original</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-cardWhite rounded-2xl p-6 sm:p-8 shadow-sm">
-                            <h3 class="text-xl font-bold text-darkGreen mb-3">Sinopse da Obra</h3>
-                            <p class="text-gray-700 text-sm sm:text-base leading-relaxed mb-6">${book.synopsis}</p>
-                            
-                            <div class="bg-bgLight rounded-2xl p-6 border border-gray-200">
-                                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-300">
-                                    <span class="text-xs font-bold uppercase text-darkGreen tracking-wider"><i class="fa-solid fa-book-open mr-1"></i> Leitor Integrado do Museu</span>
-                                    <span class="text-xs text-gray-500 font-medium">Visualização Digital</span>
-                                </div>
-                                <div class="bg-white p-8 rounded-xl shadow-inner min-h-[300px] flex flex-col justify-center text-center">
-                                    <h4 class="serif-font text-2xl font-bold text-darkGreen mb-3">${book.title}</h4>
-                                    <p class="text-sm text-gray-600 italic mb-6">Por ${book.author}</p>
-                                    <p class="text-xs text-gray-500 max-w-md mx-auto mb-6">Esta obra faz parte do acervo preservado do Museu Literário Digital. Clique no botão abaixo para iniciar a leitura imersiva ou baixar o arquivo completo.</p>
-                                    <button onclick="alert('Iniciando modo de leitura interativa da obra!')" class="mx-auto bg-goldLit text-darkGreen px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-amber-400 transition shadow">
-                                        <i class="fa-solid fa-book-reader mr-2"></i> Abrir Leitor em Tela Cheia
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                ${relatedVideos.length > 0 ? `
-                    <div class="bg-cardWhite rounded-2xl p-6 sm:p-8 shadow-sm mb-8">
-                        <h3 class="text-xl font-bold text-darkGreen mb-4"><i class="fa-solid fa-video text-instGreen mr-2"></i> Vídeos e Conteúdos Multimídia Relacionados</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            ${relatedVideos.map(v => `
-                                <div class="bg-bgLight p-4 rounded-xl border border-gray-200 flex items-center justify-between">
-                                    <div>
-                                        <h4 class="font-bold text-darkGreen text-sm mb-1">${v.title}</h4>
-                                        <a href="${v.url}" target="_blank" class="text-xs text-instGreen hover:underline font-semibold"><i class="fa-brands fa-youtube mr-1"></i> Assistir no YouTube</a>
-                                    </div>
-                                    <div class="w-10 h-10 rounded-full bg-instGreen text-white flex items-center justify-center">
-                                        <i class="fa-solid fa-play text-xs"></i>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-            `;
-        }
-
-        function renderGallery() {
-            const grid = document.getElementById('galleryGrid');
-            if (appData.gallery.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500"><p>Nenhuma fotografia cadastrada no momento.</p></div>`;
-                return;
-            }
-
-            grid.innerHTML = appData.gallery.map(item => `
-                <div class="bg-cardWhite rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-100 group">
-                    <div class="h-64 overflow-hidden bg-gray-100 relative">
-                        <img src="${item.url}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        <span class="absolute top-3 left-3 bg-goldLit text-darkGreen text-xs font-bold px-3 py-1 rounded-lg shadow">${item.project}</span>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-darkGreen text-base mb-1">${item.title}</h4>
-                        <p class="text-xs text-gray-500"><i class="fa-solid fa-camera mr-1 text-instGreen"></i> Registro Fotográfico Oficial</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function switchAdminTab(tabName) {
-            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('aside nav button').forEach(el => {
-                el.classList.remove('bg-instGreen', 'text-white');
-                el.classList.add('hover:bg-instGreen/50', 'text-softGreen');
-            });
-
-            const targetContent = document.getElementById(`admin-${tabName}`);
-            if (targetContent) targetContent.classList.remove('hidden');
-
-            const activeBtn = document.getElementById(`tab-${tabName}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('hover:bg-instGreen/50', 'text-softGreen');
-                activeBtn.classList.add('bg-instGreen', 'text-white');
-            }
-
-            if (tabName === 'dashboard') renderAdminDashboard();
-            if (tabName === 'books') renderAdminBooksTable();
-            if (tabName === 'gallery') renderAdminGalleryGrid();
-            if (tabName === 'videos') renderAdminVideosList();
-        }
-
-        function renderAdminDashboard() {
-            document.getElementById('stat-books-count').innerText = appData.books.length;
-            document.getElementById('stat-photos-count').innerText = appData.gallery.length;
-            document.getElementById('stat-videos-count').innerText = appData.videos.length;
-        }
-
-        function renderAdminBooksTable() {
-            const tbody = document.getElementById('adminBooksTableBody');
-            if (appData.books.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-500">Nenhum livro cadastrado.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = appData.books.map(book => `
-                <tr class="hover:bg-bgLight transition">
-                    <td class="p-4">
-                        <img src="${book.cover}" alt="" class="w-10 h-14 object-cover rounded shadow-sm">
-                    </td>
-                    <td class="p-4 font-bold text-darkGreen">${book.title}<br><span class="text-xs font-normal text-gray-500">${book.year}</span></td>
-                    <td class="p-4 text-gray-600">${book.author}</td>
-                    <td class="p-4"><span class="bg-softGreen text-darkGreen text-xs font-semibold px-2.5 py-1 rounded-md">${book.category}</span></td>
-                    <td class="p-4 text-right space-x-2">
-                        <button onclick="editBook('${book.id}')" class="text-blue-600 hover:text-blue-800 p-1.5" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteBook('${book.id}')" class="text-red-600 hover:text-red-800 p-1.5" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderAdminGalleryGrid() {
-            const grid = document.getElementById('adminGalleryGrid');
-            if (appData.gallery.length === 0) {
-                grid.innerHTML = `<p class="text-gray-500 text-sm">Nenhuma foto cadastrada.</p>`;
-                return;
-            }
-
-            grid.innerHTML = appData.gallery.map(item => `
-                <div class="bg-bgLight rounded-xl p-4 border border-gray-200 flex flex                <div class="bg-bgLight rounded-xl p-4 border border-gray-200 flex flex-col justify-between">
-                    <div>
-                        <div class="h-40 rounded-lg overflow-hidden mb-3">
-                            <img src="${item.url}" alt="" class="w-full h-full object-cover">
-                        </div>
-                        <h4 class="font-bold text-darkGreen text-sm mb-1">${item.title}</h4>
-                        <p class="text-xs text-gray-500">${item.project}</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-gray-200 flex justify-end">
-                        <button onclick="deleteGalleryItem('${item.id}')" class="text-red-600 text-xs font-semibold hover:underline"><i class="fa-solid fa-trash mr-1"></i> Excluir Foto</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderAdminVideosList() {
-            const list = document.getElementById('adminVideosList');
-            if (appData.videos.length === 0) {
-                list.innerHTML = `<p class="text-gray-500 text-sm">Nenhum vídeo vinculado.</p>`;
-                return;
-            }
-
-            list.innerHTML = appData.videos.map(v => {
-                const book = appData.books.find(b => b.id === v.bookId);
-                return `
-                    <div class="bg-bgLight p-4 rounded-xl border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <h4 class="font-bold text-darkGreen text-sm mb-1">${v.title}</h4>
-                            <p class="text-xs text-gray-500 mb-1">Obra vinculada: <span class="font-medium text-darkGreen">${book ? book.title : 'Geral'}</span></p>
-                            <a href="${v.url}" target="_blank" class="text-xs text-instGreen hover:underline">${v.url}</a>
-                        </div>
-                        <button onclick="deleteVideoItem('${v.id}')" class="text-red-600 hover:text-red-800 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function openBookModal(bookId) {
-            document.getElementById('bookModal').classList.remove('hidden');
-            document.getElementById('bookForm').reset();
-            document.getElementById('bookId').value = '';
-            document.getElementById('bookModalTitle').innerText = 'Cadastrar Novo Livro';
-
-            if (bookId) {
-                const book = appData.books.find(b => b.id === bookId);
-                if (book) {
-                    document.getElementById('bookModalTitle').innerText = 'Editar Obra Literária';
-                    document.getElementById('bookId').value = book.id;
-                    document.getElementById('bookTitle').value = book.title;
-                    document.getElementById('bookAuthor').value = book.author;
-                    document.getElementById('bookCategory').value = book.category;
-                    document.getElementById('bookYear').value = book.year;
-                    document.getElementById('bookClass').value = book.class || '';
-                    document.getElementById('bookCover').value = book.cover;
-                    document.getElementById('bookPdf').value = book.pdf || '';
-                    document.getElementById('bookSynopsis').value = book.synopsis;
-                }
-            }
-        }
-        function closeBookModal() { document.getElementById('bookModal').classList.add('hidden'); }
-
-        function openGalleryModal() { document.getElementById('galleryModal').classList.remove('hidden'); document.getElementById('galleryForm').reset(); }
-        function closeGalleryModal() { document.getElementById('galleryModal').classList.add('hidden'); }
-
-        function openVideoModal() {
-            document.getElementById('videoModal').classList.remove('hidden');
-            document.getElementById('videoForm').reset();
-            const select = document.getElementById('videoBookId');
-            select.innerHTML = appData.books.map(b => `<option value="${b.id}">${b.title} (${b.author})</option>`).join('');
-        }
-        function closeVideoModal() { document.getElementById('videoModal').classList.add('hidden'); }
-
-        function saveBookForm(e) {
-            e.preventDefault();
-            const id = document.getElementById('bookId').value;
-            const bookData = {
-                id: id ? id : 'b_' + Date.now(),
-                title: document.getElementById('bookTitle').value,
-                author: document.getElementById('bookAuthor').value,
-                category: document.getElementById('bookCategory').value,
-                year: document.getElementById('bookYear').value,
-                class: document.getElementById('bookClass').value,
-                cover: document.getElementById('bookCover').value,
-                pdf: document.getElementById('bookPdf').value,
-                synopsis: document.getElementById('bookSynopsis').value
-            };
-
-            if (id) {
-                const index = appData.books.findIndex(b => b.id === id);
-                if (index !== -1) appData.books[index] = bookData;
-            } else {
-                appData.books.unshift(bookData);
-            }
-
-            saveData();
-            closeBookModal();
-            renderAdminBooksTable();
-            renderHomeShelves();
-            alert('Obra salva com sucesso!');
-        }
-
-        function editBook(id) { openBookModal(id); }
-
-        function deleteBook(id) {
-            if (confirm('Deseja realmente excluir esta obra do acervo?')) {
-                appData.books = appData.books.filter(b => b.id !== id);
-                saveData();
-                renderAdminBooksTable();
-                renderHomeShelves();
-            }
-        }
-
-        function saveGalleryForm(e) {
-            e.preventDefault();
-            const item = {
-                id: 'g_' + Date.now(),
-                title: document.getElementById('galleryTitle').value,
-                url: document.getElementById('galleryUrl').value,
-                project: document.getElementById('galleryProject').value
-            };
-            appData.gallery.unshift(item);
-            saveData();
-            closeGalleryModal();
-            renderAdminGalleryGrid();
-            alert('Fotografia adicionada com sucesso!');
-        }
-
-        function deleteGalleryItem(id) {
-            if (confirm('Deseja excluir esta foto?')) {
-                appData.gallery = appData.gallery.filter(g => g.id !== id);
-                saveData();
-                renderAdminGalleryGrid();
-            }
-        }
-
-        function saveVideoForm(e) {
-            e.preventDefault();
-            const video = {
-                id: 'v_' + Date.now(),
-                title: document.getElementById('videoTitle').value,
-                url: document.getElementById('videoUrl').value,
-                bookId: document.getElementById('videoBookId').value
-            };
-            appData.videos.unshift(video);
-            saveData();
-            closeVideoModal();
-            renderAdminVideosList();
-            alert('Vídeo vinculado com sucesso!');
-        }
-
-        function deleteVideoItem(id) {
-            if (confirm('Deseja excluir este vídeo?')) {
-                appData.videos = appData.videos.filter(v => v.id !== id);
-                saveData();
-                renderAdminVideosList();
-            }
-        }
-
-        window.onload = initApp;
-    </script>
-</body>
-</html>
                 
+                {/* Barra de Pesquisa Rápida */}
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#8A6240]" />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar por título, autor..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#102820] focus:outline-none focus:border-[#4C6444] shadow-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Filtros por Categoria */}
+              <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
+                <button
+                  onClick={() => setSelectedCategoryFilter('all')}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition shadow-sm ${
+                    selectedCategoryFilter === 'all'
+                      ? 'bg-[#102820] text-white'
+                      : 'bg-[#F4EFE6] text-[#4D2D18] hover:bg-[#dfcca8]'
+                  }`}
+                >
+                  Todas as Categorias
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategoryFilter(cat)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition shadow-sm ${
+                      selectedCategoryFilter === cat
+                        ? 'bg-[#102820] text-white'
+                        : 'bg-[#F4EFE6] text-[#4D2D18] hover:bg-[#dfcca8]'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Grade de Obras */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {books
+                  .filter(b => b.status === 'published')
+                  .filter(b => selectedCategoryFilter === 'all' || b.category === selectedCategoryFilter)
+                  .filter(b => 
+                    b.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    b.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    b.synopsis.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .map((book) => (
+                    <div 
+                      key={book.id}
+                      className="bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99] flex flex-col transition transform hover:-translate-y-1 hover:shadow-xl group"
+                    >
+                      <div className="relative h-80 bg-[#d3c1a5] overflow-hidden">
+                        <img 
+                          src={book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600'} 
+                          alt={book.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
+                        <div className="absolute top-3 left-3 bg-[#102820]/80 backdrop-blur-md text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+                          {book.category}
+                        </div>
+                      </div>
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-serif font-bold text-lg text-[#102820] line-clamp-1">{book.title}</h3>
+                          <p className="text-xs text-[#8A6240] font-medium mt-0.5">{book.author}</p>
+                          <p className="text-xs text-[#4C6444] mt-2 line-clamp-2">{book.synopsis}</p>
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-[#CFBB99] flex items-center justify-between">
+                          <span className="text-xs text-[#889063] font-semibold">{book.year}</span>
+                          <button
+                            onClick={() => {
+                              setSelectedBook(book);
+                              setActiveTab('book-detail');
+                            }}
+                            className="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs px-4 py-2 rounded-lg font-medium transition shadow"
+                          >
+                            Ver Obra
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: DETALHES DA OBRA ================= */}
+          {activeTab === 'book-detail' && selectedBook && (
+            <div className="p-6 lg:p-12 max-w-5xl mx-auto space-y-8">
+              <button
+                onClick={() => setActiveTab('catalog')}
+                className="flex items-center space-x-2 text-[#4C6444] hover:text-[#102820] font-medium text-sm transition"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span>Voltar ao Acervo</span>
+              </button>
+
+              <div className="bg-[#F4EFE6] rounded-3xl p-8 shadow-xl border border-[#CFBB99] grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-1">
+                  <div className="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-[3/4] border border-[#CFBB99]">
+                    <img 
+                      src={selectedBook.coverUrl} 
+                      alt={selectedBook.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={() => setIsReading(true)}
+                      className="w-full flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-3.5 px-4 rounded-xl font-medium shadow-lg transition transform hover:-translate-y-0.5"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      <span>Ler Obra (Tela Cheia)</span>
+                    </button>
+                    
+                    <a
+                      href={selectedBook.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center space-x-2 bg-[#8A6240] hover:bg-[#6e4e33] text-white py-3.5 px-4 rounded-xl font-medium shadow transition"
+                    >
+                      <Download className="w-5 h-5" />
+                      <span>Baixar PDF Original</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 space-y-6">
+                  <div>
+                    <div className="flex items-center space-x-3 mb-2">
+                      <span className="bg-[#102820] text-[#E5D7C4] text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
+                        {selectedBook.category}
+                      </span>
+                      <span className="text-xs text-[#889063] font-semibold">Publicado em {selectedBook.year}</span>
+                    </div>
+                    <h1 className="text-3xl lg:text-4xl font-serif font-bold text-[#102820]">{selectedBook.title}</h1>
+                    {selectedBook.subtitle && (
+                      <p className="text-lg text-[#8A6240] font-serif italic mt-1">{selectedBook.subtitle}</p>
+                    )}
+                    <p className="text-sm font-semibold text-[#4C6444] mt-2">Autor(es): {selectedBook.author}</p>
+                  </div>
+
+                  <div className="border-t border-[#CFBB99] pt-4 space-y-2">
+                    <h3 className="font-serif font-bold text-lg text-[#102820]">Sinopse</h3>
+                    <p className="text-sm text-[#4D2D18] leading-relaxed">{selectedBook.synopsis}</p>
+                  </div>
+
+                  <div className="border-t border-[#CFBB99] pt-4 grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="font-semibold text-[#102820] block">Turma / Projeto:</span>
+                      <span className="text-[#4C6444]">{selectedBook.turma || 'Geral'}</span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-[#102820] block">Créditos e Edição:</span>
+                      <span className="text-[#4C6444]">{selectedBook.credits || 'Museu Literário Digital'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: GALERIA FOTOGRÁFICA ================= */}
+          {activeTab === 'gallery' && (
+            <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+              <div>
+                <h1 className="text-3xl font-serif font-bold text-[#102820]">Galeria de Fotografias</h1>
+                <p className="text-sm text-[#4D2D18] mt-1">Registros visuais de projetos, oficinas e eventos culturais.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {gallery.map((item) => (
+                  <div key={item.id} className="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99] flex flex-col">
+                    <div className="h-64 bg-[#d3c1a5] overflow-hidden relative group">
+                      <img 
+                        src={item.imageUrl} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                      <div className="absolute bottom-3 left-3 bg-[#102820]/80 text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-medium">
+                        {item.date}
+                      </div>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-semibold text-[#889063] tracking-wider">{item.project}</span>
+                        <h3 className="font-serif font-bold text-lg text-[#102820] mt-1">{item.title}</h3>
+                        <p className="text-xs text-[#4D2D18] mt-2">{item.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: ÁREA AUDIOVISUAL ================= */}
+          {activeTab === 'audiovisual' && (
+            <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+              <div>
+                <h1 className="text-3xl font-serif font-bold text-[#102820]">Área Audiovisual</h1>
+                <p className="text-sm text-[#4D2D18] mt-1">Vídeos, documentários e apresentações multimídia.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {videos.map((vid) => (
+                  <div key={vid.id} className="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99] flex flex-col">
+                    <div className="relative aspect-video bg-black">
+                      <iframe 
+                        src={vid.videoUrl} 
+                        title={vid.title} 
+                        className="w-full h-full"
+                        allowFullScreen
+                      />
+                    </div>
+                    <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs bg-[#102820] text-[#E5D7C4] px-2.5 py-0.5 rounded-full font-semibold">{vid.category}</span>
+                          <span className="text-xs text-[#889063]">{vid.date}</span>
+                        </div>
+                        <h3 className="font-serif font-bold text-xl text-[#102820] mt-2">{vid.title}</h3>
+                        <p className="text-sm text-[#4D2D18] mt-2">{vid.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: SOBRE ================= */}
+          {activeTab === 'about' && (
+            <div className="p-6 lg:p-12 max-w-4xl mx-auto space-y-8">
+              <div className="bg-[#F4EFE6] rounded-3xl p-8 lg:p-12 shadow-xl border border-[#CFBB99] space-y-6">
+                <h1 className="text-3xl lg:text-4xl font-serif font-bold text-[#102820]">Sobre o Museu Literário Digital</h1>
+                <p className="text-base text-[#4D2D18] leading-relaxed">
+                  O Museu Literário Digital é uma plataforma inovadora criada com o propósito de preservar, organizar, divulgar e valorizar produções literárias, artísticas e culturais. Inspirado na natureza e na riqueza das tradições editoriais, nosso espaço conecta leitores, autores e estudantes através da tecnologia.
+                </p>
+                <div className="border-t border-[#CFBB99] pt-6 space-y-4">
+                  <h3 className="font-serif font-bold text-xl text-[#102820]">Nossos Objetivos</h3>
+                  <ul className="list-disc pl-5 space-y-2 text-sm text-[#4D2D18]">
+                    <li>Preservar a memória literária e cultural regional e nacional.</li>
+                    <li>Incentivar a leitura e a escrita por meio de ferramentas digitais modernas.</li>
+                    <li>Proporcionar um ambiente acessível para publicação de produções escolares e independentes.</li>
+                    <li>Garantir acesso gratuito e universal a obras de relevância artística e educativa.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= TAB: PAINEL ADMINISTRATIVO ================= */}
+          {activeTab === 'admin' && (
+            <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+              {!isAdminAuthenticated ? (
+                <div className="max-w-md mx-auto bg-[#F4EFE6] rounded-3xl p-8 shadow-2xl border border-[#CFBB99] space-y-6 mt-12">
+                  <div className="text-center space-y-2">
+                    <Shield className="w-12 h-12 text-[#4C6444] mx-auto" />
+                    <h2 className="text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
+                    <p className="text-xs text-[#4D2D18]">Digite a senha administrativa para gerenciar o museu.</p>
+                  </div>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (adminPass === 'admin123' || adminPass === '1234') {
+                      setIsAdminAuthenticated(true);
+                    } else {
+                      alert('Senha incorreta! (Dica de teste: admin123)');
+                    }
+                  }} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#102820] mb-1">Senha de Acesso</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••"
+                        value={adminPass}
+                        onChange={(e) => setAdminPass(e.target.value)}
+                        className="w-full bg-white border border-[#CFBB99] rounded-xl px-4 py-3 text-sm text-[#102820] focus:outline-none focus:border-[#4C6444]"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-[#102820] hover:bg-[#1a3f33] text-white py-3 rounded-xl font-medium shadow-lg transition"
+                    >
+                      Entrar no Painel
+                    </button>
+                    <p className="text-[11px] text-center text-[#889063]">Senha padrão para demonstração: <code className="bg-[#E5D7C4] px-1.5 py-0.5 rounded text-[#102820]">admin123</code></p>
+                  </form>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Navegação do Admin */}
+                  <div className="flex items-center justify-between bg-[#F4EFE6] p-4 rounded-2xl shadow-sm border border-[#CFBB99]">
+                    <div className="flex items-center space-x-2 overflow-x-auto">
+                      {[
+                        { id: 'dashboard', label: 'Indicadores' },
+                        { id: 'books', label: 'Gerenciar Obras' },
+                        { id: 'categories', label: 'Categorias' },
+                        { id: 'gallery', label: 'Galeria' },
+                        { id: 'videos', label: 'Vídeos' },
+                      ].map((sec) => (
+                        <button
+                          key={sec.id}
+                          onClick={() => setAdminSection(sec.id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                            adminSection === sec.id
+                              ? 'bg-[#102820] text-white shadow'
+                              : 'text-[#4D2D18] hover:bg-[#dfcca8]'
+                          }`}
+                        >
+                          {sec.label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setIsAdminAuthenticated(false)}
+                      className="text-xs text-red-700 hover:text-red-900 font-semibold px-3 py-2"
+                    >
+                      Sair
+                    </button>
+                  </div>
+
+                  {/* Seção: Dashboard / Indicadores */}
+                  {adminSection === 'dashboard' && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-[#F4EFE6] p-6 rounded-2xl shadow-md border border-[#CFBB99]">
+                          <span className="text-xs text-[#889063] font-semibold uppercase">Total de Obras</span>
+                          <h3 className="text-3xl font-serif font-bold text-[#102820] mt-2">{books.length}</h3>
+                        </div>
+                        <div className="bg-[#F4EFE6] p-6 rounded-2xl shadow-md border border-[#CFBB99]">
+                          <span className="text-xs text-[#889063] font-semibold uppercase">Categorias</span>
+                          <h3 className="text-3xl font-serif font-bold text-[#102820] mt-2">{categories.length}</h3>
+                        </div>
+                        <div className="bg-[#F4EFE6] p-6 rounded-2xl shadow-md border border-[#CFBB99]">
+                          <span className="text-xs text-[#889063] font-semibold uppercase">Fotografias</span>
+                          <h3 className="text-3xl font-serif font-bold text-[#102820] mt-2">{gallery.length}</h3>
+                        </div>
+                        <div className="bg-[#F4EFE6] p-6 rounded-2xl shadow-md border border-[#CFBB99]">
+                          <span className="text-xs text-[#889063] font-semibold uppercase">Vídeos</span>
+                          <h3 className="text-3xl font-serif font-bold text-[#102820] mt-2">{videos.length}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção: Gerenciar Obras (CRUD) */}
+                  {adminSection === 'books' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      {/* Formulário */}
+                      <div className="bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-4">
+                        <h3 className="font-serif font-bold text-lg text-[#102820]">
+                          {editingBookId ? 'Editar Obra' : 'Cadastrar Nova Obra'}
+                        </h3>
+                        <form onSubmit={handleSaveBook} className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Título *</label>
+                            <input
+                              type="text"
+                              value={bookForm.title}
+                              onChange={e => setBookForm({...bookForm, title: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Subtítulo</label>
+                            <input
+                              type="text"
+                              value={bookForm.subtitle}
+                              onChange={e => setBookForm({...bookForm, subtitle: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Autor *</label>
+                            <input
+                              type="text"
+                              value={bookForm.author}
+                              onChange={e => setBookForm({...bookForm, author: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Categoria</label>
+                            <select
+                              value={bookForm.category}
+                              onChange={e => setBookForm({...bookForm, category: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            >
+                              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Sinopse</label>
+                            <textarea
+                              rows="3"
+                              value={bookForm.synopsis}
+                              onChange={e => setBookForm({...bookForm, synopsis: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">URL da Capa (Imagem)</label>
+                            <input
+                              type="text"
+                              value={bookForm.coverUrl}
+                              onChange={e => setBookForm({...bookForm, coverUrl: e.target.value})}
+                              placeholder="https://..."
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">URL do PDF</label>
+                            <input
+                              type="text"
+                              value={bookForm.pdfUrl}
+                              onChange={e => setBookForm({...bookForm, pdfUrl: e.target.value})}
+                              placeholder="https://..."
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-[#102820] mb-1">Prateleira da Página Inicial</label>
+                            <select
+                              value={bookForm.shelf}
+                              onChange={e => setBookForm({...bookForm, shelf: e.target.value})}
+                              className="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs text-[#102820]"
+                            >
+                              {shelvesConfig.map(s => <option key={s.shelfName} value={s.shelfName}>{s.title}</option>)}
+                            </select>
+                          </div>
+                          <div className="flex items-center space-x-2 pt-2">
+                            <input
+                              type="checkbox"
+                              id="featured"
+                              checked={bookForm.featured}
+                              onChange={e => setBookForm({...bookForm, featured: e.target.checked})}
+                              className="rounded border-[#CFBB99] text-[#4C6444]"
+                            />
+                            <label htmlFor="featured" className="text-xs font-semibold text-[#102820]">Destacar na página inicial</label>
+                          </div>
+                          <div className="pt-3 flex space-x-2">
+                            <button
+                              type="submit"
+                              className="flex-1 bg-[#4C6444] hover:bg-[#394c33] text-white py-2.5 rounded-xl text-xs font-semibold shadow transition"
+                            >
+                              {editingBookId ? 'Atualizar Obra' : 'Salvar Nova Obra'}
+                            </button>
+                            {editingBookId && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingBookId(null);
+                                  setBookForm({
+                                    title: '', subtitle: '', author: '', synopsis: '', category: categories[0] || 'Romance',
+                                    year: '2026', turma: '', credits: '', coverUrl: '', pdfUrl: '', shelf: 'Novas publicações', status: 'published', featured: false
+                                  });
+                                }}
+                                className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-2.5 rounded-xl text-xs font-semibold transition"
+                              >
+                                Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </form>
+                      </div>
+
+                      {/* Lista de Obras Cadastradas */}
+                      <div className="lg:col-span-2 bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-4">
+                        <h3 className="font-serif font-bold text-lg text-[#102820]">Obras Cadastradas ({books.length})</h3>
+                        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                          {books.map(book => (
+                            <div key={book.id} className="bg-white p-4 rounded-2xl border border-[#CFBB99] flex items-center justify-between shadow-sm">
+                              <div className="flex items-center space-x-3">
+                                <img src={book.coverUrl} alt={book.title} className="w-12 h-16 object-cover rounded-lg" />
+                                <div>
+                                  <h4 className="font-serif font-bold text-sm text-[#102820]">{book.title}</h4>
+                                  <p className="text-xs text-[#8A6240]">{book.author} • {book.category}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => handleEditBook(book)}
+                                  className="p-2 bg-[#B3B792]/30 hover:bg-[#B3B792] text-[#102820] rounded-lg transition"
+                                  title="Editar"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteBook(book.id)}
+                                  className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção: Categorias */}
+                  {adminSection === 'categories' && (
+                    <div className="bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] max-w-xl mx-auto space-y-6">
+                      <h3 className="font-serif font-bold text-lg text-[#102820]">Gerenciar Categorias</h3>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const newCat = e.target.elements.catName.value.trim();
+                        if (newCat && !categories.includes(newCat)) {
+                          setCategories([...categories, newCat]);
+                          e.target.reset();
+                        }
+                      }} className="flex space-x-2">
+                        <input
+                          name="catName"
+                          type="text"
+                          placeholder="Nova categoria..."
+                          className="flex-1 bg-white border border-[#CFBB99] rounded-xl px-4 py-2 text-xs text-[#102820]"
+                          required
+                        />
+                        <button type="submit" className="bg-[#4C6444] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow">
+                          Adicionar
+                        </button>
+                      </form>
+                      <div className="flex flex-wrap gap-2">
+                        {categories.map(c => (
+                          <div key={c} className="bg-white px-3 py-1.5 rounded-xl border border-[#CFBB99] text-xs font-medium text-[#102820] flex items-center space-x-2">
+                            <span>{c}</span>
+                            <button onClick={() => setCategories(categories.filter(item => item !== c))} className="text-red-600 hover:text-red-800">×</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seção: Galeria */}
+                  {adminSection === 'gallery' && (
+                    <div className="bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-6">
+                      <h3 className="font-serif font-bold text-lg text-[#102820]">Gerenciar Fotografias da Galeria</h3>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const title = e.target.elements.gTitle.value;
+                        const desc = e.target.elements.gDesc.value;
+                        const url = e.target.elements.gUrl.value;
+                        if (title && url) {
+                          setGallery([{ id: Date.now().toString(), title, description: desc, imageUrl: url, date: 'Outubro de 2026', project: 'Novo Projeto' }, ...gallery]);
+                          e.target.reset();
+                        }
+                      }} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input name="gTitle" placeholder="Título da foto" className="bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required />
+                        <input name="gDesc" placeholder="Descrição" className="bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required />
+                        <input name="gUrl" placeholder="URL da Imagem" className="bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required />
+                        <button type="submit" className="md:col-span-3 bg-[#4C6444] text-white py-2 rounded-xl text-xs font-semibold shadow">Adicionar Fotografia</button>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Seção: Vídeos */}
+                  {adminSection === 'videos' && (
+                    <div className="bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-6">
+                      <h3 className="font-serif font-bold text-lg text-[#102820]">Gerenciar Vídeos e Audiovisual</h3>
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const title = e.target.elements.vTitle.value;
+                        const url = e.target.elements.vUrl.value;
+                        if (title && url) {
+                          setVideos([{ id: Date.now().toString(), title, description: 'Vídeo cadastrado pelo painel', videoUrl: url, category: 'Geral', date: 'Outubro de 2026' }, ...videos]);
+                          e.target.reset();
+                        }
+                      }} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input name="vTitle" placeholder="Título do Vídeo" className="bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required />
+                        <input name="vUrl" placeholder="URL de Incorporação (Embed do YouTube)" className="bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required />
+                        <button type="submit" className="md:col-span-2 bg-[#4C6444] text-white py-2 rounded-xl text-xs font-semibold shadow">Adicionar Vídeo</button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      </main>
+
+      {/* ==========================================
+          LEITOR DE LIVROS EM TELA CHEIA (MODAL IMERSIVO)
+          ========================================== */}
+      {isReading && selectedBook && (
+        <div className={`fixed inset-0 z-50 flex flex-col transition-colors duration-300 ${
+          readTheme === 'dark' ? 'bg-[#121212] text-[#E5D7C4]' :
+          readTheme === 'sepia' ? 'bg-[#F4ECD8] text-[#433422]' :
+          'bg-[#FFFFFF] text-[#102820]'
+        }`}>
+          {/* Barra de Controle do Leitor */}
+          <div className={`h-16 px-6 flex items-center justify-between border-b ${
+            readTheme === 'dark' ? 'border-gray-800 bg-[#1a1a1a]' :
+            readTheme === 'sepia' ? 'border-[#E2D4BD] bg-[#EADCC5]' :
+            'border-gray-200 bg-gray-100'
+          }`}>
+            <div>
+              <h3 className="font-serif font-bold text-base line-clamp-1">{selectedBook.title}</h3>
+              <p className="text-xs opacity-80">{selectedBook.author}</p>
+            </div>
+
+            {/* Controles Flutuantes: Temas, Zoom e Fechar */}
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center bg-black/10 rounded-xl p-1 space-x-1">
+                <button 
+                  onClick={() => setReadTheme('light')} 
+                  className={`p-2 rounded-lg text-xs font-medium transition ${readTheme === 'light' ? 'bg-white shadow text-black' : 'opacity-70 hover:opacity-100'}`}
+                  title="Modo Claro"
+                >
+                  <Sun className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setReadTheme('sepia')} 
+                  className={`p-2 rounded-lg text-xs font-medium transition ${readTheme === 'sepia' ? 'bg-[#F4ECD8] shadow text-[#433422]' : 'opacity-70 hover:opacity-100'}`}
+                  title="Modo Sépia"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setReadTheme('dark')} 
+                  className={`p-2 rounded-lg text-xs font-medium transition ${readTheme === 'dark' ? 'bg-black shadow text-white' : 'opacity-70 hover:opacity-100'}`}
+                  title="Modo Escuro"
+                >
+                  <Moon className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-1 bg-black/10 rounded-xl p-1">
+                <button 
+                  onClick={() => setReadZoom(Math.max(70, readZoom - 10))}
+                  className="px-2 py-1 text-xs font-bold hover:bg-black/10 rounded"
+                >
+                  -
+                </button>
+                <span className="text-xs px-2 font-medium">{readZoom}%</span>
+                <button 
+                  onClick={() => setReadZoom(Math.min(160, readZoom + 10))}
+                  className="px-2 py-1 text-xs font-bold hover:bg-black/10 rounded"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                onClick={() => setIsReading(false)}
+                className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-xl trtransition shadow"
+                title="Fechar Leitor"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Área de Visualização do Conteúdo do Livro */}
+          <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
+            <div 
+              style={{ transform: `scale(${readZoom / 100})`, transformOrigin: 'top center' }} 
+              className="max-w-3xl w-full p-12 rounded-2xl shadow-2xl transition-transform duration-200 space-y-6"
+            >
+              <div className="text-center pb-8 border-b border-current/20">
+                <h1 className="font-serif text-3xl font-bold">{selectedBook.title}</h1>
+                <p className="text-sm italic opacity-80 mt-1">{selectedBook.subtitle}</p>
+                <p className="text-xs font-semibold uppercase tracking-widest mt-3 opacity-70">Por {selectedBook.author}</p>
+              </div>
+
+              <div className="space-y-6 font-serif text-lg leading-relaxed text-justify">
+                <p>
+                  {selectedBook.synopsis}
+                </p>
+                <p>
+                  Bem-vindo à página de leitura imersiva do <strong>Museu Literário Digital</strong>. Este espaço foi projetado para garantir o conforto visual, permitindo que leitores de todas as idades desfrutem das obras em tela cheia, com ajustes de tema (claro, sépia e escuro) e controle completo de zoom.
+                </p>
+                <p>
+                  As produções literárias aqui reunidas representam o esforço coletivo de preservação da memória, da criatividade e da cultura. Utilize os controles superiores para alternar entre os modos de leitura conforme a sua preferência.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Rodapé de Paginação do Leitor */}
+          <div className={`h-14 px-6 flex items-center justify-between border-t ${
+            readTheme === 'dark' ? 'border-gray-800 bg-[#1a1a1a]' :
+            readTheme === 'sepia' ? 'border-[#E2D4BD] bg-[#EADCC5]' :
+            'border-gray-200 bg-gray-100'
+          }`}>
+            <button 
+              onClick={() => setReadPage(Math.max(1, readPage - 1))}
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-black/10 hover:bg-black/20 text-xs font-medium"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Anterior</span>
+            </button>
+            <span className="text-xs font-medium opacity-80">Página {readPage} de 10</span>
+            <button 
+              onClick={() => setReadPage(readPage + 1)}
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-black/10 hover:bg-black/20 text-xs font-medium"
+            >
+              <span>Próxima</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+)       html
+                                

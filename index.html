@@ -256,7 +256,6 @@
       document.getElementById('mobileOverlay').classList.add('hidden');
     }
 
-    // Suporte ao fechamento do menu com a tecla Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeMobileMenu();
@@ -265,7 +264,6 @@
     });
 
     function render() {
-      // Atualizar botões do menu lateral
       document.querySelectorAll('.nav-btn').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
         if (tab === state.activeTab || (state.activeTab === 'book-detail' && tab === 'catalog')) {
@@ -277,7 +275,6 @@
         }
       });
 
-      // Atualizar Título do Cabeçalho (Correção da sintaxe corrigida aqui)
       const titles = {
         home: 'Página Inicial',
         catalog: 'Acervo Completo de Obras',
@@ -287,9 +284,12 @@
         about: 'Sobre o Projeto',
         admin: 'Painel Administrativo'
       };
-      document.getElementById('headerTitle').textContent = titles[state.activeTab] || 'Museu Literário Digital';
+      
+      const titleElem = document.getElementById('headerTitle');
+      if (titleElem) {
+        titleElem.textContent = titles[state.activeTab] || 'Museu Literário Digital';
+      }
 
-      // Renderizar Conteúdo Correspondente
       const area = document.getElementById('contentArea');
       area.innerHTML = '';
 
@@ -394,7 +394,7 @@
             </div>
             <div class="relative w-full md:w-80">
               <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-[#8A6240]"></i>
-              <input type="text" placeholder="Pesquisar por título, autor..." value="${state.searchTerm}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#102820] focus:outline-none">
+              <input type="text" placeholder="Pesquisar por título, autor..." value="${state.searchTerm}" oninput="state.searstate.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#102820] focus:outline-none">
             </div>
           </div>
           <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
@@ -405,7 +405,6 @@
       `;
     }
 
-    // Função dedicada para atualizar dinamicamente a grade de livros na busca
     function getFilteredBooksHTML() {
       let filteredBooks = state.books.filter(b => b.status === 'published')
         .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
@@ -633,7 +632,6 @@
       state.books.unshift(newBook);
       alert('Obra cadastrada com sucesso!');
       
-      // Limpeza correta do formulário após o cadastro
       document.getElementById('bookForm').reset();
       render();
     }
@@ -650,7 +648,6 @@
       document.getElementById('readerBookTitle').textContent = title;
       document.getElementById('readerBookAuthor').textContent = author;
       
-      // Redefinição correta do zoom ao abrir cada novo documento
       state.readerZoom = 100;
       document.getElementById('zoomLabel').textContent = '100%';
       document.getElementById('pdfIframe').style.transform = 'none';

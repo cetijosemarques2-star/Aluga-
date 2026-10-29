@@ -256,6 +256,14 @@
       document.getElementById('mobileOverlay').classList.add('hidden');
     }
 
+    // Suporte ao fechamento do menu com a tecla Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+        closePdfReader();
+      }
+    });
+
     function render() {
       // Atualizar botões do menu lateral
       document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -269,7 +277,7 @@
         }
       });
 
-      // Atualizar Título do Cabeçalho
+      // Atualizar Título do Cabeçalho (Correção da sintaxe corrigida aqui)
       const titles = {
         home: 'Página Inicial',
         catalog: 'Acervo Completo de Obras',
@@ -279,7 +287,7 @@
         about: 'Sobre o Projeto',
         admin: 'Painel Administrativo'
       };
-      document.getElementById('headerTitle.textContent = titles[state.activeTab] || 'Museu Literário Digital';
+      document.getElementById('headerTitle').textContent = titles[state.activeTab] || 'Museu Literário Digital';
 
       // Renderizar Conteúdo Correspondente
       const area = document.getElementById('contentArea');
@@ -372,19 +380,45 @@
     }
 
     function renderCatalog() {
-      let filteredBooks = state.books.filter(b => b.status === 'published')
-        .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
-        .filter(b => b.title.toLowerCase().includes(state.searchTerm.toLowerCase()) || b.author.toLowerCase().includes(state.searchTerm.toLowerCase()));
-
       let categoriesBtns = `<button onclick="setCategoryFilter('all')" class="px-4 py-2 rounded-xl text-xs font-semibold transition shadow-sm ${state.selectedCategoryFilter === 'all' ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">Todas</button>`;
       categoriesBtns += state.categories.map(c => `
         <button onclick="setCategoryFilter('${c}')" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition shadow-sm ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${c}</button>
       `).join('');
 
-      let booksGrid = filteredBooks.map(book => `
+      return `
+        <div class="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 class="text-3xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
+              <p class="text-sm text-[#4D2D18] mt-1">Explore todas as obras e produções catalogadas.</p>
+            </div>
+            <div class="relative w-full md:w-80">
+              <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-[#8A6240]"></i>
+              <input type="text" placeholder="Pesquisar por título, autor..." value="${state.searchTerm}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#102820] focus:outline-none">
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
+          <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            ${getFilteredBooksHTML()}
+          </div>
+        </div>
+      `;
+    }
+
+    // Função dedicada para atualizar dinamicamente a grade de livros na busca
+    function getFilteredBooksHTML() {
+      let filteredBooks = state.books.filter(b => b.status === 'published')
+        .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
+        .filter(b => b.title.toLowerCase().includes(state.searchTerm.toLowerCase()) || b.author.toLowerCase().includes(state.searchTerm.toLowerCase()));
+
+      if (filteredBooks.length === 0) {
+        return `<div class="col-span-full py-12 text-center text-sm text-[#8A6240]">Nenhuma obra encontrada com os critérios informados.</div>`;
+      }
+
+      return filteredBooks.map(book => `
         <div class="bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99] flex flex-col group">
           <div class="relative h-80 bg-[#d3c1a5] overflow-hidden">
-            <img src="${book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600'}" class="w-full h-full object-cover group-hover:scale-105 transition duration duration-500">
+            <img src="${book.coverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600'">
             <div class="absolute top-3 left-3 bg-[#102820]/80 text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase">
               ${book.category}
             </div>
@@ -402,23 +436,13 @@
           </div>
         </div>
       `).join('');
+    }
 
-      return `
-        <div class="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 class="text-3xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
-              <p class="text-sm text-[#4D2D18] mt-1">Explore todas as obras e produções catalogadas.</p>
-            </div>
-            <div class="relative w-full md:w-80">
-              <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-[#8A6240]"></i>
-              <input type="text" placeholder="Pesquisar por título, autor..." value="${state.searchTerm}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#102820] focus:outline-none">
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">${booksGrid}</div>
-        </div>
-      `;
+    function renderCatalogGrid() {
+      const grid = document.getElementById('booksGrid');
+      if (grid) {
+        grid.innerHTML = getFilteredBooksHTML();
+      }
     }
 
     function renderBookDetail() {
@@ -550,7 +574,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-4">
               <h3 class="font-serif font-bold text-lg text-[#102820]">Cadastrar Nova Obra</h3>
-              <form onsubmit="handleSaveBook(event)" class="space-y-3">
+              <form id="bookForm" onsubmit="handleSaveBook(event)" class="space-y-3">
                 <input id="fTitle" placeholder="Título *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required>
                 <input id="fAuthor" placeholder="Autor *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required>
                 <input id="fCategory" placeholder="Categoria (ex: Conto)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs" required>
@@ -608,6 +632,9 @@
       };
       state.books.unshift(newBook);
       alert('Obra cadastrada com sucesso!');
+      
+      // Limpeza correta do formulário após o cadastro
+      document.getElementById('bookForm').reset();
       render();
     }
 
@@ -623,6 +650,11 @@
       document.getElementById('readerBookTitle').textContent = title;
       document.getElementById('readerBookAuthor').textContent = author;
       
+      // Redefinição correta do zoom ao abrir cada novo documento
+      state.readerZoom = 100;
+      document.getElementById('zoomLabel').textContent = '100%';
+      document.getElementById('pdfIframe').style.transform = 'none';
+
       document.getElementById('pdfIframe').src = pdfUrl;
       document.getElementById('pdfReaderModal').classList.remove('hidden');
     }

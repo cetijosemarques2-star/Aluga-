@@ -23,7 +23,7 @@
     .font-serif {
       font-family: 'Cormorant Garamond', serif;
     }
-    /* Animação suave de folhear página */
+    /* Animação suave e sincronizada de folhear página (500ms) */
     .page-flip {
       transition: transform 0.5s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s ease;
       transform-style: preserve-3d;
@@ -114,7 +114,7 @@
   </main>
 
   <!-- ==========================================
-      LEITOR EM TELA CHEIA TOTAL (OTIMIZADO PARA CELULAR)
+      LEITOR EM TELA CHEIA (TEXTO ANIMADO OU PDF)
       ========================================== -->
   <div id="pdfReaderModal" class="fixed inset-0 z-50 flex flex-col bg-[#2c221a] text-[#F4ECD8] hidden">
     <!-- Cabeçalho do Leitor -->
@@ -125,36 +125,15 @@
       </div>
       <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
         <span id="pageIndicator" class="hidden sm:inline-block text-xs font-mono bg-black/30 px-3 py-1 rounded-lg">Página 1 de 3</span>
-        <button onclick="closePdfReader()" class="bg-red-600 text-white p-2 sm:p-2.5 rounded-xl hover:bg-red-700 transition flex items-center justify-center">
+        <button onclick="closePdfReader()" id="closeReaderBtn" class="bg-red-600 text-white p-2 sm:p-2.5 rounded-xl hover:bg-red-700 transition flex items-center justify-center">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
     </div>
     
-    <!-- Visualizador de Páginas (Tela Cheia Imersiva) -->
-    <div class="flex-1 flex items-center justify-center p-2 sm:p-6 perspective-[1500px] overflow-hidden">
-      <div id="bookPageContainer" class="page-flip w-full h-full max-w-4xl max-h-none sm:max-h-[800px] bg-[#F9F3EA] text-[#2c221a] p-5 sm:p-12 rounded-xl sm:rounded-r-2xl sm:rounded-l-md shadow-2xl border-l-4 sm:border-l-8 border-[#102820] flex flex-col justify-between overflow-y-auto">
-        
-        <div class="border-b border-[#dcd0bc] pb-3 mb-4 sm:mb-6 flex justify-between items-center shrink-0">
-          <span class="font-serif italic text-xs sm:text-sm text-[#8A6240] truncate pr-2" id="readerHeaderBookName">Nome da Obra</span>
-          <span class="text-xs text-gray-500 font-mono shrink-0" id="topPageNum">1</span>
-        </div>
-
-        <div id="pageContentText" class="flex-1 font-serif text-base sm:text-xl leading-relaxed space-y-4 my-auto">
-          <!-- Texto da página injetado dinamicamente -->
-        </div>
-
-        <div class="pt-4 sm:pt-6 border-t border-[#dcd0bc] flex justify-between items-center mt-4 shrink-0">
-          <button onclick="changePage(-1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i><span>Anterior</span>
-          </button>
-          <span id="bottomPageNum" class="text-xs text-gray-600 font-bold">1 / 3</span>
-          <button onclick="changePage(1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
-            <span>Próxima</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-      </div>
+    <!-- Visualizador Dinâmico (Iframe para PDF real ou Livro Animado para Textos) -->
+    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-2 sm:p-6 perspective-[1500px] overflow-hidden">
+      <!-- Injetado dinamicamente via JS (PDF Viewer ou Livro de Páginas) -->
     </div>
   </div>
 
@@ -169,7 +148,7 @@
       selectedCategoryFilter: 'all',
       selectedBookId: null,
       currentPage: 1,
-      totalPages: 3,
+      totalPages: 1,
       
       books: [
         {
@@ -181,6 +160,7 @@
           category: 'Crônica',
           year: '2025',
           coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
+          pdfUrl: '',
           status: 'published',
           featured: true,
           shelf: 'Crônicas',
@@ -199,17 +179,14 @@
           category: 'Poesia',
           year: '2026',
           coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600',
+          pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Exemplo de PDF real
           status: 'published',
           featured: true,
           shelf: 'Literatura nordestina',
-          pages: [
-            "I\n\nQuando o verde desponta na terra seca,\nO sertanejo sorri pro céu anil.\nA viola ponteia a alma que seca,\nNo canto mais forte do meu Brasil.",
-            "II\n\nNão há sol que desande a esperança,\nDe quem planta o milho e espera o chão.\nNa alma do povo há sempre uma dança,\nDe fé e coragem no coração.",
-            "III\n\nTerra de luz, de poesia e encanto,\nOnde o verso brota igual flor no agreste.\nQuem bebe dessa água e enxuga o pranto,\nLeva o nordeste gravado no peito."
-          ]
+          pages: []
         }
       ],
-      categories: ['Conto', 'Crônica', 'Poesia', 'Literatura nordestina', 'Produção escolar'],
+      categories: ['Conto', 'Crônica', 'Poesia', 'Literatura nordestina', 'Produção escolar', 'Romance'],
       gallery: [
         { id: '1', title: 'Oficina de Contação de Histórias', description: 'Alunos reunidos na biblioteca ao ar livre.', imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800', date: 'Agosto, 2026', project: 'Festival' }
       ],
@@ -224,6 +201,12 @@
       { title: 'Literatura nordestina', shelfName: 'Literatura nordestina' },
       { title: 'Novas publicações', shelfName: 'Novas publicações' }
     ];
+
+    // Função auxiliar para evitar XSS ao injetar dados textuais do usuário
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
 
     function switchTab(tab) {
       state.activeTab = tab;
@@ -292,18 +275,18 @@
         let booksCards = shelfBooks.map(book => `
           <div class="w-52 sm:w-56 shrink-0 bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99]/60 flex flex-col group">
             <div class="relative h-64 sm:h-72 overflow-hidden bg-[#d3c1a5]">
-              <img src="${book.coverUrl}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <img src="${escapeHtml(book.coverUrl)}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
               <div class="absolute top-3 left-3 bg-[#102820]/80 text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase">
-                ${book.category}
+                ${escapeHtml(book.category)}
               </div>
             </div>
             <div class="p-4 flex-1 flex flex-col justify-between">
               <div>
-                <h3 class="font-serif font-bold text-base text-[#102820] line-clamp-1">${book.title}</h3>
-                <p class="text-xs text-[#8A6240] font-medium mt-0.5 line-clamp-1">${book.author}</p>
+                <h3 class="font-serif font-bold text-base text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
+                <p class="text-xs text-[#8A6240] font-medium mt-0.5 line-clamp-1">${escapeHtml(book.author)}</p>
               </div>
               <div class="mt-4 pt-3 border-t border-[#CFBB99]/40 flex items-center justify-between">
-                <span class="text-[11px] text-[#889063] font-semibold">${book.year}</span>
+                <span class="text-[11px] text-[#889063] font-semibold">${escapeHtml(book.year)}</span>
                 <button onclick="openBook('${book.id}')" class="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs px-3.5 py-1.5 rounded-lg font-medium transition shadow">
                   Ler
                 </button>
@@ -317,7 +300,7 @@
             <div class="flex items-center justify-between border-b border-[#889063]/30 pb-2">
               <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#102820] flex items-center space-x-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-[#4C6444]"></span>
-                <span>${shelf.title}</span>
+                <span>${escapeHtml(shelf.title)}</span>
               </h2>
             </div>
             <div class="flex space-x-4 sm:space-x-6 overflow-x-auto pb-4 pt-2 scrollbar-thin">
@@ -350,7 +333,7 @@
     function renderCatalog() {
       let categoriesBtns = `<button onclick="setCategoryFilter('all')" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === 'all' ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">Todas</button>`;
       categoriesBtns += state.categories.map(c => `
-        <button onclick="setCategoryFilter('${c}')" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${c}</button>
+        <button onclick="setCategoryFilter('${c}')" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${escapeHtml(c)}</button>
       `).join('');
 
       return `
@@ -358,11 +341,11 @@
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
-              <p class="text-xs sm:text-sm text-[#4D2D18] mt-1">Pesquise por títulos ou autores.</p>
+              <p class="text-xs sm:text-sm text-[#4D2D18] mt-1">Pesquise por título, autor, sinopse ou categoria.</p>
             </div>
             <div class="relative w-full md:w-80">
               <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 text-[#8A6240]"></i>
-              <input type="text" placeholder="Pesquisar..." value="${state.searchTerm}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none">
+              <input type="text" placeholder="Pesquisar..." value="${escapeHtml(state.searchTerm)}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none">
             </div>
           </div>
           <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
@@ -374,28 +357,36 @@
     }
 
     function getFilteredBooksHTML() {
+      const termo = state.searchTerm.trim().toLowerCase();
+
       let filtered = state.books.filter(b => b.status === 'published')
         .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
-        .filter(b => b.title.toLowerCase().includes(state.searchTerm.toLowerCase()) || b.author.toLowerCase().includes(state.searchTerm.toLowerCase()))        .filter(b => b.title.toLowerCase().includes(state.searchTerm.toLowerCase()) || b.author.toLowerCase().includes(state.searchTerm.toLowerCase()));
+        .filter(book =>
+          book.title.toLowerCase().includes(termo) ||
+          book.author.toLowerCase().includes(termo) ||
+          (book.subtitle || '').toLowerCase().includes(termo) ||
+          (book.synopsis || '').toLowerCase().includes(termo) ||
+          book.category.toLowerCase().includes(termo)
+        );
 
       if (filtered.length === 0) return `<div class="col-span-full py-12 text-center text-sm text-[#8A6240]">Nenhuma obra encontrada.</div>`;
 
       return filtered.map(book => `
         <div class="bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99] flex flex-col">
           <div class="relative h-72 bg-[#d3c1a5] overflow-hidden">
-            <img src="${book.coverUrl}" class="w-full h-full object-cover">
+            <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
             <div class="absolute top-3 left-3 bg-[#102820]/80 text-[#E5D7C4] text-[10px] px-2.5 py-1 rounded-full font-semibold">
-              ${book.category}
+              ${escapeHtml(book.category)}
             </div>
           </div>
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
-              <h3 class="font-serif font-bold text-base text-[#102820] line-clamp-1">${book.title}</h3>
-              <p class="text-xs text-[#8A6240] font-medium mt-0.5">${book.author}</p>
+              <h3 class="font-serif font-bold text-base text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
+              <p class="text-xs text-[#8A6240] font-medium mt-0.5">${escapeHtml(book.author)}</p>
             </div>
             <div class="mt-4 pt-3 border-t border-[#CFBB99] flex items-center justify-between">
-              <span class="text-xs text-[#889063] font-semibold">${book.year}</span>
-              <button onclick="openBook('${book.id}')" class="bg-[#4C6444] text-white text-xs px-4 py-2 rounded-lg font-medium shadow">Ver Detalhes</button>
+              <span class="text-xs text-[#889063] font-semibold">${escapeHtml(book.year)}</span>
+              <button onclick="openBook('${escapeHtml(book.id)}')" class="bg-[#4C6444] text-whitetext-xs px-4 py-2 rounded-lg font-medium shadow">Ver Detalhes</button>
             </div>
           </div>
         </div>
@@ -419,20 +410,20 @@
           <div class="bg-[#F4EFE6] rounded-3xl p-6 sm:p-8 shadow-xl border border-[#CFBB99] grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div class="md:col-span-1">
               <div class="rounded-2xl overflow-hidden shadow-2xl aspect-[3/4] border border-[#CFBB99] max-w-[240px] mx-auto md:max-w-none">
-                <img src="${book.coverUrl}" class="w-full h-full object-cover">
+                <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
               </div>
-              <button onclick="openPdfReader('${book.id}')" class="w-full mt-4 flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-3 px-4 rounded-xl font-medium shadow transition">
+              <button onclick="openPdfReader('${escapeHtml(book.id)}')" class="w-full mt-4 flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-3 px-4 rounded-xl font-medium shadow transition">
                 <i data-lucide="book-open" class="w-5 h-5"></i><span>Ler Obra</span>
               </button>
             </div>
             <div class="md:col-span-2 space-y-4">
-              <span class="bg-[#102820] text-[#E5D7C4] text-xs px-3 py-1 rounded-full uppercase">${book.category}</span>
-              <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#102820]">${book.title}</h1>
-              <p class="text-sm sm:text-base text-[#8A6240] font-serif italic">${book.subtitle || ''}</p>
-              <p class="text-sm font-semibold text-[#4C6444]">Autor: ${book.author}</p>
+              <span class="bg-[#102820] text-[#E5D7C4] text-xs px-3 py-1 rounded-full uppercase">${escapeHtml(book.category)}</span>
+              <h1 class="text-2xl sm:text-3xl font-serif font-bold text-[#102820]">${escapeHtml(book.title)}</h1>
+              <p class="text-sm sm:text-base text-[#8A6240] font-serif italic">${escapeHtml(book.subtitle || '')}</p>
+              <p class="text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
               <div class="border-t border-[#CFBB99] pt-4">
                 <h3 class="font-serif font-bold text-lg text-[#102820] mb-2">Sinopse</h3>
-                <p class="text-sm text-[#4D2D18] leading-relaxed">${book.synopsis}</p>
+                <p class="text-sm text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
               </div>
             </div>
           </div>
@@ -444,11 +435,11 @@
       let cards = state.gallery.map(item => `
         <div class="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99] flex flex-col">
           <div class="h-56 sm:h-64 bg-[#d3c1a5] relative">
-            <img src="${item.imageUrl}" class="w-full h-full object-cover">
+            <img src="${escapeHtml(item.imageUrl)}" class="w-full h-full object-cover">
           </div>
           <div class="p-5">
-            <h3 class="font-serif font-bold text-lg text-[#102820]">${item.title}</h3>
-            <p class="text-xs text-[#4D2D18] mt-2">${item.description}</p>
+            <h3 class="font-serif font-bold text-lg text-[#102820]">${escapeHtml(item.title)}</h3>
+            <p class="text-xs text-[#4D2D18] mt-2">${escapeHtml(item.description)}</p>
           </div>
         </div>
       `).join('');
@@ -460,11 +451,11 @@
       let cards = state.videos.map(vid => `
         <div class="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99]">
           <div class="aspect-video bg-black">
-            <iframe src="${vid.videoUrl}" class="w-full h-full" allowfullscreen></iframe>
+            <iframe src="${escapeHtml(vid.videoUrl)}" class="w-full h-full" allowfullscreen></iframe>
           </div>
           <div class="p-5 sm:p-6 space-y-2">
-            <h3 class="font-serif font-bold text-lg sm:text-xl text-[#102820]">${vid.title}</h3>
-            <p class="text-xs sm:text-sm text-[#4D2D18]">${vid.description}</p>
+            <h3 class="font-serif font-bold text-lg sm:text-xl text-[#102820]">${escapeHtml(vid.title)}</h3>
+            <p class="text-xs sm:text-sm text-[#4D2D18]">${escapeHtml(vid.description)}</p>
           </div>
         </div>
       `).join('');
@@ -492,7 +483,7 @@
             <div class="text-center space-y-2">
               <i data-lucide="shield" class="w-12 h-12 text-[#4C6444] mx-auto"></i>
               <h2 class="text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
-              <p class="text-xs text-[#4D2D18]">Senha padrão: admin123</p>
+              <p class="text-xs text-[#4D2D18]">Insira a chave de acesso administrativo</p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
               <input id="adminPassInput" type="password" placeholder="Senha..." class="w-full bg-white border border-[#CFBB99] rounded-xl px-4 py-3 text-sm focus:outline-none" required>
@@ -505,10 +496,10 @@
       let booksList = state.books.map(b => `
         <div class="bg-white p-3 sm:p-4 rounded-2xl border border-[#CFBB99] flex items-center justify-between shadow-sm">
           <div class="pr-2">
-            <h4 class="font-serif font-bold text-sm text-[#102820] truncate max-w-[180px] sm:max-w-xs">${b.title}</h4>
-            <p class="text-[11px] text-[#8A6240]">${b.author} • ${b.category}</p>
+            <h4 class="font-serif font-bold text-sm text-[#102820] truncate max-w-[180px] sm:max-w-xs">${escapeHtml(b.title)}</h4>
+            <p class="text-[11px] text-[#8A6240]">${escapeHtml(b.author)} • ${escapeHtml(b.category)}</p>
           </div>
-          <button onclick="deleteBook('${b.id}')" class="p-2 bg-red-100 text-red-700 rounded-lg shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          <button onclick="deleteBook('${escapeHtml(b.id)}')" class="p-2 bg-red-100 text-red-700 rounded-lg shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>
       `).join('');
 
@@ -523,11 +514,15 @@
               <h3 class="font-serif font-bold text-lg text-[#102820]">Cadastrar Obra</h3>
               <form id="bookForm" onsubmit="handleSaveBook(event)" class="space-y-3">
                 <input id="fTitle" placeholder="Título *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
+                <input id="fSubtitle" placeholder="Subtítulo" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
                 <input id="fAuthor" placeholder="Autor *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
-                <input id="fCategory" placeholder="Categoria *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
+                <input id="fCategory" placeholder="Categoria (ex: Conto, Poesia) *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
+                <input id="fYear" placeholder="Ano (ex: 2026)" value="2026" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
                 <textarea id="fSynopsis" placeholder="Sinopse" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
                 <input id="fCover" placeholder="URL da Capa" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <button type="submit" class="w-full bg-[#4C6444] text-white py-2.5 rounded-xl text-xs font-semibold shadow">Salvar</button>
+                <input id="fPdf" placeholder="URL do PDF Original (opcional)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
+                <textarea id="fPages" placeholder="Páginas em texto separado por linhas em branco (caso não tenha PDF)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none h-20"></textarea>
+                <button type="submit" class="w-full bg-[#4C6444] text-white py-2.5 rounded-xl text-xs font-semibold shadow">Salvar Obra</button>
               </form>
             </div>
             <div class="lg:col-span-2 bg-[#F4EFE6] p-6 rounded-3xl shadow-lg border border-[#CFBB99] space-y-4">
@@ -551,29 +546,36 @@
 
     function handleAdminLogin(e) {
       e.preventDefault();
-      if (document.getElementById('adminPassInput').value === 'admin123') {
+      const inputPass = document.getElementById('adminPassInput').value;
+      if (inputPass === 'admin123') {
         state.isAdminAuth = true;
         render();
       } else {
-        alert('Senha incorreta! Use: admin123');
+        alert('Senha incorreta!');
       }
     }
 
     function handleSaveBook(e) {
       e.preventDefault();
+      const rawPages = document.getElementById('fPages').value.trim();
+      const pagesArray = rawPages ? rawPages.split(/\n\s*\n/) : ["Página inicial da obra.", "Conteúdo e desenvolvimento.", "Conclusão."];
+
       const newBook = {
         id: Date.now().toString(),
         title: document.getElementById('fTitle').value,
+        subtitle: document.getElementById('fSubtitle').value,
         author: document.getElementById('fAuthor').value,
         category: document.getElementById('fCategory').value,
+        year: document.getElementById('fYear').value || '2026',
         synopsis: document.getElementById('fSynopsis').value,
         coverUrl: document.getElementById('fCover').value || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
-        year: '2026',
+        pdfUrl: document.getElementById('fPdf').value.trim(),
         status: 'published',
         featured: true,
         shelf: 'Novas publicações',
-        pages: ["Página inicial da obra.", "Conteúdo intermediário da história.", "Conclusão e considerações finais."]
+        pages: pagesArray
       };
+
       state.books.unshift(newBook);
       alert('Obra cadastrada com sucesso!');
       document.getElementById('bookForm').reset();
@@ -581,31 +583,70 @@
     }
 
     function deleteBook(id) {
-      if (confirm('Deseja excluir esta obra?')) {
+      if (confirm('Deseja excluir esta obra do acervo?')) {
         state.books = state.books.filter(b => b.id !== id);
         render();
       }
     }
 
-    // --- LEITOR COM ANIMAÇÃO DE FOLHA ---
+    // --- LEITOR INTELIGENTE (PDF REAL OU LIVRO ANIMADO) ---
     function openPdfReader(bookId) {
       const book = state.books.find(b => b.id === bookId);
       if (!book) return;
       
       state.currentReadingBook = book;
-      state.currentPage = 1;
-      state.totalPages = book.pages ? book.pages.length : 3;
-
       document.getElementById('readerBookTitle').textContent = book.title;
       document.getElementById('readerBookAuthor').textContent = book.author;
-      document.getElementById('readerHeaderBookName').textContent = book.title;
 
-      updateReaderPageContent();
+      const bodyContainer = document.getElementById('readerBodyContainer');
+      bodyContainer.innerHTML = '';
+
+      if (book.pdfUrl && book.pdfUrl.length > 5) {
+        document.getElementById('pageIndicator').style.display = 'none';
+        bodyContainer.innerHTML = `
+          <div class="w-full h-full flex flex-col items-center justify-center bg-black/20 p-2 sm:p-4 rounded-xl">
+            <iframe src="${escapeHtml(book.pdfUrl)}" class="w-full h-full rounded-lg shadow-2xl bg-white" title="Leitor de PDF"></iframe>
+          </div>
+        `;
+      } else if (book.pages && book.pages.length > 0) {
+        document.getElementById('pageIndicator').style.display = 'inline-block';
+        state.currentPage = 1;
+        state.totalPages = book.pages.length;
+
+        bodyContainer.innerHTML = `
+          <div id="bookPageContainer" class="page-flip w-full h-full max-w-4xl max-h-none sm:max-h-[800px] bg-[#F9F3EA] text-[#2c221a] p-5 sm:p-12 rounded-xl sm:rounded-r-2xl sm:rounded-l-md shadow-2xl border-l-4 sm:border-l-8 border-[#102820] flex flex-col justify-between overflow-y-auto">
+            <div class="border-b border-[#dcd0bc] pb-3 mb-4 sm:mb-6 flex justify-between items-center shrink-0">
+              <span class="font-serif italic text-xs sm:text-sm text-[#8A6240] truncate pr-2">${escapeHtml(book.title)}</span>
+              <span class="text-xs text-gray-500 font-mono shrink-0" id="topPageNum">1</span>
+            </div>
+
+            <div id="pageContentText" class="flex-1 font-serif text-base sm:text-xl leading-relaxed space-y-4 my-auto">
+              <!-- Conteúdo injetado -->
+            </div>
+
+            <div class="pt-4 sm:pt-6 border-t border-[#dcd0bc] flex justify-between items-center mt-4 shrink-0">
+              <button onclick="changePage(-1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i><span>Anterior</span>
+              </button>
+              <span id="bottomPageNum" class="text-xs text-gray-600 font-bold">1 / ${state.totalPages}</span>
+              <button onclick="changePage(1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
+                <span>Próxima</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        updateReaderPageContent();
+      } else {
+        bodyContainer.innerHTML = `<div class="text-center text-white p-8">O conteúdo desta obra ainda não está disponível para leitura.</div>`;
+      }
+
       document.getElementById('pdfReaderModal').classList.remove('hidden');
+      document.getElementById('closeReaderBtn').focus();
     }
 
     function closePdfReader() {
       document.getElementById('pdfReaderModal').classList.add('hidden');
+      document.getElementById('readerBodyContainer').innerHTML = '';
     }
 
     function changePage(direction) {
@@ -613,23 +654,36 @@
       if (newPage < 1 || newPage > state.totalPages) return;
 
       const container = document.getElementById('bookPageContainer');
+      if (!container) return;
+
       container.classList.add('flipping');
 
+      // Sincronizado perfeitamente com a transição CSS de 500ms
       setTimeout(() => {
         state.currentPage = newPage;
         updateReaderPageContent();
         container.classList.remove('flipping');
-      }, 250);
+      }, 500);
     }
 
     function updateReaderPageContent() {
       const book = state.currentReadingBook;
-      const text = book.pages ? book.pages[state.currentPage - 1] : `Conteúdo da página ${state.currentPage}`;
+      const text = book.pages && book.pages[state.currentPage - 1] ? book.pages[state.currentPage - 1] : `Página ${state.currentPage}`;
       
-      document.getElementById('pageContentText').innerHTML = `<p>${text.replace(/\n\n/g, '</p><p>')}</p>`;
-      document.getElementById('topPageNum').textContent = state.currentPage;
-      document.getElementById('bottomPageNum').textContent = `${state.currentPage} / ${state.totalPages}`;
-      document.getElementById('pageIndicator').textContent = `Página ${state.currentPage} de ${state.totalPages}`;
+      const contentElem = document.getElementById('pageContentText');
+      if (contentElem) {
+        contentElem.innerHTML = `<p>${escapeHtml(text).replace(/\n\n/g, '</p><p>')}</p>`;
+      }
+      const topNum = document.getElementById('topPageNum');
+      if (topNum) topNum.textContent = state.currentPage;
+
+      const botNum = document.getElementById('bottomPageNum');
+      if (botNum) botNum.textContent = `${state.currentPage} / ${state.totalPages}`;
+
+      const indicator = document.getElementById('pageIndicator');
+      if (indicator) indicator.textContent = `Página ${state.currentPage} de ${state.totalPages}`;
+      
+      lucide.createIcons();
     }
 
     window.onload = () => render();

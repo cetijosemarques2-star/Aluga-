@@ -332,7 +332,7 @@
       }).join('');
 
       return `
-        <div class="min-h-full flex flex-col pb-24 lg:pb-12">
+        <div class="min-h-full flex flex-col pb-28 lg:pb-12">
           <div class="bg-[#102820] text-white py-16 lg:py-24 px-6 sm:px-12 flex flex-col items-center justify-center text-center shadow-2xl">
             <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#E5D7C4] leading-tight max-w-3xl">
               “Um lugar para as histórias viverem.”
@@ -358,7 +358,7 @@
       `).join('');
 
       return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-28 lg:pb-12">
+        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
@@ -427,7 +427,7 @@
       if (!book) return `<div class="p-16 text-center">Obra não encontrada. <button onclick="switchTab('catalog')" class="text-[#4C6444] underline">Voltar</button></div>`;
 
       return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-5xl mx-auto space-y-8 pb-32 lg:pb-16">
+        <div class="p-6 sm:p-10 lg:p-16 max-w-5xl mx-auto space-y-8 pb-36 lg:pb-16">
           <button onclick="switchTab('catalog')" class="flex items-center space-x-2 text-[#4C6444] font-medium text-sm hover:underline">
             <i data-lucide="chevron-left" class="w-5 h-5"></i><span>Voltar ao Acervo</span>
           </button>
@@ -447,7 +447,10 @@
               <p class="text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
               <div class="border-t border-[#CFBB99] pt-5">
                 <h3 class="font-serif font-bold text-lg text-[#102820] mb-2">Sinopse</h3>
-                <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed max-h-[40vh] sm:max-h-none overflow-y-auto pr-2">${escapeHtml(book.synopsis)}</p>
+                <!-- Área de sinopse com rolagem interna e espaçamento generoso para os botões virtuais do celular -->
+                <div class="max-h-[35vh] sm:max-h-none overflow-y-auto pr-2">
+                  <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -472,7 +475,7 @@
         </div>
       `).join('');
 
-      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-28 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Galeria Fotográfica</h1><p class="text-sm text-[#4D2D18]">Clique em qualquer imagem para ampliá-la.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${cards}</div></div>`;
+      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Galeria Fotográfica</h1><p class="text-sm text-[#4D2D18]">Clique em qualquer imagem para ampliá-la.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${cards}</div></div>`;
     }
 
     function renderAudiovisual() {
@@ -489,12 +492,12 @@
         </div>
       `).join('');
 
-      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-28 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Área Audiovisual</h1><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${cards}</div></div>`;
+      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Área Audiovisual</h1><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${cards}</div></div>`;
     }
 
     function renderAbout() {
       return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-4xl mx-auto pb-28 lg:pb-12">
+        <div class="p-6 sm:p-10 lg:p-16 max-w-4xl mx-auto pb-32 lg:pb-12">
           <div class="bg-[#F4EFE6] rounded-3xl p-8 sm:p-12 shadow-2xl border border-[#CFBB99] space-y-6">
             <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Sobre o Museu Literário Digital</h1>
             <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">
@@ -508,7 +511,7 @@
     function renderAdmin() {
       if (!state.isAdminAuth) {
         return `
-          <div class="max-w-md mx-auto bg-[#F4EFE6] rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#CFBB99] space-y-6 mt-12 mx-4 sm:mx-auto pb-28 lg:pb-12">
+          <div class="max-w-md mx-auto bg-[#F4EFE6] rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#CFBB99] space-y-6 mt-12 mx-4 sm:mx-auto pb-32 lg:pb-12">
             <div class="text-center space-y-2">
               <i data-lucide="shield" class="w-12 h-12 text-[#4C6444] mx-auto"></i>
               <h2 class="text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
@@ -533,7 +536,7 @@
       `).join('');
 
       return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-28 lg:pb-12">
+        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12">
           <div class="flex items-center justify-between bg-[#F4EFE6] p-4 rounded-2xl border border-[#CFBB99]">
             <span class="text-sm font-bold text-[#102820]">Painel Administrativo</span>
             <button onclick="state.isAdminAuth=false; render();" class="text-xs text-red-700 font-semibold">Sair</button>

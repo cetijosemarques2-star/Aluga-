@@ -24,7 +24,6 @@
     .font-serif {
       font-family: 'Cormorant Garamond', serif;
     }
-    /* Animação suave e corrigida de folhear página sem piscar */
     .page-container {
       perspective: 2000px;
     }
@@ -42,7 +41,7 @@
 <body class="bg-[#E5D7C4] text-[#102820] h-screen overflow-hidden flex flex-col lg:flex-row">
 
   <!-- ==========================================
-      MENU LATERAL ESQUERDO (RESPONSIVO PC/MOBILE)
+      MENU LATERAL ESQUERDO
       ========================================== -->
   <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#102820] text-[#E5D7C4] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
     <div class="p-6 border-b border-[#4C6444]/40 flex items-center justify-between cursor-pointer shrink-0" onclick="switchTab('home')">
@@ -118,10 +117,9 @@
   </main>
 
   <!-- ==========================================
-      MODAL DO LEITOR DE LIVROS (TELA CHEIA)
+      MODAL DO LEITOR DE LIVROS
       ========================================== -->
   <div id="pdfReaderModal" class="fixed inset-0 z-50 flex flex-col bg-[#2c221a] text-[#F4ECD8] hidden">
-    <!-- Cabeçalho do Leitor -->
     <div id="readerHeader" class="h-16 px-6 flex items-center justify-between border-b border-[#433422] bg-[#1a130f] shrink-0">
       <div class="overflow-hidden pr-2 min-w-0">
         <h3 id="readerBookTitle" class="font-serif font-bold text-base truncate">Título da Obra</h3>
@@ -135,14 +133,11 @@
       </div>
     </div>
     
-    <!-- Visualizador Dinâmico -->
-    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-4 sm:p-8 page-container overflow-hidden w-full h-full">
-      <!-- Injetado dinamicamente -->
-    </div>
+    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-4 sm:p-8 page-container overflow-hidden w-full h-full"></div>
   </div>
 
   <!-- ==========================================
-      MODAL DE FOTO EM TELA CHEIA (GALERIA)
+      MODAL DE FOTO EM TELA CHEIA
       ========================================== -->
   <div id="photoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 hidden backdrop-blur-md" onclick="closePhotoModal()">
     <div class="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center" onclick="event.stopPropagation()">
@@ -161,7 +156,7 @@
       SCRIPT DA APLICAÇÃO
       ========================================== -->
   <script>
-    let state = {
+    const state = {
       activeTab: 'home',
       isAdminAuth: false,
       searchTerm: '',
@@ -225,7 +220,7 @@
 
     function escapeHtml(str) {
       if (!str) return '';
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     function switchTab(tab) {
@@ -235,13 +230,17 @@
     }
 
     function toggleMobileMenu() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      document.getElementById('mobileOverlay').classList.toggle('hidden');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      if(sidebar) sidebar.classList.toggle('-translate-x-full');
+      if(overlay) overlay.classList.toggle('hidden');
     }
 
     function closeMobileMenu() {
-      document.getElementById('sidebar').classList.add('-translate-x-full');
-      document.getElementById('mobileOverlay').classList.add('hidden');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      if(sidebar) sidebar.classList.add('-translate-x-full');
+      if(overlay) overlay.classList.add('hidden');
     }
 
     window.addEventListener('keydown', (e) => {
@@ -272,9 +271,11 @@
         admin: 'Painel Administrativo'
       };
       
-      document.getElementById('headerTitle').textContent = titles[state.activeTab] || 'Museu Literário';
+      const headerTitle = document.getElementById('headerTitle');
+      if(headerTitle) headerTitle.textContent = titles[state.activeTab] || 'Museu Literário';
 
       const area = document.getElementById('contentArea');
+      if(!area) return;
       area.innerHTML = '';
 
       if (state.activeTab === 'home') area.innerHTML = renderHome();
@@ -285,7 +286,9 @@
       else if (state.activeTab === 'about') area.innerHTML = renderAbout();
       else if (state.activeTab === 'admin') area.innerHTML = renderAdmin();
 
-      lucide.createIcons();
+      if(typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     }
 
     function renderHome() {
@@ -383,10 +386,7 @@
       let filtered = state.books.filter(b => b.status === 'published')
         .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
         .filter(book =>
-          book.title.toLowerCase().includes(termo) ||
-          book.author.toLowerCase().includes(termo) ||
-          .filter(book =>
-          book.title.toLowerCase().includes(termo) ||
+          book.title.          book.title.toLowerCase().includes(termo) ||
           book.author.toLowerCase().includes(termo) ||
           (book.subtitle || '').toLowerCase().includes(termo) ||
           (book.synopsis || '').toLowerCase().includes(termo) ||
@@ -447,7 +447,6 @@
               <p class="text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
               <div class="border-t border-[#CFBB99] pt-5">
                 <h3 class="font-serif font-bold text-lg text-[#102820] mb-2">Sinopse</h3>
-                <!-- Área de sinopse com rolagem interna e espaçamento generoso para os botões virtuais do celular -->
                 <div class="max-h-[35vh] sm:max-h-none overflow-y-auto pr-2">
                   <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
                 </div>
@@ -621,7 +620,6 @@
       }
     }
 
-    // --- LEITOR INTELIGENTE COM ANIMAÇÃO CORRIGIDA ---
     function openPdfReader(bookId) {
       const book = state.books.find(b => b.id === bookId);
       if (!book) return;
@@ -712,10 +710,11 @@
       const indicator = document.getElementById('pageIndicator');
       if (indicator) indicator.textContent = `Página ${state.currentPage} de ${state.totalPages}`;
       
-      lucide.createIcons();
+      if(typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     }
 
-    // --- FUNÇÕES DA MODAL DE FOTO EM TELA CHEIA ---
     function openPhotoModal(url, title, desc) {
       document.getElementById('modalPhotoImg').src = decodeURIComponent(url);
       document.getElementById('modalPhotoTitle').textContent = decodeURIComponent(title);
@@ -728,7 +727,9 @@
       document.getElementById('modalPhotoImg').src = '';
     }
 
-    window.onload = () => render();
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+    });
   </script>
 </body>
 </html>

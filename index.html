@@ -24,32 +24,35 @@
     .font-serif {
       font-family: 'Cormorant Garamond', serif;
     }
-    /* Animação suave e sincronizada de folhear página (500ms) */
+    /* Animação suave e corrigida de folhear página sem piscar */
+    .page-container {
+      perspective: 2000px;
+    }
     .page-flip {
-      transition: transform 0.5s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s ease;
+      transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
       transform-style: preserve-3d;
       transform-origin: left center;
+      backface-visibility: hidden;
     }
     .flipping {
-      transform: rotateY(-80deg);
-      opacity: 0.1;
+      transform: rotateY(-90deg);
     }
   </style>
 </head>
 <body class="bg-[#E5D7C4] text-[#102820] h-screen overflow-hidden flex flex-col lg:flex-row">
 
   <!-- ==========================================
-      MENU LATERAL ESQUERDO (RESPONSIVO)
+      MENU LATERAL ESQUERDO (RESPONSIVO PC/MOBILE)
       ========================================== -->
   <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#102820] text-[#E5D7C4] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
-    <div class="p-5 border-b border-[#4C6444]/40 flex items-center justify-between cursor-pointer shrink-0" onclick="switchTab('home')">
+    <div class="p-6 border-b border-[#4C6444]/40 flex items-center justify-between cursor-pointer shrink-0" onclick="switchTab('home')">
       <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-lg bg-[#4C6444] flex items-center justify-center shadow-md shrink-0">
-          <i data-lucide="book-open" class="w-5 h-5 text-[#E5D7C4]"></i>
+        <div class="w-10 h-10 rounded-lg bg-[#4C6444] flex items-center justify-center shadow-md shrink-0">
+          <i data-lucide="book-open" class="w-6 h-6 text-[#E5D7C4]"></i>
         </div>
         <div>
-          <h1 class="font-serif text-base font-bold tracking-wide text-white leading-tight">Museu Literário</h1>
-          <p class="text-[9px] text-[#B3B792] tracking-wider uppercase">Digital & Cultural</p>
+          <h1 class="font-serif text-lg font-bold tracking-wide text-white leading-tight">Museu Literário</h1>
+          <p class="text-[10px] text-[#B3B792] tracking-wider uppercase">Digital & Cultural</p>
         </div>
       </div>
       <button onclick="toggleMobileMenu()" class="lg:hidden text-[#B3B792] hover:text-white p-1">
@@ -58,34 +61,34 @@
     </div>
 
     <!-- Navegação -->
-    <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-      <button onclick="switchTab('home')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="home">
-        <i data-lucide="book-marked" class="w-4 h-4 shrink-0"></i>
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+      <button onclick="switchTab('home')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="home">
+        <i data-lucide="book-marked" class="w-5 h-5 shrink-0"></i>
         <span>Início</span>
       </button>
-      <button onclick="switchTab('catalog')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="catalog">
-        <i data-lucide="library" class="w-4 h-4 shrink-0"></i>
+      <button onclick="switchTab('catalog')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="catalog">
+        <i data-lucide="library" class="w-5 h-5 shrink-0"></i>
         <span>Acervo Literário</span>
       </button>
-      <button onclick="switchTab('gallery')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="gallery">
-        <i data-lucide="image" class="w-4 h-4 shrink-0"></i>
+      <button onclick="switchTab('gallery')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="gallery">
+        <i data-lucide="image" class="w-5 h-5 shrink-0"></i>
         <span>Galeria Fotográfica</span>
       </button>
-      <button onclick="switchTab('audiovisual')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="audiovisual">
-        <i data-lucide="video" class="w-4 h-4 shrink-0"></i>
+      <button onclick="switchTab('audiovisual')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="audiovisual">
+        <i data-lucide="video" class="w-5 h-5 shrink-0"></i>
         <span>Área Audiovisual</span>
       </button>
-      <button onclick="switchTab('about')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="about">
-        <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+      <button onclick="switchTab('about')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="about">
+        <i data-lucide="info" class="w-5 h-5 shrink-0"></i>
         <span>Sobre o Museu</span>
       </button>
-      <button onclick="switchTab('admin')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200" data-tab="admin">
-        <i data-lucide="shield" class="w-4 h-4 shrink-0"></i>
+      <button onclick="switchTab('admin')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="admin">
+        <i data-lucide="shield" class="w-5 h-5 shrink-0"></i>
         <span>Painel Administrativo</span>
       </button>
     </nav>
 
-    <div class="p-3 border-t border-[#4C6444]/40 bg-[#0c1f18] text-[11px] text-[#B3B792] text-center shrink-0">
+    <div class="p-4 border-t border-[#4C6444]/40 bg-[#0c1f18] text-xs text-[#B3B792] text-center shrink-0">
       <p>© 2026 Museu Literário Digital</p>
     </div>
   </aside>
@@ -99,42 +102,58 @@
   <main class="flex-1 flex flex-col lg:pl-72 h-screen overflow-hidden bg-[#E5D7C4] w-full">
     
     <!-- Barra Superior -->
-    <header class="h-14 sm:h-16 bg-[#102820] text-[#E5D7C4] px-4 sm:px-6 flex items-center justify-between shadow-md z-30 shrink-0">
-      <div class="flex items-center space-x-3 min-w-0">
+    <header class="h-16 bg-[#102820] text-[#E5D7C4] px-6 flex items-center justify-between shadow-md z-30 shrink-0">
+      <div class="flex items-center space-x-4 min-w-0">
         <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg bg-[#4C6444] text-white focus:outline-none shrink-0">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
-        <span id="headerTitle" class="font-serif text-base sm:text-lg font-medium text-white truncate">Página Inicial</span>
+        <span id="headerTitle" class="font-serif text-lg font-medium text-white truncate">Página Inicial</span>
       </div>
     </header>
 
-    <!-- Área Rolável -->
+    <!-- Área Rolável Principal -->
     <div id="contentArea" class="flex-1 overflow-y-auto">
       <!-- Conteúdo injetado via JS -->
     </div>
   </main>
 
   <!-- ==========================================
-      LEITOR EM TELA CHEIA TOTAL (OTIMIZADO MOBILE)
+      MODAL DO LEITOR DE LIVROS (TELA CHEIA)
       ========================================== -->
   <div id="pdfReaderModal" class="fixed inset-0 z-50 flex flex-col bg-[#2c221a] text-[#F4ECD8] hidden">
     <!-- Cabeçalho do Leitor -->
-    <div id="readerHeader" class="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-[#433422] bg-[#1a130f] shrink-0">
+    <div id="readerHeader" class="h-16 px-6 flex items-center justify-between border-b border-[#433422] bg-[#1a130f] shrink-0">
       <div class="overflow-hidden pr-2 min-w-0">
-        <h3 id="readerBookTitle" class="font-serif font-bold text-sm sm:text-base truncate">Título da Obra</h3>
-        <p id="readerBookAuthor" class="text-[10px] sm:text-xs opacity-75 truncate">Autor</p>
+        <h3 id="readerBookTitle" class="font-serif font-bold text-base truncate">Título da Obra</h3>
+        <p id="readerBookAuthor" class="text-xs opacity-75 truncate">Autor</p>
       </div>
-      <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+      <div class="flex items-center space-x-3 shrink-0">
         <span id="pageIndicator" class="hidden sm:inline-block text-xs font-mono bg-black/30 px-3 py-1 rounded-lg">Página 1 de 3</span>
-        <button onclick="closePdfReader()" id="closeReaderBtn" class="bg-red-600 text-white p-2 rounded-xl hover:bg-red-700 transition flex items-center justify-center">
+        <button onclick="closePdfReader()" id="closeReaderBtn" class="bg-red-600 text-white p-2.5 rounded-xl hover:bg-red-700 transition flex items-center justify-center">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
     </div>
     
     <!-- Visualizador Dinâmico -->
-    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-2 sm:p-6 perspective-[1500px] overflow-hidden w-full h-full">
+    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-4 sm:p-8 page-container overflow-hidden w-full h-full">
       <!-- Injetado dinamicamente -->
+    </div>
+  </div>
+
+  <!-- ==========================================
+      MODAL DE FOTO EM TELA CHEIA (GALERIA)
+      ========================================== -->
+  <div id="photoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 hidden backdrop-blur-md" onclick="closePhotoModal()">
+    <div class="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="closePhotoModal()" class="absolute -top-12 right-0 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <img id="modalPhotoImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/10">
+      <div class="mt-4 text-center text-white">
+        <h3 id="modalPhotoTitle" class="font-serif text-xl font-bold"></h3>
+        <p id="modalPhotoDesc" class="text-sm text-gray-300 mt-1 max-w-xl"></p>
+      </div>
     </div>
   </div>
 
@@ -189,10 +208,11 @@
       ],
       categories: ['Conto', 'Crônica', 'Poesia', 'Literatura nordestina', 'Produção escolar', 'Romance'],
       gallery: [
-        { id: '1', title: 'Oficina de Contação de Histórias', description: 'Alunos reunidos na biblioteca ao ar livre.', imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=800', date: 'Agosto, 2026', project: 'Festival' }
+        { id: '1', title: 'Oficina de Contação de Histórias', description: 'Alunos reunidos na biblioteca ao ar livre compartilhando leituras.', imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=1200', date: 'Agosto, 2026', project: 'Festival' },
+        { id: '2', title: 'Exposição de Poesia Visual', description: 'Trabalhos artísticos desenvolvidos pelas turmas do ensino médio.', imageUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=1200', date: 'Setembro, 2026', project: 'Mostra Cultural' }
       ],
       videos: [
-        { id: '1', title: 'Documentário: Vozes da Terra', description: 'Panorama sobre literatura oral.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', category: 'Documentário' }
+        { id: '1', title: 'Documentário: Vozes da Terra', description: 'Panorama sobre literatura oral e contadores de causos.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', category: 'Documentário' }
       ]
     };
 
@@ -228,6 +248,7 @@
       if (e.key === 'Escape') {
         closeMobileMenu();
         closePdfReader();
+        closePhotoModal();
       }
     });
 
@@ -235,9 +256,9 @@
       document.querySelectorAll('.nav-btn').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
         if (tab === state.activeTab || (state.activeTab === 'book-detail' && tab === 'catalog')) {
-          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#4C6444] text-white shadow-md';
+          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-[#4C6444] text-white shadow-md';
         } else {
-          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[#B3B792] hover:bg-[#15352a] hover:text-white transition-all';
+          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-[#B3B792] hover:bg-[#15352a] hover:text-white transition-all';
         }
       });
 
@@ -273,22 +294,22 @@
         if (shelfBooks.length === 0) return '';
 
         let booksCards = shelfBooks.map(book => `
-          <div class="w-48 sm:w-56 shrink-0 bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99]/60 flex flex-col group">
-            <div class="relative h-60 sm:h-72 overflow-hidden bg-[#d3c1a5]">
+          <div class="w-60 sm:w-68 lg:w-72 shrink-0 bg-[#F4EFE6] rounded-3xl shadow-xl overflow-hidden border border-[#CFBB99]/80 flex flex-col group hover:shadow-2xl transition duration-300">
+            <div class="relative h-72 sm:h-80 overflow-hidden bg-[#d3c1a5]">
               <img src="${escapeHtml(book.coverUrl)}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-              <div class="absolute top-2.5 left-2.5 bg-[#102820]/80 text-[#E5D7C4] text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase">
+              <div class="absolute top-3 left-3 bg-[#102820]/90 text-[#E5D7C4] text-[10px] sm:text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
                 ${escapeHtml(book.category)}
               </div>
             </div>
-            <div class="p-3.5 flex-1 flex flex-col justify-between">
+            <div class="p-5 flex-1 flex flex-col justify-between">
               <div>
-                <h3 class="font-serif font-bold text-sm sm:text-base text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
-                <p class="text-[11px] sm:text-xs text-[#8A6240] font-medium mt-0.5 line-clamp-1">${escapeHtml(book.author)}</p>
+                <h3 class="font-serif font-bold text-lg sm:text-xl text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
+                <p class="text-xs sm:text-sm text-[#8A6240] font-medium mt-1 line-clamp-1">${escapeHtml(book.author)}</p>
               </div>
-              <div class="mt-3 pt-2.5 border-t border-[#CFBB99]/40 flex items-center justify-between">
-                <span class="text-[10px] sm:text-[11px] text-[#889063] font-semibold">${escapeHtml(book.year)}</span>
-                <button onclick="openBook('${book.id}')" class="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs px-3 py-1 rounded-lg font-medium transition shadow">
-                  Ler
+              <div class="mt-5 pt-3.5 border-t border-[#CFBB99]/50 flex items-center justify-between">
+                <span class="text-xs text-[#889063] font-bold">${escapeHtml(book.year)}</span>
+                <button onclick="openBook('${book.id}')" class="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs sm:text-sm px-4 py-2 rounded-xl font-medium transition shadow">
+                  Ler Obra
                 </button>
               </div>
             </div>
@@ -296,14 +317,14 @@
         `).join('');
 
         return `
-          <div class="space-y-3">
-            <div class="flex items-center justify-between border-b border-[#889063]/30 pb-2">
-              <h2 class="text-lg sm:text-2xl font-serif font-bold text-[#102820] flex items-center space-x-2">
-                <span class="w-2 h-2 rounded-full bg-[#4C6444]"></span>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#889063]/30 pb-3">
+              <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#102820] flex items-center space-x-2.5">
+                <span class="w-3 h-3 rounded-full bg-[#4C6444]"></span>
                 <span>${escapeHtml(shelf.title)}</span>
               </h2>
             </div>
-            <div class="flex space-x-3.5 sm:space-x-6 overflow-x-auto pb-3 pt-1 scrollbar-thin">
+            <div class="flex space-x-6 overflow-x-auto pb-4 pt-2 scrollbar-thin">
               ${booksCards}
             </div>
           </div>
@@ -312,18 +333,18 @@
 
       return `
         <div class="min-h-full flex flex-col">
-          <div class="bg-[#102820] text-white py-10 sm:py-16 px-4 sm:px-8 flex flex-col items-center justify-center text-center shadow-xl">
-            <h1 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#E5D7C4] leading-tight max-w-2xl">
+          <div class="bg-[#102820] text-white py-16 lg:py-24 px-6 sm:px-12 flex flex-col items-center justify-center text-center shadow-2xl">
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#E5D7C4] leading-tight max-w-3xl">
               “Um lugar para as histórias viverem.”
             </h1>
-            <p class="text-xs sm:text-base lg:text-lg text-[#B3B792] font-light max-w-lg mx-auto mt-2 sm:mt-3">
-              Explore livros, poemas e memórias que atravessam gerações.
+            <p class="text-sm sm:text-lg text-[#B3B792] font-light max-w-xl mx-auto mt-4">
+              Explore livros, poemas e memórias que atravessam gerações com elegância e imersão.
             </p>
-            <button onclick="switchTab('catalog')" class="mt-5 bg-[#4C6444] hover:bg-[#5d7954] text-white px-6 py-2.5 rounded-xl font-medium shadow transition text-xs sm:text-sm">
-              Explorar Acervo
+            <button onclick="switchTab('catalog')" class="mt-8 bg-[#4C6444] hover:bg-[#5d7954] text-white px-8 py-3.5 rounded-2xl font-medium shadow-xl transition text-sm sm:text-base">
+              Explorar Acervo Completo
             </button>
           </div>
-          <div class="py-6 sm:py-10 px-4 sm:px-6 lg:px-12 space-y-8 sm:space-y-10 max-w-7xl mx-auto w-full">
+          <div class="py-10 lg:py-16 px-4 sm:px-8 lg:px-16 space-y-12 max-w-[1400px] mx-auto w-full">
             ${shelvesHtml}
           </div>
         </div>
@@ -331,25 +352,25 @@
     }
 
     function renderCatalog() {
-      let categoriesBtns = `<button onclick="setCategoryFilter('all')" class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === 'all' ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">Todas</button>`;
+      let categoriesBtns = `<button onclick="setCategoryFilter('all')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === 'all' ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">Todas</button>`;
       categoriesBtns += state.categories.map(c => `
-        <button onclick="setCategoryFilter('${c}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${escapeHtml(c)}</button>
+        <button onclick="setCategoryFilter('${c}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${escapeHtml(c)}</button>
       `).join('');
 
       return `
-        <div class="p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto space-y-5 sm:space-y-8">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 class="text-xl sm:text-3xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
-              <p class="text-xs sm:text-sm text-[#4D2D18] mt-0.5">Pesquise por título, autor, sinopse ou categoria.</p>
+              <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
+              <p class="text-sm text-[#4D2D18] mt-1">Pesquise por título, autor, sinopse ou categoria.</p>
             </div>
-            <div class="relative w-full md:w-80">
-              <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-[#8A6240]"></i>
-              <input type="text" placeholder="Pesquisar..." value="${escapeHtml(state.searchTerm)}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm focus:outline-none">
+            <div class="relative w-full md:w-96">
+              <i data-lucide="search" class="absolute left-4 top-3.5 w-4 h-4 text-[#8A6240]"></i>
+              <input type="text" placeholder="Pesquisar no acervo..." value="${escapeHtml(state.searchTerm)}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none shadow-sm">
             </div>
           </div>
-          <div class="flex items-center space-x-2 overflow-x-auto pb-1.5">${categoriesBtns}</div>
-          <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
+          <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
             ${getFilteredBooksHTML()}
           </div>
         </div>
@@ -369,24 +390,24 @@
           book.category.toLowerCase().includes(termo)
         );
 
-      if (filtered.length === 0) return `<div class="col-span-full py-12 text-center text-xs sm:text-sm text-[#8A6240]">Nenhuma obra encontrada.</div>`;
+      if (filtered.length === 0) return `<div class="col-span-full py-16 text-center text-sm text-[#8A6240]">Nenhuma obra encontrada com os critérios informados.</div>`;
 
       return filtered.map(book => `
-        <div class="bg-[#F4EFE6] rounded-2xl shadow-md overflow-hidden border border-[#CFBB99] flex flex-col">
-          <div class="relative h-64 sm:h-72 bg-[#d3c1a5] overflow-hidden">
+        <div class="bg-[#F4EFE6] rounded-3xl shadow-lg overflow-hidden border border-[#CFBB99] flex flex-col hover:shadow-2xl transition duration-300">
+          <div class="relative h-72 sm:h-80 bg-[#d3c1a5] overflow-hidden">
             <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
-            <div class="absolute top-2.5 left-2.5 bg-[#102820]/80 text-[#E5D7C4] text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <div class="absolute top-3 left-3 bg-[#102820]/90 text-[#E5D7C4] text-[10px] px-3 py-1 rounded-full font-semibold uppercase">
               ${escapeHtml(book.category)}
             </div>
           </div>
-          <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
+          <div class="p-5 flex-1 flex flex-col justify-between">
             <div>
-              <h3 class="font-serif font-bold text-base text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
-              <p class="text-xs text-[#8A6240] font-medium mt-0.5">${escapeHtml(book.author)}</p>
+              <h3 class="font-serif font-bold text-lg text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
+              <p class="text-xs sm:text-sm text-[#8A6240] font-medium mt-1">${escapeHtml(book.author)}</p>
             </div>
-            <div class="mt-3.5 pt-2.5 border-t border-[#CFBB99] flex items-center justify-between">
-              <span class="text-xs text-[#889063] font-semibold">${escapeHtml(book.year)}</span>
-              <button onclick="openBook('${escapeHtml(book.id)}')" class="bg-[#4C6444] text-white text-xs px-3.5 py-1.5 rounded-lg font-medium shadow">Ver Detalhes</button>
+            <div class="mt-5 pt-3 border-t border-[#CFBB99] flex items-center justify-between">
+              <span class="text-xs text-[#889063] font-bold">${escapeHtml(book.year)}</span>
+              <button onclick="openBook('${escapeHtml(book.id)}')" class="bg-[#4C6444] text-white text-xs px-4 py-2 rounded-xl font-medium shadow hover:bg-[#394c33] transition">Ver Detalhes</button>
             </div>
           </div>
         </div>
@@ -400,30 +421,30 @@
 
     function renderBookDetail() {
       const book = state.books.find(b => b.id === state.selectedBookId);
-      if (!book) return `<div class="p-12 text-center text-xs sm:text-sm">Obra não encontrada. <button onclick="switchTab('catalog')" class="text-[#4C6444] underline">Voltar</button></div>`;
+      if (!book) return `<div class="p-16 text-center">Obra não encontrada. <button onclick="switchTab('catalog')" class="text-[#4C6444] underline">Voltar</button></div>`;
 
       return `
-        <div class="p-4 sm:p-6 lg:p-12 max-w-4xl mx-auto space-y-5 sm:space-y-8">
-          <button onclick="switchTab('catalog')" class="flex items-center space-x-1.5 text-[#4C6444] font-medium text-xs sm:text-sm">
-            <i data-lucide="chevron-left" class="w-4 h-4"></i><span>Voltar ao Acervo</span>
+        <div class="p-6 sm:p-10 lg:p-16 max-w-5xl mx-auto space-y-8">
+          <button onclick="switchTab('catalog')" class="flex items-center space-x-2 text-[#4C6444] font-medium text-sm hover:underline">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i><span>Voltar ao Acervo</span>
           </button>
-          <div class="bg-[#F4EFE6] rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl border border-[#CFBB99] grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+          <div class="bg-[#F4EFE6] rounded-3xl p-6 sm:p-10 shadow-2xl border border-[#CFBB99] grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 items-center">
             <div class="md:col-span-1 flex flex-col items-center">
-              <div class="rounded-xl overflow-hidden shadow-xl aspect-[3/4] border border-[#CFBB99] w-44 sm:w-52 md:w-full">
+              <div class="rounded-2xl overflow-hidden shadow-2xl aspect-[3/4] border border-[#CFBB99] w-52 sm:w-64 md:w-full">
                 <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
               </div>
-              <button onclick="openPdfReader('${escapeHtml(book.id)}')" class="w-full mt-4 flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium shadow transition">
-                <i data-lucide="book-open" class="w-4 h-4"></i><span>Ler Obra</span>
+              <button onclick="openPdfReader('${escapeHtml(book.id)}')" class="w-full mt-6 flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-3.5 px-6 rounded-2xl font-medium shadow-xl transition">
+                <i data-lucide="book-open" class="w-5 h-5"></i><span>Ler Obra Agora</span>
               </button>
             </div>
-            <div class="md:col-span-2 space-y-3 sm:space-y-4">
-              <span class="inline-block bg-[#102820] text-[#E5D7C4] text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full uppercase">${escapeHtml(book.category)}</span>
-              <h1 class="text-xl sm:text-3xl font-serif font-bold text-[#102820] leading-tight">${escapeHtml(book.title)}</h1>
-              <p class="text-xs sm:text-base text-[#8A6240] font-serif italic">${escapeHtml(book.subtitle || '')}</p>
-              <p class="text-xs sm:text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
-              <div class="border-t border-[#CFBB99] pt-3 sm:pt-4">
-                <h3 class="font-serif font-bold text-base sm:text-lg text-[#102820] mb-1.5">Sinopse</h3>
-                <p class="text-xs sm:text-sm text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
+            <div class="md:col-span-2 space-y-5">
+              <span class="inline-block bg-[#102820] text-[#E5D7C4] text-xs px-3.5 py-1 rounded-full uppercase tracking-wider">${escapeHtml(book.category)}</span>
+              <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820] leading-tight">${escapeHtml(book.title)}</h1>
+              <p class="text-sm sm:text-lg text-[#8A6240] font-serif italic">${escapeHtml(book.subtitle || '')}</p>
+              <p class="text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
+              <div class="border-t border-[#CFBB99] pt-5">
+                <h3 class="font-serif font-bold text-lg text-[#102820] mb-2">Sinopse</h3>
+                <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
               </div>
             </div>
           </div>
@@ -433,43 +454,48 @@
 
     function renderGallery() {
       let cards = state.gallery.map(item => `
-        <div class="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99] flex flex-col">
-          <div class="h-48 sm:h-64 bg-[#d3c1a5] relative">
-            <img src="${escapeHtml(item.imageUrl)}" class="w-full h-full object-cover">
+        <div onclick="openPhotoModal('${encodeURIComponent(item.imageUrl)}', '${encodeURIComponent(item.title)}', '${encodeURIComponent(item.description)}')" class="bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-xl border border-[#CFBB99] flex flex-col group cursor-pointer hover:shadow-2xl transition duration-300">
+          <div class="h-64 sm:h-72 bg-[#d3c1a5] relative overflow-hidden">
+            <img src="${escapeHtml(item.imageUrl)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+              <span class="bg-[#102820]/90 text-white text-xs px-4 py-2 rounded-xl font-medium shadow">Ver em Tela Cheia</span>
+            </div>
           </div>
-          <div class="p-4 sm:p-5">
-            <h3 class="font-serif font-bold text-base sm:text-lg text-[#102820]">${escapeHtml(item.title)}</h3>
-            <p class="text-[11px] sm:text-xs text-[#4D2D18] mt-1.5">${escapeHtml(item.description)}</p>
+          <div class="p-6">
+            <div class="text-xs text-[#889063] font-bold mb-1">${escapeHtml(item.date)} • ${escapeHtml(item.project)}</div>
+            <h3 class="font-serif font-bold text-xl text-[#102820]">${escapeHtml(item.title)}</h3>
+            <p class="text-xs sm:text-sm text-[#4D2D18] mt-2 line-clamp-2">${escapeHtml(item.description)}</p>
           </div>
         </div>
       `).join('');
 
-      return `<div class="p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto space-y-5 sm:space-y-8"><h1 class="text-xl sm:text-3xl font-serif font-bold text-[#102820]">Galeria Fotográfica</h1><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">${cards}</div></div>`;
+      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Galeria Fotográfica</h1><p class="text-sm text-[#4D2D18]">Clique em qualquer imagem para ampliá-la.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${cards}</div></div>`;
     }
 
     function renderAudiovisual() {
       let cards = state.videos.map(vid => `
-        <div class="bg-[#F4EFE6] rounded-2xl overflow-hidden shadow-md border border-[#CFBB99]">
-          <div class="aspect-video bg-black">
+        <div class="bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-xl border border-[#CFBB99] flex flex-col">
+          <div class="aspect-video bg-black relative">
             <iframe src="${escapeHtml(vid.videoUrl)}" class="w-full h-full" allowfullscreen></iframe>
           </div>
-          <div class="p-4 sm:p-6 space-y-1.5">
-            <h3 class="font-serif font-bold text-base sm:text-xl text-[#102820]">${escapeHtml(vid.title)}</h3>
-            <p class="text-xs sm:text-sm text-[#4D2D18]">${escapeHtml(vid.description)}</p>
+          <div class="p-6 space-y-2">
+            <span class="text-xs bg-[#102820] text-[#E5D7C4] px-3 py-0.5 rounded-full font-semibold uppercase">${escapeHtml(vid.category)}</span>
+            <h3 class="font-serif font-bold text-xl text-[#102820] mt-2">${escapeHtml(vid.title)}</h3>
+            <p class="text-sm text-[#4D2D18]">${escapeHtml(vid.description)}</p>
           </div>
         </div>
       `).join('');
 
-      return `<div class="p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto space-y-5 sm:space-y-8"><h1 class="text-xl sm:text-3xl font-serif font-bold text-[#102820]">Área Audiovisual</h1><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">${cards}</div></div>`;
+      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Área Audiovisual</h1><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${cards}</div></div>`;
     }
 
     function renderAbout() {
       return `
-        <div class="p-4 sm:p-6 lg:p-12 max-w-4xl mx-auto">
-          <div class="bg-[#F4EFE6] rounded-2xl sm:rounded-3xl p-6 sm:p-12 shadow-xl border border-[#CFBB99] space-y-4 sm:space-y-6">
-            <h1 class="text-xl sm:text-4xl font-serif font-bold text-[#102820]">Sobre o Museu Literário Digital</h1>
-            <p class="text-xs sm:text-base text-[#4D2D18] leading-relaxed">
-              Plataforma dedicada à preservação, organização e divulgação da literatura e produções culturais.
+        <div class="p-6 sm:p-10 lg:p-16 max-w-4xl mx-auto">
+          <div class="bg-[#F4EFE6] rounded-3xl p-8 sm:p-12 shadow-2xl border border-[#CFBB99] space-y-6">
+            <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Sobre o Museu Literário Digital</h1>
+            <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">
+              Plataforma dedicada à preservação, organização, divulgação e leitura de obras literárias e produções culturais escolares.
             </p>
           </div>
         </div>
@@ -479,55 +505,55 @@
     function renderAdmin() {
       if (!state.isAdminAuth) {
         return `
-          <div class="max-w-md mx-auto bg-[#F4EFE6] rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#CFBB99] space-y-5 mt-6 sm:mt-12 mx-4 sm:mx-auto">
-            <div class="text-center space-y-1.5">
-              <i data-lucide="shield" class="w-10 h-10 text-[#4C6444] mx-auto"></i>
-              <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
-              <p class="text-[11px] sm:text-xs text-[#4D2D18]">Insira a chave de acesso administrativo</p>
+          <div class="max-w-md mx-auto bg-[#F4EFE6] rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#CFBB99] space-y-6 mt-12 mx-4 sm:mx-auto">
+            <div class="text-center space-y-2">
+              <i data-lucide="shield" class="w-12 h-12 text-[#4C6444] mx-auto"></i>
+              <h2 class="text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
+              <p class="text-xs text-[#4D2D18]">Insira a chave de acesso administrativo</p>
             </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-3.5">
-              <input id="adminPassInput" type="password" placeholder="Senha..." class="w-full bg-white border border-[#CFBB99] rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none" required>
-              <button type="submit" class="w-full bg-[#102820] text-white py-2.5 rounded-xl font-medium text-xs sm:text-sm shadow-lg">Entrar</button>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+              <input id="adminPassInput" type="password" placeholder="Senha..." class="w-full bg-white border border-[#CFBB99] rounded-2xl px-4 py-3 text-sm focus:outline-none" required>
+              <button type="submit" class="w-full bg-[#102820] text-white py-3 rounded-2xl font-medium text-sm shadow-lg">Entrar</button>
             </form>
           </div>
         `;
       }
 
       let booksList = state.books.map(b => `
-        <div class="bg-white p-3 rounded-xl border border-[#CFBB99] flex items-center justify-between shadow-sm">
+        <div class="bg-white p-4 rounded-2xl border border-[#CFBB99] flex items-center justify-between shadow-sm">
           <div class="pr-2 min-w-0">
-            <h4 class="font-serif font-bold text-xs sm:text-sm text-[#102820] truncate">${escapeHtml(b.title)}</h4>
-            <p class="text-[10px] sm:text-[11px] text-[#8A6240] truncate">${escapeHtml(b.author)} • ${escapeHtml(b.category)}</p>
+            <h4 class="font-serif font-bold text-sm text-[#102820] truncate">${escapeHtml(b.title)}</h4>
+            <p class="text-xs text-[#8A6240] truncate">${escapeHtml(b.author)} • ${escapeHtml(b.category)}</p>
           </div>
-          <button onclick="deleteBook('${escapeHtml(b.id)}')" class="p-1.5 bg-red-100 text-red-700 rounded-lg shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button onclick="deleteBook('${escapeHtml(b.id)}')" class="p-2 bg-red-100 text-red-700 rounded-xl shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>
       `).join('');
 
       return `
-        <div class="p-4 sm:p-6 lg:p-12 max-w-7xl mx-auto space-y-5 sm:space-y-8">
-          <div class="flex items-center justify-between bg-[#F4EFE6] p-3.5 rounded-xl border border-[#CFBB99]">
-            <span class="text-xs sm:text-sm font-bold text-[#102820]">Painel Administrativo</span>
+        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8">
+          <div class="flex items-center justify-between bg-[#F4EFE6] p-4 rounded-2xl border border-[#CFBB99]">
+            <span class="text-sm font-bold text-[#102820]">Painel Administrativo</span>
             <button onclick="state.isAdminAuth=false; render();" class="text-xs text-red-700 font-semibold">Sair</button>
           </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div class="bg-[#F4EFE6] p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-[#CFBB99] space-y-3.5">
-              <h3 class="font-serif font-bold text-base sm:text-lg text-[#102820]">Cadastrar Obra</h3>
-              <form id="bookForm" onsubmit="handleSaveBook(event)" class="space-y-2.5">
-                <input id="fTitle" placeholder="Título *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
-                <input id="fSubtitle" placeholder="Subtítulo" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <input id="fAuthor" placeholder="Autor *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
-                <input id="fCategory" placeholder="Categoria (ex: Conto, Poesia) *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none" required>
-                <input id="fYear" placeholder="Ano (ex: 2026)" value="2026" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <textarea id="fSynopsis" placeholder="Sinopse" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none h-16"></textarea>
-                <input id="fCover" placeholder="URL da Capa" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <input id="fPdf" placeholder="URL do PDF Original (opcional)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none">
-                <textarea id="fPages" placeholder="Páginas em texto (separadas por linhas em branco)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3 py-2 text-xs focus:outline-none h-16"></textarea>
-                <button type="submit" class="w-full bg-[#4C6444] text-white py-2.5 rounded-xl text-xs font-semibold shadow">Salvar Obra</button>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-[#F4EFE6] p-6 sm:p-8 rounded-3xl shadow-xl border border-[#CFBB99] space-y-4">
+              <h3 class="font-serif font-bold text-lg text-[#102820]">Cadastrar Obra</h3>
+              <form id="bookForm" onsubmit="handleSaveBook(event)" class="space-y-3">
+                <input id="fTitle" placeholder="Título *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
+                <input id="fSubtitle" placeholder="Subtítulo" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
+                <input id="fAuthor" placeholder="Autor *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
+                <input id="fCategory" placeholder="Categoria (ex: Conto, Poesia) *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
+                <input id="fYear" placeholder="Ano (ex: 2026)" value="2026" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
+                <textarea id="fSynopsis" placeholder="Sinopse" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none h-20"></textarea>
+                <input id="fCover" placeholder="URL da Capa" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
+                <input id="fPdf" placeholder="URL do PDF Original (opcional)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
+                <textarea id="fPages" placeholder="Páginas em texto (separadas por linhas em branco)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none h-20"></textarea>
+                <button type="submit" class="w-full bg-[#4C6444] text-white py-3 rounded-xl text-xs font-semibold shadow">Salvar Obra</button>
               </form>
             </div>
-            <div class="lg:col-span-2 bg-[#F4EFE6] p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-[#CFBB99] space-y-3.5">
-              <h3 class="font-serif font-bold text-base sm:text-lg text-[#102820]">Obras Cadastradas</h3>
-              <div class="space-y-2.5 max-h-[350px] sm:max-h-[400px] overflow-y-auto">${booksList}</div>
+            <div class="lg:col-span-2 bg-[#F4EFE6] p-6 sm:p-8 rounded-3xl shadow-xl border border-[#CFBB99] space-y-4">
+              <h3 class="font-serif font-bold text-lg text-[#102820]">Obras Cadastradas</h3>
+              <div class="space-y-3 max-h-[500px] overflow-y-auto">${booksList}</div>
             </div>
           </div>
         </div>
@@ -589,6 +615,7 @@
       }
     }
 
+    // --- LEITOR INTELIGENTE COM ANIMAÇÃO CORRIGIDA ---
     function openPdfReader(bookId) {
       const book = state.books.find(b => b.id === bookId);
       if (!book) return;
@@ -603,8 +630,8 @@
       if (book.pdfUrl && book.pdfUrl.length > 5) {
         document.getElementById('pageIndicator').style.display = 'none';
         bodyContainer.innerHTML = `
-          <div class="w-full h-full flex flex-col items-center justify-center bg-black/20 p-1 sm:p-4 rounded-xl">
-            <iframe src="${escapeHtml(book.pdfUrl)}" class="w-full h-full rounded-lg shadow-2xl bg-white" title="Leitor de PDF"></iframe>
+          <div class="w-full h-full flex flex-col items-center justify-center bg-black/20 p-2 sm:p-4 rounded-2xl">
+            <iframe src="${escapeHtml(book.pdfUrl)}" class="w-full h-full rounded-xl shadow-2xl bg-white" title="Leitor de PDF"></iframe>
           </div>
         `;
       } else if (book.pages && book.pages.length > 0) {
@@ -613,20 +640,20 @@
         state.totalPages = book.pages.length;
 
         bodyContainer.innerHTML = `
-          <div id="bookPageContainer" class="page-flip w-full h-full max-w-4xl bg-[#F9F3EA] text-[#2c221a] p-4 sm:p-12 rounded-xl sm:rounded-r-2xl sm:rounded-l-md shadow-2xl border-l-4 sm:border-l-8 border-[#102820] flex flex-col justify-between overflow-y-auto">
-            <div class="border-b border-[#dcd0bc] pb-2 sm:pb-3 mb-3 sm:mb-6 flex justify-between items-center shrink-0">
-              <span class="font-serif italic text-xs sm:text-sm text-[#8A6240] truncate pr-2">${escapeHtml(book.title)}</span>
+          <div id="bookPageContainer" class="page-flip w-full h-full max-w-4xl bg-[#F9F3EA] text-[#2c221a] p-6 sm:p-16 rounded-2xl shadow-2xl border-l-8 border-[#102820] flex flex-col justify-between overflow-y-auto">
+            <div class="border-b border-[#dcd0bc] pb-4 mb-6 flex justify-between items-center shrink-0">
+              <span class="font-serif italic text-sm text-[#8A6240] truncate pr-2">${escapeHtml(book.title)}</span>
               <span class="text-xs text-gray-500 font-mono shrink-0" id="topPageNum">1</span>
             </div>
 
-            <div id="pageContentText" class="flex-1 font-serif text-sm sm:text-xl leading-relaxed space-y-3 my-auto"></div>
+            <div id="pageContentText" class="flex-1 font-serif text-lg sm:text-2xl leading-relaxed space-y-4 my-auto"></div>
 
-            <div class="pt-3 sm:pt-6 border-t border-[#dcd0bc] flex justify-between items-center mt-3 shrink-0">
-              <button onclick="changePage(-1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
+            <div class="pt-6 border-t border-[#dcd0bc] flex justify-between items-center mt-6 shrink-0">
+              <button onclick="changePage(-1)" class="px-5 py-2.5 bg-[#4C6444] text-white rounded-xl text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-2 shadow">
                 <i data-lucide="chevron-left" class="w-4 h-4"></i><span>Anterior</span>
               </button>
               <span id="bottomPageNum" class="text-xs text-gray-600 font-bold">1 / ${state.totalPages}</span>
-              <button onclick="changePage(1)" class="px-3 sm:px-5 py-2 bg-[#4C6444] text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-1 sm:space-x-2 shadow">
+              <button onclick="changePage(1)" class="px-5 py-2.5 bg-[#4C6444] text-white rounded-xl text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-2 shadow">
                 <span>Próxima</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
               </button>
             </div>
@@ -634,7 +661,7 @@
         `;
         updateReaderPageContent();
       } else {
-        bodyContainer.innerHTML = `<div class="text-center text-white p-6 text-xs sm:text-base">O conteúdo desta obra ainda não está disponível para leitura.</div>`;
+        bodyContainer.innerHTML = `<div class="text-center text-white p-8">O conteúdo desta obra ainda não está disponível para leitura.</div>`;
       }
 
       document.getElementById('pdfReaderModal').classList.remove('hidden');
@@ -659,7 +686,7 @@
         state.currentPage = newPage;
         updateReaderPageContent();
         container.classList.remove('flipping');
-      }, 500);
+      }, 300);
     }
 
     function updateReaderPageContent() {
@@ -680,6 +707,19 @@
       if (indicator) indicator.textContent = `Página ${state.currentPage} de ${state.totalPages}`;
       
       lucide.createIcons();
+    }
+
+    // --- FUNÇÕES DA MODAL DE FOTO EM TELA CHEIA ---
+    function openPhotoModal(url, title, desc) {
+      document.getElementById('modalPhotoImg').src = decodeURIComponent(url);
+      document.getElementById('modalPhotoTitle').textContent = decodeURIComponent(title);
+      document.getElementById('modalPhotoDesc').textContent = decodeURIComponent(desc);
+      document.getElementById('photoModal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photoModal').classList.add('hidden');
+      document.getElementById('modalPhotoImg').src = '';
     }
 
     window.onload = () => render();

@@ -1,735 +1,1314 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full bg-slate-50">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Museu Literário Digital</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Cormorant Garamond & Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .font-serif {
-      font-family: 'Cormorant Garamond', serif;
-    }
-    .page-container {
-      perspective: 2000px;
-    }
-    .page-flip {
-      transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
-      transform-style: preserve-3d;
-      transform-origin: left center;
-      backface-visibility: hidden;
-    }
-    .flipping {
-      transform: rotateY(-90deg);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADM — Simulador de Gestão Empresarial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Scrollbar & Utility Classes -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .azulejo {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border-radius: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .azulejo:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        .azulejo-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            color: #ffffff;
+            border-radius: 1rem;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+            .azulejo { border: 1px solid #ccc; box-shadow: none; }
+        }
+    </style>
 </head>
-<body class="bg-[#E5D7C4] text-[#102820] h-screen overflow-hidden flex flex-col lg:flex-row">
+<body class="h-full text-slate-800 flex flex-col md:flex-row overflow-x-hidden bg-slate-50">
 
-  <!-- ==========================================
-      MENU LATERAL ESQUERDO
-      ========================================== -->
-  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#102820] text-[#E5D7C4] transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
-    <div class="p-6 border-b border-[#4C6444]/40 flex items-center justify-between cursor-pointer shrink-0" onclick="switchTab('home')">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-lg bg-[#4C6444] flex items-center justify-center shadow-md shrink-0">
-          <i data-lucide="book-open" class="w-6 h-6 text-[#E5D7C4]"></i>
-        </div>
+    <!-- OVERLAY BACKDROP FOR MOBILE MENU -->
+    <div id="sidebar-backdrop" onclick="closeSidebar()" class="fixed inset-0 bg-slate-900/60 z-40 hidden md:hidden transition-opacity"></div>
+
+    <!-- SIDEBAR DRAWER -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-brand-950 text-white transform -translate-x-full md:translate-x-0 md:static md:w-64 transition-transform duration-300 ease-in-out flex flex-col justify-between shadow-xl">
         <div>
-          <h1 class="font-serif text-lg font-bold tracking-wide text-white leading-tight">Museu Literário</h1>
-          <p class="text-[10px] text-[#B3B792] tracking-wider uppercase">Digital & Cultural</p>
-        </div>
-      </div>
-      <button onclick="toggleMobileMenu()" class="lg:hidden text-[#B3B792] hover:text-white p-1">
-        <i data-lucide="x" class="w-6 h-6"></i>
-      </button>
-    </div>
-
-    <!-- Navegação -->
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-      <button onclick="switchTab('home')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="home">
-        <i data-lucide="book-marked" class="w-5 h-5 shrink-0"></i>
-        <span>Início</span>
-      </button>
-      <button onclick="switchTab('catalog')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="catalog">
-        <i data-lucide="library" class="w-5 h-5 shrink-0"></i>
-        <span>Acervo Literário</span>
-      </button>
-      <button onclick="switchTab('gallery')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="gallery">
-        <i data-lucide="image" class="w-5 h-5 shrink-0"></i>
-        <span>Galeria Fotográfica</span>
-      </button>
-      <button onclick="switchTab('audiovisual')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="audiovisual">
-        <i data-lucide="video" class="w-5 h-5 shrink-0"></i>
-        <span>Área Audiovisual</span>
-      </button>
-      <button onclick="switchTab('about')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="about">
-        <i data-lucide="info" class="w-5 h-5 shrink-0"></i>
-        <span>Sobre o Museu</span>
-      </button>
-      <button onclick="switchTab('admin')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" data-tab="admin">
-        <i data-lucide="shield" class="w-5 h-5 shrink-0"></i>
-        <span>Painel Administrativo</span>
-      </button>
-    </nav>
-
-    <div class="p-4 border-t border-[#4C6444]/40 bg-[#0c1f18] text-xs text-[#B3B792] text-center shrink-0">
-      <p>© 2026 Museu Literário Digital</p>
-    </div>
-  </aside>
-
-  <!-- Overlay Mobile -->
-  <div id="mobileOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 z-40 lg:hidden hidden backdrop-blur-sm"></div>
-
-  <!-- ==========================================
-      CONTEÚDO PRINCIPAL
-      ========================================== -->
-  <main class="flex-1 flex flex-col lg:pl-72 h-screen overflow-hidden bg-[#E5D7C4] w-full">
-    
-    <!-- Barra Superior -->
-    <header class="h-16 bg-[#102820] text-[#E5D7C4] px-6 flex items-center justify-between shadow-md z-30 shrink-0">
-      <div class="flex items-center space-x-4 min-w-0">
-        <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg bg-[#4C6444] text-white focus:outline-none shrink-0">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
-        <span id="headerTitle" class="font-serif text-lg font-medium text-white truncate">Página Inicial</span>
-      </div>
-    </header>
-
-    <!-- Área Rolável Principal -->
-    <div id="contentArea" class="flex-1 overflow-y-auto">
-      <!-- Conteúdo injetado via JS -->
-    </div>
-  </main>
-
-  <!-- ==========================================
-      MODAL DO LEITOR DE LIVROS
-      ========================================== -->
-  <div id="pdfReaderModal" class="fixed inset-0 z-50 flex flex-col bg-[#2c221a] text-[#F4ECD8] hidden">
-    <div id="readerHeader" class="h-16 px-6 flex items-center justify-between border-b border-[#433422] bg-[#1a130f] shrink-0">
-      <div class="overflow-hidden pr-2 min-w-0">
-        <h3 id="readerBookTitle" class="font-serif font-bold text-base truncate">Título da Obra</h3>
-        <p id="readerBookAuthor" class="text-xs opacity-75 truncate">Autor</p>
-      </div>
-      <div class="flex items-center space-x-3 shrink-0">
-        <span id="pageIndicator" class="hidden sm:inline-block text-xs font-mono bg-black/30 px-3 py-1 rounded-lg">Página 1 de 3</span>
-        <button onclick="closePdfReader()" id="closeReaderBtn" class="bg-red-600 text-white p-2.5 rounded-xl hover:bg-red-700 transition flex items-center justify-center">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-    
-    <div id="readerBodyContainer" class="flex-1 flex items-center justify-center p-4 sm:p-8 page-container overflow-hidden w-full h-full"></div>
-  </div>
-
-  <!-- ==========================================
-      MODAL DE FOTO EM TELA CHEIA
-      ========================================== -->
-  <div id="photoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 hidden backdrop-blur-md" onclick="closePhotoModal()">
-    <div class="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center" onclick="event.stopPropagation()">
-      <button onclick="closePhotoModal()" class="absolute -top-12 right-0 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition">
-        <i data-lucide="x" class="w-6 h-6"></i>
-      </button>
-      <img id="modalPhotoImg" src="" class="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl border border-white/10">
-      <div class="mt-4 text-center text-white">
-        <h3 id="modalPhotoTitle" class="font-serif text-xl font-bold"></h3>
-        <p id="modalPhotoDesc" class="text-sm text-gray-300 mt-1 max-w-xl"></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================
-      SCRIPT DA APLICAÇÃO
-      ========================================== -->
-  <script>
-    const state = {
-      activeTab: 'home',
-      isAdminAuth: false,
-      searchTerm: '',
-      selectedCategoryFilter: 'all',
-      selectedBookId: null,
-      currentPage: 1,
-      totalPages: 1,
-      
-      books: [
-        {
-          id: '1',
-          title: 'Crônicas da Terra Vermelha',
-          subtitle: 'Memórias e paisagens do interior',
-          author: 'Mariana Silva',
-          synopsis: 'Uma coletânea sensível de crônicas sobre a infância no interior, os cheiros da terra molhada, as tardes de outono e a sabedoria dos antigos.',
-          category: 'Crônica',
-          year: '2025',
-          coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
-          pdfUrl: '',
-          status: 'published',
-          featured: true,
-          shelf: 'Crônicas',
-          pages: [
-            "Capítulo I\n\nA terra vermelha guardava os segredos das primeiras chuvas de novembro. Quando o cheiro de mato molhado subia pelo vale, sabíamos que o tempo havia mudado de ritmo.",
-            "As tardes eram longas na varanda da casa de vó. Entre um gole de café coado na hora e histórias contadas à sombra da mangueira, o mundo lá fora parecia distante e seguro.",
-            "Hoje, mesmo longe daquela paisagem, basta fechar os olhos para ouvir o vento balançar os cafezais. As raízes que lá deixamos continuam a nutrir quem somos."
-          ]
-        },
-        {
-          id: '2',
-          title: 'Versos do Sertão Verde',
-          subtitle: 'Poesia popular e contemporânea',
-          author: 'Antônio Bezerra',
-          synopsis: 'Poemas que cantam a força da caatinga, a resiliência do povo nordestino e a beleza das chuvas que transformam a paisagem.',
-          category: 'Poesia',
-          year: '2026',
-          coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600',
-          pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-          status: 'published',
-          featured: true,
-          shelf: 'Literatura nordestina',
-          pages: []
-        }
-      ],
-      categories: ['Conto', 'Crônica', 'Poesia', 'Literatura nordestina', 'Produção escolar', 'Romance'],
-      gallery: [
-        { id: '1', title: 'Oficina de Contação de Histórias', description: 'Alunos reunidos na biblioteca ao ar livre compartilhando leituras.', imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=1200', date: 'Agosto, 2026', project: 'Festival' },
-        { id: '2', title: 'Exposição de Poesia Visual', description: 'Trabalhos artísticos desenvolvidos pelas turmas do ensino médio.', imageUrl: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=1200', date: 'Setembro, 2026', project: 'Mostra Cultural' }
-      ],
-      videos: [
-        { id: '1', title: 'Documentário: Vozes da Terra', description: 'Panorama sobre literatura oral e contadores de causos.', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', category: 'Documentário' }
-      ]
-    };
-
-    const shelvesConfig = [
-      { title: 'Obras em destaque', shelfName: 'Obras em destaque' },
-      { title: 'Crônicas', shelfName: 'Crônicas' },
-      { title: 'Literatura nordestina', shelfName: 'Literatura nordestina' },
-      { title: 'Novas publicações', shelfName: 'Novas publicações' }
-    ];
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    function switchTab(tab) {
-      state.activeTab = tab;
-      render();
-      closeMobileMenu();
-    }
-
-    function toggleMobileMenu() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('mobileOverlay');
-      if(sidebar) sidebar.classList.toggle('-translate-x-full');
-      if(overlay) overlay.classList.toggle('hidden');
-    }
-
-    function closeMobileMenu() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('mobileOverlay');
-      if(sidebar) sidebar.classList.add('-translate-x-full');
-      if(overlay) overlay.classList.add('hidden');
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeMobileMenu();
-        closePdfReader();
-        closePhotoModal();
-      }
-    });
-
-    function render() {
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        const tab = btn.getAttribute('data-tab');
-        if (tab === state.activeTab || (state.activeTab === 'book-detail' && tab === 'catalog')) {
-          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-[#4C6444] text-white shadow-md';
-        } else {
-          btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-[#B3B792] hover:bg-[#15352a] hover:text-white transition-all';
-        }
-      });
-
-      const titles = {
-        home: 'Página Inicial',
-        catalog: 'Acervo Completo',
-        'book-detail': 'Detalhes da Obra',
-        gallery: 'Galeria Fotográfica',
-        audiovisual: 'Área Audiovisual',
-        about: 'Sobre o Projeto',
-        admin: 'Painel Administrativo'
-      };
-      
-      const headerTitle = document.getElementById('headerTitle');
-      if(headerTitle) headerTitle.textContent = titles[state.activeTab] || 'Museu Literário';
-
-      const area = document.getElementById('contentArea');
-      if(!area) return;
-      area.innerHTML = '';
-
-      if (state.activeTab === 'home') area.innerHTML = renderHome();
-      else if (state.activeTab === 'catalog') area.innerHTML = renderCatalog();
-      else if (state.activeTab === 'book-detail') area.innerHTML = renderBookDetail();
-      else if (state.activeTab === 'gallery') area.innerHTML = renderGallery();
-      else if (state.activeTab === 'audiovisual') area.innerHTML = renderAudiovisual();
-      else if (state.activeTab === 'about') area.innerHTML = renderAbout();
-      else if (state.activeTab === 'admin') area.innerHTML = renderAdmin();
-
-      if(typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-    }
-
-    function renderHome() {
-      let shelvesHtml = shelvesConfig.map(shelf => {
-        const shelfBooks = state.books.filter(b => b.status === 'published' && (b.shelf === shelf.shelfName || (shelf.shelfName === 'Obras em destaque' && b.featured)));
-        if (shelfBooks.length === 0) return '';
-
-        let booksCards = shelfBooks.map(book => `
-          <div class="w-60 sm:w-68 lg:w-72 shrink-0 bg-[#F4EFE6] rounded-3xl shadow-xl overflow-hidden border border-[#CFBB99]/80 flex flex-col group hover:shadow-2xl transition duration-300">
-            <div class="relative h-72 sm:h-80 overflow-hidden bg-[#d3c1a5]">
-              <img src="${escapeHtml(book.coverUrl)}" alt="${escapeHtml(book.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-              <div class="absolute top-3 left-3 bg-[#102820]/90 text-[#E5D7C4] text-[10px] sm:text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
-                ${escapeHtml(book.category)}
-              </div>
-            </div>
-            <div class="p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="font-serif font-bold text-lg sm:text-xl text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
-                <p class="text-xs sm:text-sm text-[#8A6240] font-medium mt-1 line-clamp-1">${escapeHtml(book.author)}</p>
-              </div>
-              <div class="mt-5 pt-3.5 border-t border-[#CFBB99]/50 flex items-center justify-between">
-                <span class="text-xs text-[#889063] font-bold">${escapeHtml(book.year)}</span>
-                <button onclick="openBook('${book.id}')" class="bg-[#4C6444] hover:bg-[#394c33] text-white text-xs sm:text-sm px-4 py-2 rounded-xl font-medium transition shadow">
-                  Ler Obra
-                </button>
-              </div>
-            </div>
-          </div>
-        `).join('');
-
-        return `
-          <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-[#889063]/30 pb-3">
-              <h2 class="text-xl sm:text-2xl font-serif font-bold text-[#102820] flex items-center space-x-2.5">
-                <span class="w-3 h-3 rounded-full bg-[#4C6444]"></span>
-                <span>${escapeHtml(shelf.title)}</span>
-              </h2>
-            </div>
-            <div class="flex space-x-6 overflow-x-auto pb-4 pt-2 scrollbar-thin">
-              ${booksCards}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      return `
-        <div class="min-h-full flex flex-col pb-28 lg:pb-12">
-          <div class="bg-[#102820] text-white py-16 lg:py-24 px-6 sm:px-12 flex flex-col items-center justify-center text-center shadow-2xl">
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#E5D7C4] leading-tight max-w-3xl">
-              “Um lugar para as histórias viverem.”
-            </h1>
-            <p class="text-sm sm:text-lg text-[#B3B792] font-light max-w-xl mx-auto mt-4">
-              Explore livros, poemas e memórias que atravessam gerações com elegância e imersão.
-            </p>
-            <button onclick="switchTab('catalog')" class="mt-8 bg-[#4C6444] hover:bg-[#5d7954] text-white px-8 py-3.5 rounded-2xl font-medium shadow-xl transition text-sm sm:text-base">
-              Explorar Acervo Completo
-            </button>
-          </div>
-          <div class="py-10 lg:py-16 px-4 sm:px-8 lg:px-16 space-y-12 max-w-[1400px] mx-auto w-full">
-            ${shelvesHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    function renderCatalog() {
-      let categoriesBtns = `<button onclick="setCategoryFilter('all')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === 'all' ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">Todas</button>`;
-      categoriesBtns += state.categories.map(c => `
-        <button onclick="setCategoryFilter('${c}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-sm shrink-0 ${state.selectedCategoryFilter === c ? 'bg-[#102820] text-white' : 'bg-[#F4EFE6] text-[#4D2D18]'}">${escapeHtml(c)}</button>
-      `).join('');
-
-      return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Acervo Literário</h1>
-              <p class="text-sm text-[#4D2D18] mt-1">Pesquise por título, autor, sinopse ou categoria.</p>
-            </div>
-            <div class="relative w-full md:w-96">
-              <i data-lucide="search" class="absolute left-4 top-3.5 w-4 h-4 text-[#8A6240]"></i>
-              <input type="text" placeholder="Pesquisar no acervo..." value="${escapeHtml(state.searchTerm)}" oninput="state.searchTerm = this.value; renderCatalogGrid()" class="w-full bg-[#F4EFE6] border border-[#CFBB99] rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none shadow-sm">
-            </div>
-          </div>
-          <div class="flex items-center space-x-2 overflow-x-auto pb-2">${categoriesBtns}</div>
-          <div id="booksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-            ${getFilteredBooksHTML()}
-          </div>
-        </div>
-      `;
-    }
-
-    function getFilteredBooksHTML() {
-      const termo = state.searchTerm.trim().toLowerCase();
-
-      let filtered = state.books.filter(b => b.status === 'published')
-        .filter(b => state.selectedCategoryFilter === 'all' || b.category === state.selectedCategoryFilter)
-        .filter(book =>
-          book.title.          book.title.toLowerCase().includes(termo) ||
-          book.author.toLowerCase().includes(termo) ||
-          (book.subtitle || '').toLowerCase().includes(termo) ||
-          (book.synopsis || '').toLowerCase().includes(termo) ||
-          book.category.toLowerCase().includes(termo)
-        );
-
-      if (filtered.length === 0) return `<div class="col-span-full py-16 text-center text-sm text-[#8A6240]">Nenhuma obra encontrada com os critérios informados.</div>`;
-
-      return filtered.map(book => `
-        <div class="bg-[#F4EFE6] rounded-3xl shadow-lg overflow-hidden border border-[#CFBB99] flex flex-col hover:shadow-2xl transition duration-300">
-          <div class="relative h-72 sm:h-80 bg-[#d3c1a5] overflow-hidden">
-            <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
-            <div class="absolute top-3 left-3 bg-[#102820]/90 text-[#E5D7C4] text-[10px] px-3 py-1 rounded-full font-semibold uppercase">
-              ${escapeHtml(book.category)}
-            </div>
-          </div>
-          <div class="p-5 flex-1 flex flex-col justify-between">
-            <div>
-              <h3 class="font-serif font-bold text-lg text-[#102820] line-clamp-1">${escapeHtml(book.title)}</h3>
-              <p class="text-xs sm:text-sm text-[#8A6240] font-medium mt-1">${escapeHtml(book.author)}</p>
-            </div>
-            <div class="mt-5 pt-3 border-t border-[#CFBB99] flex items-center justify-between">
-              <span class="text-xs text-[#889063] font-bold">${escapeHtml(book.year)}</span>
-              <button onclick="openBook('${escapeHtml(book.id)}')" class="bg-[#4C6444] text-white text-xs px-4 py-2 rounded-xl font-medium shadow hover:bg-[#394c33] transition">Ver Detalhes</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderCatalogGrid() {
-      const grid = document.getElementById('booksGrid');
-      if (grid) grid.innerHTML = getFilteredBooksHTML();
-    }
-
-    function renderBookDetail() {
-      const book = state.books.find(b => b.id === state.selectedBookId);
-      if (!book) return `<div class="p-16 text-center">Obra não encontrada. <button onclick="switchTab('catalog')" class="text-[#4C6444] underline">Voltar</button></div>`;
-
-      return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-5xl mx-auto space-y-8 pb-36 lg:pb-16">
-          <button onclick="switchTab('catalog')" class="flex items-center space-x-2 text-[#4C6444] font-medium text-sm hover:underline">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i><span>Voltar ao Acervo</span>
-          </button>
-          <div class="bg-[#F4EFE6] rounded-3xl p-6 sm:p-10 shadow-2xl border border-[#CFBB99] grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 items-start">
-            <div class="md:col-span-1 flex flex-col items-center">
-              <div class="rounded-2xl overflow-hidden shadow-2xl aspect-[3/4] border border-[#CFBB99] w-52 sm:w-64 md:w-full">
-                <img src="${escapeHtml(book.coverUrl)}" class="w-full h-full object-cover">
-              </div>
-              <button onclick="openPdfReader('${escapeHtml(book.id)}')" class="w-full mt-6 flex items-center justify-center space-x-2 bg-[#4C6444] hover:bg-[#394c33] text-white py-3.5 px-6 rounded-2xl font-medium shadow-xl transition">
-                <i data-lucide="book-open" class="w-5 h-5"></i><span>Ler Obra Agora</span>
-              </button>
-            </div>
-            <div class="md:col-span-2 space-y-5">
-              <span class="inline-block bg-[#102820] text-[#E5D7C4] text-xs px-3.5 py-1 rounded-full uppercase tracking-wider">${escapeHtml(book.category)}</span>
-              <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820] leading-tight">${escapeHtml(book.title)}</h1>
-              <p class="text-sm sm:text-lg text-[#8A6240] font-serif italic">${escapeHtml(book.subtitle || '')}</p>
-              <p class="text-sm font-semibold text-[#4C6444]">Autor: ${escapeHtml(book.author)}</p>
-              <div class="border-t border-[#CFBB99] pt-5">
-                <h3 class="font-serif font-bold text-lg text-[#102820] mb-2">Sinopse</h3>
-                <div class="max-h-[35vh] sm:max-h-none overflow-y-auto pr-2">
-                  <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">${escapeHtml(book.synopsis)}</p>
+            <!-- BRANDING -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-brand-500/30">
+                        ADM
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight tracking-wide text-white">ADM SIMULADOR</h1>
+                        <p class="text-xs text-brand-200">Gestão & Empreendedorismo</p>
+                    </div>
                 </div>
-              </div>
+                <button onclick="closeSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-          </div>
-        </div>
-      `;
-    }
 
-    function renderGallery() {
-      let cards = state.gallery.map(item => `
-        <div onclick="openPhotoModal('${encodeURIComponent(item.imageUrl)}', '${encodeURIComponent(item.title)}', '${encodeURIComponent(item.description)}')" class="bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-xl border border-[#CFBB99] flex flex-col group cursor-pointer hover:shadow-2xl transition duration-300">
-          <div class="h-64 sm:h-72 bg-[#d3c1a5] relative overflow-hidden">
-            <img src="${escapeHtml(item.imageUrl)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-              <span class="bg-[#102820]/90 text-white text-xs px-4 py-2 rounded-xl font-medium shadow">Ver em Tela Cheia</span>
+            <!-- NAVIGATION ITEMS -->
+            <nav class="p-3 space-y-1 text-sm font-medium">
+                <button onclick="nav('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-brand-500"></i> Visão Geral
+                </button>
+                <button onclick="nav('companies')" id="nav-companies" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="building-2" class="w-5 h-5 text-brand-500"></i> Empresas
+                </button>
+                <button onclick="nav('incomes')" id="nav-incomes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-emerald-400"></i> Receitas
+                </button>
+                <button onclick="nav('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="arrow-down-left" class="w-5 h-5 text-rose-400"></i> Despesas
+                </button>
+                <button onclick="nav('payables')" id="nav-payables" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="receipt" class="w-5 h-5 text-brand-500"></i> Contas a Pagar / Receber
+                </button>
+                <button onclick="nav('loans')" id="nav-loans" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="landmark" class="w-5 h-5 text-brand-500"></i> Empréstimos
+                </button>
+                <button onclick="nav('equity')" id="nav-equity" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Patrimônio
+                </button>
+                <button onclick="nav('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-brand-500"></i> Relatórios (DRE)
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 space-y-3">
+            <button onclick="resetData()" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 rounded-lg border border-rose-900/50 transition">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar Simulação
+            </button>
+            <div class="text-center text-[10px] text-slate-500">
+                ADM v2.0 • Modelo Educacional
             </div>
-          </div>
-          <div class="p-6">
-            <div class="text-xs text-[#889063] font-bold mb-1">${escapeHtml(item.date)} • ${escapeHtml(item.project)}</div>
-            <h3 class="font-serif font-bold text-xl text-[#102820]">${escapeHtml(item.title)}</h3>
-            <p class="text-xs sm:text-sm text-[#4D2D18] mt-2 line-clamp-2">${escapeHtml(item.description)}</p>
-          </div>
         </div>
-      `).join('');
+    </aside>
 
-      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Galeria Fotográfica</h1><p class="text-sm text-[#4D2D18]">Clique em qualquer imagem para ampliá-la.</p><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">${cards}</div></div>`;
-    }
-
-    function renderAudiovisual() {
-      let cards = state.videos.map(vid => `
-        <div class="bg-[#F4EFE6] rounded-3xl overflow-hidden shadow-xl border border-[#CFBB99] flex flex-col">
-          <div class="aspect-video bg-black relative">
-            <iframe src="${escapeHtml(vid.videoUrl)}" class="w-full h-full" allowfullscreen></iframe>
-          </div>
-          <div class="p-6 space-y-2">
-            <span class="text-xs bg-[#102820] text-[#E5D7C4] px-3 py-0.5 rounded-full font-semibold uppercase">${escapeHtml(vid.category)}</span>
-            <h3 class="font-serif font-bold text-xl text-[#102820] mt-2">${escapeHtml(vid.title)}</h3>
-            <p class="text-sm text-[#4D2D18]">${escapeHtml(vid.description)}</p>
-          </div>
-        </div>
-      `).join('');
-
-      return `<div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12"><h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Área Audiovisual</h1><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">${cards}</div></div>`;
-    }
-
-    function renderAbout() {
-      return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-4xl mx-auto pb-32 lg:pb-12">
-          <div class="bg-[#F4EFE6] rounded-3xl p-8 sm:p-12 shadow-2xl border border-[#CFBB99] space-y-6">
-            <h1 class="text-2xl sm:text-4xl font-serif font-bold text-[#102820]">Sobre o Museu Literário Digital</h1>
-            <p class="text-sm sm:text-base text-[#4D2D18] leading-relaxed">
-              Plataforma dedicada à preservação, organização, divulgação e leitura de obras literárias e produções culturais escolares.
-            </p>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderAdmin() {
-      if (!state.isAdminAuth) {
-        return `
-          <div class="max-w-md mx-auto bg-[#F4EFE6] rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#CFBB99] space-y-6 mt-12 mx-4 sm:mx-auto pb-32 lg:pb-12">
-            <div class="text-center space-y-2">
-              <i data-lucide="shield" class="w-12 h-12 text-[#4C6444] mx-auto"></i>
-              <h2 class="text-2xl font-serif font-bold text-[#102820]">Área Restrita</h2>
-              <p class="text-xs text-[#4D2D18]">Insira a chave de acesso administrativo</p>
+    <!-- MAIN WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        
+        <!-- TOP HEADER NAVBAR -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 flex items-center justify-between gap-4 no-print shadow-sm">
+            <div class="flex items-center gap-3">
+                <button onclick="openSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div>
+                    <h2 id="page-title" class="text-lg font-bold text-slate-900 leading-tight">Visão Geral</h2>
+                    <p id="page-subtitle" class="text-xs text-slate-500 hidden sm:block">Painel principal da empresa</p>
+                </div>
             </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-              <input id="adminPassInput" type="password" placeholder="Senha..." class="w-full bg-white border border-[#CFBB99] rounded-2xl px-4 py-3 text-sm focus:outline-none" required>
-              <button type="submit" class="w-full bg-[#102820] text-white py-3 rounded-2xl font-medium text-sm shadow-lg">Entrar</button>
+
+            <!-- CONTROLS: PERFIL & EMPRESA SELEÇÃO -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- SELETOR DE PERFIL -->
+                <div class="bg-slate-100 p-1 rounded-xl flex border border-slate-200">
+                    <button onclick="setRole('company')" id="btn-role-company" class="px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm">
+                        Admin Empresa
+                    </button>
+                    <button onclick="setRole('general')" id="btn-role-general" class="px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">
+                        Admin Geral
+                    </button>
+                </div>
+
+                <!-- SELETOR DE EMPRESA -->
+                <div class="relative min-w-[140px] sm:min-w-[180px]">
+                    <select id="company-selector" onchange="changeActiveCompany(this.value)" class="w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-slate-800">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+
+            <!-- ALERT BENCHMARK / IA BANNER -->
+            <div id="ai-insight-banner" class="azulejo p-4 sm:p-5 flex items-start gap-4 border-l-4 border-brand-600">
+                <div class="p-2.5 bg-brand-50 text-brand-600 rounded-xl flex-shrink-0">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        Diagnóstico Financeiro
+                        <span id="insight-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Saudável</span>
+                    </h4>
+                    <p id="insight-text" class="text-xs sm:text-sm text-slate-600 mt-1">Carregando análise...</p>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 1: DASHBOARD -->
+            <section id="sec-dashboard" class="space-y-6">
+                <!-- METRIC AZULEJOS CARDS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                    
+                    <!-- SALDO AZULEJO (PRIMARY BRAND) -->
+                    <div class="azulejo-primary p-5 flex flex-col justify-between relative overflow-hidden shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-brand-100 font-semibold">Saldo Atual</span>
+                                <h3 id="dash-balance" class="text-2xl sm:text-3xl font-extrabold mt-1">R$ 0,00</h3>
+                            </div>
+                            <div class="p-2 bg-white/10 rounded-xl backdrop-blur-md">
+                                <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs text-brand-100">
+                            <span>Capital Inicial</span>
+                            <span id="dash-initial-capital" class="font-bold">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- RECEITAS AZULEJO -->
+                    <div class="azulejo p-5 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Receitas</span>
+                                <h3 id="dash-incomes" class="text-2xl sm:text-3xl font-bold mt-1 text-emerald-600">R$ 0,00</h3>
+                            </div>
+                            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4">Total acumulado de entradas</p>
+                    </div>
+
+                    <!-- DESPESAS AZULEJO -->
+                    <div class="azulejo p-5 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Despesas</span>
+                                <h3 id="dash-expenses" class="text-2xl sm:text-3xl font-bold mt-1 text-rose-600">R$ 0,00</h3>
+                            </div>
+                            <div class="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
+                                <i data-lucide="trending-down" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4">Total acumulado de saídas</p>
+                    </div>
+
+                    <!-- PENDÊNCIAS AZULEJO -->
+                    <div class="azulejo p-5 flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Saldo Devedor Empréstimos</span>
+                                <h3 id="dash-loans-due" class="text-2xl sm:text-3xl font-bold mt-1 text-amber-600">R$ 0,00</h3>
+                            </div>
+                            <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                                <i data-lucide="building-bank" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-4">Passivos bancários em aberto</p>
+                    </div>
+                </div>
+
+                <!-- CHARTS & SUMMARY AZULEJOS -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- CHART AZULEJO -->
+                    <div class="azulejo p-5 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-900 text-base">Fluxo de Entradas vs Saídas</h3>
+                            <span class="text-xs text-slate-400">Comparativo Operacional</span>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="financeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- QUICK TRANSACTIONS LIST AZULEJO -->
+                    <div class="azulejo p-5 flex flex-col">
+                        <h3 class="font-bold text-slate-900 text-base mb-3">Últimas Movimentações</h3>
+                        <div id="dash-recent-list" class="flex-1 space-y-3 overflow-y-auto max-h-64 pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 2: EMPRESAS (CADASTRO E GESTÃO) -->
+            <section id="sec-companies" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Empresas Cadastradas</h3>
+                        <p class="text-xs text-slate-500">Gerencie e cadastre empresas no simulador</p>
+                    </div>
+                    <button onclick="toggleCompanyModal(true)" class="btn-role-general-only w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Nova Empresa
+                    </button>
+                </div>
+
+                <!-- GRID DE EMPRESAS -->
+                <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Populated via JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: RECEITAS -->
+            <section id="sec-incomes" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Gestão de Receitas</h3>
+                        <p class="text-xs text-slate-500">Registre todas as vendas, serviços prestados e entradas</p>
+                    </div>
+                    <button onclick="toggleIncomeModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Nova Receita
+                    </button>
+                </div>
+
+                <!-- LISTA AZULEJO -->
+                <div class="azulejo overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs sm:text-sm">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 sm:p-4">Descrição</th>
+                                    <th class="p-3 sm:p-4">Categoria</th>
+                                    <th class="p-3 sm:p-4">Data</th>
+                                    <th class="p-3 sm:p-4">Valor</th>
+                                    <th class="p-3 sm:p-4">Status</th>
+                                    <th class="p-3 sm:p-4 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomes-table-body" class="divide-y divide-slate-100">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 4: DESPESAS -->
+            <section id="sec-expenses" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Gestão de Despesas</h3>
+                        <p class="text-xs text-slate-500">Controle de saídas, fornecedores, salários e contas operacionais</p>
+                    </div>
+                    <button onclick="toggleExpenseModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Nova Despesa
+                    </button>
+                </div>
+
+                <!-- LISTA AZULEJO -->
+                <div class="azulejo overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs sm:text-sm">
+                            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 sm:p-4">Descrição</th>
+                                    <th class="p-3 sm:p-4">Categoria</th>
+                                    <th class="p-3 sm:p-4">Vencimento</th>
+                                    <th class="p-3 sm:p-4">Valor</th>
+                                    <th class="p-3 sm:p-4">Status</th>
+                                    <th class="p-3 sm:p-4 text-right                                </tr>
+                            </thead>
+                            <tbody id="expenses-table-body" class="divide-y divide-slate-100">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 5: CONTAS A PAGAR / RECEBER -->
+            <section id="sec-payables" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- CONTAS A RECEBER -->
+                    <div class="azulejo p-5 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="arrow-down-left" class="w-5 h-5 text-emerald-600"></i> Contas a Receber
+                            </h3>
+                            <span id="total-receivables" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
+                        </div>
+                        <div id="receivables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- CONTAS A PAGAR -->
+                    <div class="azulejo p-5 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="arrow-up-right" class="w-5 h-5 text-rose-600"></i> Contas a Pagar
+                            </h3>
+                            <span id="total-payables" class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
+                        </div>
+                        <div id="payables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SEÇÃO 6: EMPRÉSTIMOS -->
+            <section id="sec-loans" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Empréstimos & Financiamentos</h3>
+                        <p class="text-xs text-slate-500">Solicite e administre empréstimos simulados com regras bancárias reais</p>
+                    </div>
+                    <button onclick="toggleLoanModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                        <i data-lucide="landmark" class="w-4 h-4"></i> Simular/Solicitar Empréstimo
+                    </button>
+                </div>
+
+                <div id="loans-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Populated via JS -->
+                </div>
+            </section>
+
+            <!-- SEÇÃO 7: PATRIMÔNIO -->
+            <section id="sec-equity" class="space-y-6 hidden">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Balanço Patrimonial</h3>
+                    <p class="text-xs text-slate-500">Demonstração de bens (Ativos), obrigações (Passivos) e Patrimônio Líquido</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- ATIVOS -->
+                    <div class="azulejo p-5 space-y-4">
+                        <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
+                            <span>ATIVOS (Bens e Direitos)</span>
+                            <span id="bp-total-assets">R$ 0,00</span>
+                        </h4>
+
+                        <div class="space-y-3 text-xs sm:text-sm">
+                            <div class="font-semibold text-slate-700">Ativo Circulante</div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Caixa / Saldo em Conta</span>
+                                <span id="bp-cash" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Contas a Receber</span>
+                                <span id="bp-receivables" class="font-medium">R$ 0,00</span>
+                            </div>
+
+                            <div class="font-semibold text-slate-700 pt-2">Ativo Não Circulante</div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Imobilizado & Máquinas (Estimado)</span>
+                                <span id="bp-fixed-assets" class="font-medium">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PASSIVOS & PL -->
+                    <div class="azulejo p-5 space-y-4">
+                        <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
+                            <span>PASSIVOS & PATRIMÔNIO LÍQUIDO</span>
+                            <span id="bp-total-liabilities-equity">R$ 0,00</span>
+                        </h4>
+
+                        <div class="space-y-3 text-xs sm:text-sm">
+                            <div class="font-semibold text-slate-700">Passivo Circulante</div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Contas a Pagar</span>
+                                <span id="bp-payables" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Empréstimos Bancários</span>
+                                <span id="bp-loans" class="font-medium">R$ 0,00</span>
+                            </div>
+
+                            <div class="font-semibold text-slate-700 pt-2 border-t border-slate-100">Patrimônio Líquido</div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Capital Social Integralizado</span>
+                                <span id="bp-capital" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between pl-3 text-slate-600">
+                                <span>Lucros / Prejuízos Acumulados</span>
+                                <span id="bp-retained-earnings" class="font-medium">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 8: RELATÓRIOS (DRE) -->
+            <section id="sec-reports" class="space-y-6 hidden">
+                <div class="flex justify-between items-center no-print">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Demonstrativo do Resultado do Exercício (DRE)</h3>
+                        <p class="text-xs text-slate-500">Relatório de desempenho financeiro acumulado</p>
+                    </div>
+                    <button onclick="window.print()" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-brand-700 transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Imprimir DRE
+                    </button>
+                </div>
+
+                <!-- DRE SHEET AZULEJO -->
+                <div class="azulejo p-6 sm:p-8 space-y-4 max-w-3xl mx-auto">
+                    <div class="border-b border-slate-200 pb-4 text-center">
+                        <h2 id="dre-company-name" class="text-xl font-bold text-slate-900">NOME DA EMPRESA</h2>
+                        <p class="text-xs text-slate-500">Relatório Financeiro Operacional • DRE</p>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between font-bold text-slate-800 border-b pb-1">
+                            <span>(+) Receita Bruta de Vendas / Serviços</span>
+                            <span id="dre-gross-revenue" class="text-emerald-600">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600 pl-4 border-b border-dashed pb-1">
+                            <span>(-) Custos Operacionais e Despesas Diretas</span>
+                            <span id="dre-operating-expenses" class="text-rose-600">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between font-extrabold text-base text-slate-900 bg-slate-100 p-2 rounded-lg">
+                            <span>(=) Resultado Operacional (Lucro / Prejuízo)</span>
+                            <span id="dre-operating-result">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: CADASTRO DE EMPRESA -->
+    <div id="modal-company" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="azulejo w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Nova Empresa Fictícia</h3>
+                <button onclick="toggleCompanyModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="form-company" onsubmit="handleSaveCompany(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nome Empresarial</label>
+                    <input type="text" id="comp-name" required placeholder="Ex: Tech Solutions LTDA" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Ramo de Atividade</label>
+                    <input type="text" id="comp-segment" required placeholder="Ex: Tecnologia, Comércio, Serviços" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Capital Inicial (R$)</label>
+                    <input type="number" step="0.01" id="comp-capital" required placeholder="10000.00" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="toggleCompanyModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600 hover:bg-slate-50">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md">Salvar Empresa</button>
+                </div>
             </form>
-          </div>
-        `;
-      }
-
-      let booksList = state.books.map(b => `
-        <div class="bg-white p-4 rounded-2xl border border-[#CFBB99] flex items-center justify-between shadow-sm">
-          <div class="pr-2 min-w-0">
-            <h4 class="font-serif font-bold text-sm text-[#102820] truncate">${escapeHtml(b.title)}</h4>
-            <p class="text-xs text-[#8A6240] truncate">${escapeHtml(b.author)} • ${escapeHtml(b.category)}</p>
-          </div>
-          <button onclick="deleteBook('${escapeHtml(b.id)}')" class="p-2 bg-red-100 text-red-700 rounded-xl shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>
-      `).join('');
+    </div>
 
-      return `
-        <div class="p-6 sm:p-10 lg:p-16 max-w-[1400px] mx-auto space-y-8 pb-32 lg:pb-12">
-          <div class="flex items-center justify-between bg-[#F4EFE6] p-4 rounded-2xl border border-[#CFBB99]">
-            <span class="text-sm font-bold text-[#102820]">Painel Administrativo</span>
-            <button onclick="state.isAdminAuth=false; render();" class="text-xs text-red-700 font-semibold">Sair</button>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-[#F4EFE6] p-6 sm:p-8 rounded-3xl shadow-xl border border-[#CFBB99] space-y-4">
-              <h3 class="font-serif font-bold text-lg text-[#102820]">Cadastrar Obra</h3>
-              <form id="bookForm" onsubmit="handleSaveBook(event)" class="space-y-3">
-                <input id="fTitle" placeholder="Título *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
-                <input id="fSubtitle" placeholder="Subtítulo" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
-                <input id="fAuthor" placeholder="Autor *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
-                <input id="fCategory" placeholder="Categoria (ex: Conto, Poesia) *" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none" required>
-                <input id="fYear" placeholder="Ano (ex: 2026)" value="2026" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
-                <textarea id="fSynopsis" placeholder="Sinopse" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none h-20"></textarea>
-                <input id="fCover" placeholder="URL da Capa" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
-                <input id="fPdf" placeholder="URL do PDF Original (opcional)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none">
-                <textarea id="fPages" placeholder="Páginas em texto (separadas por linhas em branco)" class="w-full bg-white border border-[#CFBB99] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none h-20"></textarea>
-                <button type="submit" class="w-full bg-[#4C6444] text-white py-3 rounded-xl text-xs font-semibold shadow">Salvar Obra</button>
-              </form>
+    <!-- MODAL: RECEITA -->
+    <div id="modal-income" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="azulejo w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Lançar Nova Receita</h3>
+                <button onclick="toggleIncomeModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div class="lg:col-span-2 bg-[#F4EFE6] p-6 sm:p-8 rounded-3xl shadow-xl border border-[#CFBB99] space-y-4">
-              <h3 class="font-serif font-bold text-lg text-[#102820]">Obras Cadastradas</h3>
-              <div class="space-y-3 max-h-[500px] overflow-y-auto">${booksList}</div>
-            </div>
-          </div>
+            <form id="form-income" onsubmit="handleSaveIncome(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Descrição</label>
+                    <input type="text" id="inc-desc" required placeholder="Ex: Venda de produtos #102" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Valor (R$)</label>
+                        <input type="number" step="0.01" id="inc-amount" required placeholder="500.00" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Categoria</label>
+                        <select id="inc-category" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                            <option value="Vendas">Vendas</option>
+                            <option value="Serviços">Serviços</option>
+                            <option value="Investimentos">Investimentos</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Data</label>
+                        <input type="date" id="inc-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="inc-status" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                            <option value="received">Recebido (Caixa)</option>
+                            <option value="pending">Pendente (A Receber)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="toggleIncomeModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md">Confirmar Entrada</button>
+                </div>
+            </form>
         </div>
-      `;
-    }
+    </div>
 
-    function openBook(id) {
-      state.selectedBookId = id;
-      switchTab('book-detail');
-    }
-
-    function setCategoryFilter(cat) {
-      state.selectedCategoryFilter = cat;
-      render();
-    }
-
-    function handleAdminLogin(e) {
-      e.preventDefault();
-      const inputPass = document.getElementById('adminPassInput').value;
-      if (inputPass === 'admin123') {
-        state.isAdminAuth = true;
-        render();
-      } else {
-        alert('Senha incorreta!');
-      }
-    }
-
-    function handleSaveBook(e) {
-      e.preventDefault();
-      const rawPages = document.getElementById('fPages').value.trim();
-      const pagesArray = rawPages ? rawPages.split(/\n\s*\n/) : ["Página inicial da obra.", "Conteúdo e desenvolvimento.", "Conclusão."];
-
-      const newBook = {
-        id: Date.now().toString(),
-        title: document.getElementById('fTitle').value,
-        subtitle: document.getElementById('fSubtitle').value,
-        author: document.getElementById('fAuthor').value,
-        category: document.getElementById('fCategory').value,
-        year: document.getElementById('fYear').value || '2026',
-        synopsis: document.getElementById('fSynopsis').value,
-        coverUrl: document.getElementById('fCover').value || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600',
-        pdfUrl: document.getElementById('fPdf').value.trim(),
-        status: 'published',
-        featured: true,
-        shelf: 'Novas publicações',
-        pages: pagesArray
-      };
-
-      state.books.unshift(newBook);
-      alert('Obra cadastrada com sucesso!');
-      document.getElementById('bookForm').reset();
-      render();
-    }
-
-    function deleteBook(id) {
-      if (confirm('Deseja excluir esta obra do acervo?')) {
-        state.books = state.books.filter(b => b.id !== id);
-        render();
-      }
-    }
-
-    function openPdfReader(bookId) {
-      const book = state.books.find(b => b.id === bookId);
-      if (!book) return;
-      
-      state.currentReadingBook = book;
-      document.getElementById('readerBookTitle').textContent = book.title;
-      document.getElementById('readerBookAuthor').textContent = book.author;
-
-      const bodyContainer = document.getElementById('readerBodyContainer');
-      bodyContainer.innerHTML = '';
-
-      if (book.pdfUrl && book.pdfUrl.length > 5) {
-        document.getElementById('pageIndicator').style.display = 'none';
-        bodyContainer.innerHTML = `
-          <div class="w-full h-full flex flex-col items-center justify-center bg-black/20 p-2 sm:p-4 rounded-2xl">
-            <iframe src="${escapeHtml(book.pdfUrl)}" class="w-full h-full rounded-xl shadow-2xl bg-white" title="Leitor de PDF"></iframe>
-          </div>
-        `;
-      } else if (book.pages && book.pages.length > 0) {
-        document.getElementById('pageIndicator').style.display = 'inline-block';
-        state.currentPage = 1;
-        state.totalPages = book.pages.length;
-
-        bodyContainer.innerHTML = `
-          <div id="bookPageContainer" class="page-flip w-full h-full max-w-4xl bg-[#F9F3EA] text-[#2c221a] p-6 sm:p-16 rounded-2xl shadow-2xl border-l-8 border-[#102820] flex flex-col justify-between overflow-y-auto">
-            <div class="border-b border-[#dcd0bc] pb-4 mb-6 flex justify-between items-center shrink-0">
-              <span class="font-serif italic text-sm text-[#8A6240] truncate pr-2">${escapeHtml(book.title)}</span>
-              <span class="text-xs text-gray-500 font-mono shrink-0" id="topPageNum">1</span>
+    <!-- MODAL: DESPESA -->
+    <div id="modal-expense" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="azulejo w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Lançar Nova Despesa</h3>
+                <button onclick="toggleExpenseModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
+            <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Descrição</label>
+                    <input type="text" id="exp-desc" required placeholder="Ex: Pagamento de Fornecedor" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Valor (R$)</label>
+                        <input type="number" step="0.01" id="exp-amount" required placeholder="250.00" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Categoria</label>
+                        <select id="exp-category" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                            <option value="Aluguel">Aluguel</option>
+                            <option value="Salários">Salários</option>
+                            <option value="Fornecedores">Fornecedores</option>
+                            <option value="Energia/Água">Energia/Água</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Vencimento</label>
+                        <input type="date" id="exp-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="exp-status" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                            <option value="paid">Pago (Debitar Caixa)</option>
+                            <option value="pending">Pendente (A Pagar)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="toggleExpenseModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md">Confirmar Despesa</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <div id="pageContentText" class="flex-1 font-serif text-lg sm:text-2xl leading-relaxed space-y-4 my-auto"></div>
-
-            <div class="pt-6 border-t border-[#dcd0bc] flex justify-between items-center mt-6 shrink-0">
-              <button onclick="changePage(-1)" class="px-5 py-2.5 bg-[#4C6444] text-white rounded-xl text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-2 shadow">
-                <i data-lucide="chevron-left" class="w-4 h-4"></i><span>Anterior</span>
-              </button>
-              <span id="bottomPageNum" class="text-xs text-gray-600 font-bold">1 / ${state.totalPages}</span>
-              <button onclick="changePage(1)" class="px-5 py-2.5 bg-[#4C6444] text-white rounded-xl text-sm font-medium hover:bg-[#394c33] transition flex items-center space-x-2 shadow">
-                <span>Próxima</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
-              </button>
+    <!-- MODAL: SOLICITAR EMPRÉSTIMO -->
+    <div id="modal-loan" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="azulejo w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Solicitar / Registrar Empréstimo</h3>
+                <button onclick="toggleLoanModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-          </div>
-        `;
-        updateReaderPageContent();
-      } else {
-        bodyContainer.innerHTML = `<div class="text-center text-white p-8">O conteúdo desta obra ainda não está disponível para leitura.</div>`;
-      }
+            <form id="form-loan" onsubmit="handleSaveLoan(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Instituição Credora</label>
+                    <input type="text" id="loan-lender" required placeholder="Ex: Banco Financeiro S.A." class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Valor Solicitado (R$)</label>
+                    <input type="number" step="0.01" id="loan-amount" required placeholder="Ex: 5000.00" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-brand-700">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Taxa de Juros Total (%)</label>
+                        <input type="number" step="0.1" id="loan-rate" value="10" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nº de Parcelas</label>
+                        <input type="number" id="loan-installments" value="6" min="1" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Data de Contratação</label>
+                    <input type="date" id="loan-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="toggleLoanModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md">Contratar Empréstimo</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-      document.getElementById('pdfReaderModal').classList.remove('hidden');
-      document.getElementById('closeReaderBtn').focus();
-    }
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        let state = {
+            currentRole: 'company',
+            activeCompanyId: null,
+            companies: [],
+            transactions: [],
+            loans: []
+        };
 
-    function closePdfReader() {
-      document.getElementById('pdfReaderModal').classList.add('hidden');
-      document.getElementById('readerBodyContainer').innerHTML = '';
-    }
+        let chartInstance = null;
 
-    function changePage(direction) {
-      const newPage = state.currentPage + direction;
-      if (newPage < 1 || newPage > state.totalPages) return;
+        const DEFAULT_STATE = {
+            currentRole: 'company',
+            activeCompanyId: 'comp_1',
+            companies: [
+                { id: 'comp_1', name: 'Alpha Inovações LTDA', segment: 'Tecnologia', initialCapital: 10000.00, createdAt: new Date().toISOString() },
+                { id: 'comp_2', name: 'Vanguard Comércio S.A.', segment: 'Varejo', initialCapital: 25000.00, createdAt: new Date().toISOString() }
+            ],
+            transactions: [
+                { id: 'tx_1', companyId: 'comp_1', type: 'income', description: 'Venda de Software SaaS', amount: 5000.00, category: 'Vendas', date: new Date().toISOString().split('T')[0], status: 'received' },
+                { id: 'tx_2', companyId: 'comp_1', type: 'expense', description: 'Aluguel de Escritório', amount: 1500.00, category: 'Aluguel', date: new Date().toISOString().split('T')[0], status: 'paid' }
+            ],
+            loans: []
+        };
 
-      const container = document.getElementById('bookPageContainer');
-      if (!container) return;
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            initChart();
+            render();
+            lucide.createIcons();
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(inp => inp.value = today);
+        });
 
-      container.classList.add('flipping');
+        function loadState() {
+            const saved = localStorage.getItem('ADM_APP_STATE_V2');
+            if (saved) {
+                try { state = JSON.parse(saved); } catch(e) { state = DEFAULT_STATE; }
+            } else {
+                state = DEFAULT_STATE;
+                saveState();
+            }
+        }
 
-      setTimeout(() => {
-        state.currentPage = newPage;
-        updateReaderPageContent();
-        container.classList.remove('flipping');
-      }, 300);
-    }
+        function saveState() {
+            localStorage.setItem('ADM_APP_STATE_V2', JSON.stringify(state));
+        }
 
-    function updateReaderPageContent() {
-      const book = state.currentReadingBook;
-      const text = book.pages && book.pages[state.currentPage - 1] ? book.pages[state.currentPage - 1] : `Página ${state.currentPage}`;
-      
-      const contentElem = document.getElementById('pageContentText');
-      if (contentElem) {
-        contentElem.innerHTML = `<p>${escapeHtml(text).replace(/\n\n/g, '</p><p>')}</p>`;
-      }
-      const topNum = document.getElementById('topPageNum');
-      if (topNum) topNum.textContent = state.currentPage;
+        function resetData() {
+            if (confirm("Tem certeza que deseja resetar todos os dados da simulação?")) {
+                localStorage.removeItem('ADM_APP_STATE_V2');
+                state = DEFAULT_STATE;
+                saveState();
+                render();
+            }
+        }
 
-      const botNum = document.getElementById('bottomPageNum');
-      if (botNum) botNum.textContent = `${state.currentPage} / ${state.totalPages}`;
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebar-backdrop').classList.remove('hidden');
+        }
 
-      const indicator = document.getElementById('pageIndicator');
-      if (indicator) indicator.textContent = `Página ${state.currentPage} de ${state.totalPages}`;
-      
-      if(typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
-    }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebar-backdrop').classList.add('hidden');
+        }
 
-    function openPhotoModal(url, title, desc) {
-      document.getElementById('modalPhotoImg').src = decodeURIComponent(url);
-      document.getElementById('modalPhotoTitle').textContent = decodeURIComponent(title);
-      document.getElementById('modalPhotoDesc').textContent = decodeURIComponent(desc);
-      document.getElementById('photoModal').classList.remove('hidden');
-    }
+        function nav(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(`sec-${sectionId}`);
+            if (target) target.classList.remove('hidden');
 
-    function closePhotoModal() {
-      document.getElementById('photoModal').classList.add('hidden');
-      document.getElementById('modalPhotoImg').src = '';
-    }
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-brand-900', 'text-white');
+                btn.classList.add('text-slate-300');
+            });
+            const activeBtn = document.getElementById(`nav-${sectionId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-900', 'text-white');
+                activeBtn.classList.remove('text-slate-300');
+            }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      render();
-    });
-  </script>
+            closeSidebar();
+            render();
+        }
+
+        function setRole(role) {
+            state.currentRole = role;
+            const btnCompany = document.getElementById('btn-role-company');
+            const btnGeneral = document.getElementById('btn-role-general');
+
+            if (role === 'company') {
+                btnCompany.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm";
+                btnGeneral.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900";
+            } else {
+                btnGeneral.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm";
+                btnCompany.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900";
+            }
+
+            saveState();
+            render();
+        }
+
+        function changeActiveCompany(id) {
+            state.activeCompanyId = id;
+            saveState();
+            render();
+        }
+
+        function render() {
+            populateCompanySelector();
+            const company = state.companies.find(c => c.id === state.activeCompanyId) || state.companies[0];
+            if (!company) return;
+
+            renderDashboard(company);
+            renderCompaniesGrid();
+            renderIncomesTable();
+            renderExpensesTable();
+            renderPayablesReceivables();
+            renderLoans();
+            renderEquity(company);
+            renderReports(company);
+            renderAIBenchmark(company);
+
+            lucide.createIcons();
+        }
+
+        function populateCompanySelector() {
+            const selector = document.getElementById('company-selector');
+            selector.innerHTML = '';
+            state.companies.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                if (c.id === state.activeCompanyId) opt.selected = true;
+                selector.appendChild(opt);
+            });
+        }
+
+        function getCompanyMetrics(companyId) {
+            const company = state.companies.find(c => c.id === companyId);
+            const initialCapital = company ? company.initialCapital : 0;
+
+            const compTxs = state.transactions.filter(t => t.companyId === companyId);
+            const compLoans = state.loans.filter(l => l.companyId === companyId);
+
+            const receivedIncomes = compTxs.filter(t => t.type === 'income' && t.status === 'received').reduce((s, t) => s + t.amount, 0);
+            const pendingIncomes = compTxs.filter(t => t.type === 'income' && t.status === 'pending').reduce((s, t) => s + t.amount, 0);
+
+            const paidExpenses = compTxs.filter(t => t.type === 'expense' && t.status === 'paid').reduce((s, t) => s + t.amount, 0);
+            const pendingExpenses = compTxs.filter(t => t.type === 'expense' && t.status === 'pending').reduce((s, t) => s + t.amount, 0);
+
+            const totalLoanPrincipalReceived = compLoans.reduce((s, l) => s + l.amount, 0);
+            const totalLoanOutstanding = compLoans.reduce((s, l) => s + l.outstanding, 0);
+
+            const currentCash = initialCapital + receivedIncomes + totalLoanPrincipalReceived - paidExpenses;
+            const operatingResult = receivedIncomes - paidExpenses;
+
+            return {
+                initialCapital,
+                receivedIncomes,
+                pendingIncomes,
+                paidExpenses,
+                pendingExpenses,
+                totalLoanOutstanding,
+                currentCash,
+                operatingResult
+            };
+        }
+
+        function renderDashboard(company) {
+            const metrics = getCompanyMetrics(company.id);
+
+            document.getElementById('dash-balance').textContent = formatBRL(metrics.currentCash);
+            document.getElementById('dash-initial-capital').textContent = formatBRL(metrics.initialCapital);
+            document.getElementById('dash-incomes').textContent = formatBRL(metrics.receivedIncomes);
+            document.getElementById('dash-expenses').textContent = formatBRL(metrics.paidExpenses);
+            document.getElementById('dash-loans-due').textContent = formatBRL(metrics.totalLoanOutstanding);
+
+            updateChart(metrics.receivedIncomes, metrics.paidExpenses);
+
+            const recentList = document.getElementById('dash-recent-list');
+            recentList.innerHTML = '';
+            const txs = state.transactions.filter(t => t.companyId === company.id).slice(-4).reverse();
+
+            if (txs.length === 0) {
+                recentList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhuma movimentação registrada.</p>';
+            } else {
+                txs.forEach(t => {
+                    const isInc = t.type === 'income';
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs";
+                    div.innerHTML = `
+                        <div class="flex items-center gap-2.5">
+                            <div class="p-2 rounded-lg ${isInc ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                <i data-lucide="${isInc ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-800">${t.description}</p>
+                                <p class="text-[10px] text-slate-400">${t.date}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold ${isInc ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${isInc ? '+' : '-'} ${formatBRL(t.amount)}
+                        </span>
+                    `;
+                    recentList.appendChild(div);
+                });
+            }
+        }
+
+        function renderCompaniesGrid() {
+            const grid = document.getElementById('companies-grid');
+            grid.innerHTML = '';
+
+            state.companies.forEach(c => {
+                const metrics = getCompanyMetrics(c.id);
+                const isSelected = c.id === state.activeCompanyId;
+                const div = document.createElement('div');
+                div.className = `azulejo p-5 space-y-4 ${isSelected ? 'border-2 border-brand-500' : ''}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base">${c.name}</h4>
+                            <span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 font-medium text-slate-600">${c.segment}</span>
+                        </div>
+                        ${isSelected ? '<span class="text-[10px] bg-brand-100 text-brand-800 font-bold px-2 py-1 rounded-full">Ativa</span>' : ''}
+                    </div>
+
+                    <div class="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                        <div class="flex justify-between">
+                            <span>Saldo em Caixa:</span>
+                            <span class="font-bold text-slate-900">${formatBRL(metrics.currentCash)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Capital Inicial:</span>
+                            <span>${formatBRL(c.initialCapital)}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="changeActiveCompany('${c.id}')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl text-xs font-bold transition">
+                            ${isSelected ? 'Empresa Selecionada' : 'Gerenciar Empresa'}
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function renderIncomesTable() {
+            const tbody = document.getElementById('incomes-table-body');
+            tbody.innerHTML = '';
+            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'income');
+
+            if (txs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma receita registrada.</td></tr>';
+                return;
+            }
+
+            txs.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4 font-semibold text-slate-800">${t.description}</td>
+                    <td class="p-3 sm:p-4 text-slate-600">${t.category}</td>
+                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
+                    <td class="p-3 sm:p-4 font-bold text-emerald-600">${formatBRL(t.amount)}</td>
+                    <td class="p-3 sm:p-4">
+                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg ${t.status === 'received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${t.status === 'received' ? 'Recebido' : 'Pendente'}
+                        </span>
+                    </td>
+                    <td class="p-3 sm:p-4 text-right space-x-1">
+                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
+                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expenses-table-body');
+            tbody.innerHTML = '';
+            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'expense');
+
+            if (txs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma despesa registrada.</td></tr>';
+                return;
+            }
+
+            txs.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="p-3 sm:p-4 font-semibold text-slate-800">${t.description}</td>
+                    <td class="p-3 sm:p-4 text-slate-600">${t.category}</td>
+                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
+                    <td class="p-3 sm:p-4 font-bold text-rose-600">${formatBRL(t.amount)}</td>
+                    <td class="p-3 sm:p-4">
+                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg ${t.status === 'paid' ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-800'}">
+                            ${t.status === 'paid' ? 'Pago' : 'Pendente'}
+                        </span>
+                    </td>
+                    <td class="p-3 sm:p-4 text-right space-x-1">
+                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
+                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPayablesReceivables() {
+            const recList = document.getElementById('receivables-list');
+            const payList = document.getElementById('payables-list');
+            recList.innerHTML = '';
+            payList.innerHTML = '';
+
+            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.status === 'pending');
+            const receivables = txs.filter(t => t.type === 'income');
+            const payables = txs.filter(t => t.type === 'expense');
+
+            document.getElementById('total-receivables').textContent = formatBRL(receivables.reduce((s, t) => s + t.amount, 0));
+            document.getElementById('total-payables').textContent = formatBRL(payables.reduce((s, t) => s + t.amount, 0));
+
+            if (receivables.length === 0) {
+                recList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhum recebimento pendente.</p>';
+            } else {
+                receivables.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex justify-between items-center text-xs";
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-slate-800">${t.description}</p>
+                            <p class="text-[10px] text-slate-500">Vencimento: ${t.date}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-emerald-700">${formatBRL(t.amount)}</p>
+                            <button onclick="settleTx('${t.id}')" class="text-[10px] text-emerald-600 font-bold hover:underline">Confirmar Recebimento</button>
+                        </div>
+                    `;
+                    recList.appendChild(div);
+                });
+            }
+
+            if (payables.length === 0) {
+                payList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhum pagamento pendente.</p>';
+            } else {
+                payables.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-rose-50/50 border border-rose-100 rounded-xl flex justify-between items-center text-xs";
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-slate-800">${t.description}</p>
+                            <p class="text-[10px] text-slate-500">Vencimento: ${t.date}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-rose-700">${formatBRL(t.amount)}</p>
+                            <button onclick="settleTx('${t.id}')" class="text-[10px] text-rose-600 font-bold hover:underline">Dar Baixa (Pagar)</button>
+                        </div>
+                    `;
+                    payList.appendChild(div);
+                });
+            }
+        }
+
+        function renderLoans() {
+            const container = document.getElementById('loans-container');
+            container.innerHTML = '';
+            const loans = state.loans.filter(l => l.companyId === state.activeCompanyId);
+
+            if (loans.length === 0) {
+                container.innerHTML = '<div class="col-span-full azulejo p-8 text-center text-xs text-slate-400">Nenhum empréstimo ativado para esta empresa.</div>';
+                return;
+            }
+
+            loans.forEach(l => {
+                const div = document.createElement('div');
+                div.className = "azulejo p-5 space-y-4";
+                div.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base">${l.lender}</h4>
+                            <span class="text-[10px] text-slate-400">Contratado em ${l.date}</span>
+                        </div>
+                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg bg-amber-100 text-amber-800">Em Aberto</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block">Valor Original</span>
+                            <span class="font-bold text-slate-800">${formatBRL(l.amount)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Saldo Devedor</span>
+                            <span class="font-bold text-rose-600">${formatBRL(l.outstanding)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Parcelas</span>
+                            <span class="font-semibold text-slate-700">${l.installmentsPaid} / ${l.installmentsTotal}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Valor Parcela</span>
+                            <span class="font-semibold text-slate-700">${formatBRL(l.installmentAmount)}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="payLoanInstallment('${l.id}')" ${l.outstanding <= 0 ? 'disabled' : ''} class="w-full py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                            Amortizar / Pagar Parcela (${formatBRL(l.installmentAmount)})
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderEquity(company) {
+            const metrics = getCompanyMetrics(company.id);
+
+            document.getElementById('bp-cash').textContent = formatBRL(metrics.currentCash);
+            document.getElementById('bp-receivables').textContent = formatBRL(metrics.pendingIncomes);
+            document.getElementById('bp-fixed-assets').textContent = formatBRL(0);
+
+            const totalAssets = metrics.currentCash + metrics.pendingIncomes;
+            document.getElementById('bp-total-assets').textContent = formatBRL(totalAssets);
+
+            document.getElementById('bp-payables').textContent = formatBRL(metrics.pendingExpenses);
+            document.getElementById('bp-loans').textContent = formatBRL(metrics.totalLoanOutstanding);
+            
+            document.getElementById('bp-capital').textContent = formatBRL(metrics.initialCapital);
+            document.getElementById('bp-retained-earnings').textContent = formatBRL(metrics.operatingResult);
+
+            const totalLiabilitiesEquity = metrics.pendingExpenses + metrics.totalLoanOutstanding + metrics.initialCapital + metrics.operatingResult;
+            document.getElementById('bp-total-liabilities-equity').textContent = formatBRL(totalLiabilitiesEquity);
+        }
+
+        function renderReports(company) {
+            const metrics = getCompanyMetrics(company.id);
+            document.getElementById('dre-company-name').textContent = company.name.toUpperCase();
+            document.getElementById('dre-gross-revenue').textContent = formatBRL(metrics.receivedIncomes);
+            document.getElementById('dre-operating-expenses').textContent = formatBRL(metrics.paidExpenses);
+
+            const opResultEl = document.getElementById('dre-operating-result');
+            opResultEl.textContent = formatBRL(metrics.operatingResult);
+            opResultEl.className = metrics.operatingResult >= 0 ? "text-emerald-600 font-extrabold" : "text-rose-600 font-extrabold";
+        }
+
+        function renderAIBenchmark(company) {
+            const metrics = getCompanyMetrics(company.id);
+            const badge = document.getElementById('insight-badge');
+            const text = document.getElementById('insight-text');
+
+            if (metrics.currentCash < 0) {
+                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800";
+                badge.textContent = "Alerta de Caixa Negativo";
+                text.textContent = "Sua empresa está com saldo de caixa negativo. Considere reduzir custos ou antecipar recebíveis.";
+            } else if (metrics.totalLoanOutstanding > metrics.initialCapital * 1.5) {
+                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
+                badge.textContent = "Alerta de Endividamento";
+                text.textContent = "O passivo bancário está elevado em relação ao capital. Recomenda-se amortizar parcelas.";
+            } else if (metrics.operatingResult > 0) {
+                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
+                badge.textContent = "Operação Lucrativa";
+                text.textContent = "Excelente! As receitas estão superando as despesas operacionais.";
+            } else {
+                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700";
+                badge.textContent = "Operação Estável";
+                text.textContent = "Continue monitorando os vencimentos e lançamentos.";
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Receitas Efetivadas', 'Despesas Pagas'],
+                    datasets: [{
+                        label: 'Valores (R$)',
+                        data: [0, 0],
+                        backgroundColor: ['#10b981', '#f43f5e'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateChart(inc, exp) {
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [inc, exp];
+                chartInstance.update();
+            }
+        }
+
+        function toggleCompanyModal(show) { document.getElementById('modal-company').classList.toggle('hidden', !show); }
+        function toggleIncomeModal(show) { document.getElementById('modal-income').classList.toggle('hidden', !show); }
+        function toggleExpenseModal(show) { document.getElementById('modal-expense').classList.toggle('hidden', !show); }
+        function toggleLoanModal(show) { document.getElementById('modal-loan').classList.toggle('hidden', !show); }
+
+        function handleSaveCompany(e) {
+            e.preventDefault();
+            const newComp = {
+                id: 'comp_' + Date.now(),
+                name: document.getElementById('comp-name').value,
+                segment: document.getElementById('comp-segment').value,
+                initialCapital: parseFloat(document.getElementById('comp-capital').value) || 0,
+                createdAt: new Date().toISOString()
+            };
+            state.companies.push(newComp);
+            state.activeCompanyId = newComp.id;
+            saveState();
+            toggleCompanyModal(false);
+            e.target.reset();
+            render();
+        }
+
+        function handleSaveIncome(e) {
+            e.preventDefault();
+            const tx = {
+                id: 'tx_' + Date.now(),
+                companyId: state.activeCompanyId,
+                type: 'income',
+                description: document.getElementById('inc-desc').value,
+                amount: parseFloat(document.getElementById('inc-amount').value) || 0,
+                category: document.getElementById('inc-category').value,
+                date: document.getElementById('inc-date').value,
+                status: document.getElementById('inc-status').value
+            };
+            state.transactions.push(tx);
+            saveState();
+            toggleIncomeModal(false);
+            e.target.reset();
+            render();
+        }
+
+        function handleSaveExpense(e) {
+            e.preventDefault();
+            const tx = {
+                id: 'tx_' + Date.now(),
+                companyId: state.activeCompanyId,
+                type: 'expense',
+                description: document.getElementById('exp-desc').value,
+                amount: parseFloat(document.getElementById('exp-amount').value) || 0,
+                category: document.getElementById('exp-category').value,
+                date: document.getElementById('exp-date').value,
+                status: document.getElementById('exp-status').value
+            };
+            state.transactions.push(tx);
+            saveState();
+            toggleExpenseModal(false);
+            e.target.reset();
+            render();
+        }
+
+        function handleSaveLoan(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+            const rate = parseFloat(document.getElementById('loan-rate').value) || 0;
+            const installments = parseInt(document.getElementById('loan-installments').value) || 1;
+
+            const totalRepayable = amount * (1 + (rate / 100));
+            const installmentAmount = totalRepayable / installments;
+
+            const loan = {
+                id: 'loan_' + Date.now(),
+                companyId: state.activeCompanyId,
+                lender: document.getElementById('loan-lender').value,
+                amount: amount,
+                totalRepayable: totalRepayable,
+                outstanding: totalRepayable,
+                installmentsTotal: installments,
+                installmentsPaid: 0,
+                installmentAmount: installmentAmount,
+                date: document.getElementById('loan-date').value
+            };
+
+            state.loans.push(loan);
+            saveState();
+            toggleLoanModal(false);
+            e.target.reset();
+            render();
+        }
+
+        function settleTx(id) {
+            const tx = state.transactions.find(t => t.id === id);
+            if (tx) {
+                tx.status = tx.type === 'income' ? 'received' : 'paid';
+                saveState();
+                render();
+            }
+        }
+
+        function deleteTx(id) {
+            state.transactions = state.transactions.filter(t => t.id !== id);
+            saveState();
+            render();
+        }
+
+        function payLoanInstallment(loanId) {
+            const loan = state.loans.find(l => l.id === loanId);
+            if (loan && loan.outstanding > 0) {
+                const metrics = getCompanyMetrics(loan.companyId);
+                if (metrics.currentCash < loan.installmentAmount) {
+                    alert("Saldo em caixa insuficiente para pagar esta parcela de empréstimo.");
+                    return;
+                }
+
+                state.transactions.push({
+                    id: 'tx_' + Date.now(),
+                    companyId: loan.companyId,
+                    type: 'expense',
+                    description: `Parcela Empréstimo - ${loan.lender}`,
+                    amount: loan.installmentAmount,
+                    category: 'Outros',
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'paid'
+                });
+
+                loan.outstanding = Math.max(0, loan.outstanding - loan.installmentAmount);
+                loan.installmentsPaid += 1;
+
+                saveState();
+                render();
+            }
+        }
+
+        function formatBRL(val) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+        }
+    </script>
 </body>
 </html>

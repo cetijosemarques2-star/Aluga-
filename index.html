@@ -31,7 +31,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom Scrollbar & Utility Classes -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -84,7 +83,7 @@
 
             <!-- NAVIGATION ITEMS -->
             <nav class="p-3 space-y-1 text-sm font-medium">
-                <button onclick="nav('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                <button onclick="nav('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white bg-brand-900 font-semibold">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 text-brand-500"></i> Visão Geral
                 </button>
                 <button onclick="nav('companies')" id="nav-companies" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
@@ -151,7 +150,6 @@
                 <!-- SELETOR DE EMPRESA -->
                 <div class="relative min-w-[140px] sm:min-w-[180px]">
                     <select id="company-selector" onchange="changeActiveCompany(this.value)" class="w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-slate-800">
-                        <!-- Populated via JS -->
                     </select>
                 </div>
             </div>
@@ -176,10 +174,7 @@
 
             <!-- SEÇÃO 1: DASHBOARD -->
             <section id="sec-dashboard" class="space-y-6">
-                <!-- METRIC AZULEJOS CARDS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                    
-                    <!-- SALDO AZULEJO (PRIMARY BRAND) -->
                     <div class="azulejo-primary p-5 flex flex-col justify-between relative overflow-hidden shadow-md">
                         <div class="flex justify-between items-start">
                             <div>
@@ -196,7 +191,6 @@
                         </div>
                     </div>
 
-                    <!-- RECEITAS AZULEJO -->
                     <div class="azulejo p-5 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
                             <div>
@@ -210,7 +204,6 @@
                         <p class="text-xs text-slate-500 mt-4">Total acumulado de entradas</p>
                     </div>
 
-                    <!-- DESPESAS AZULEJO -->
                     <div class="azulejo p-5 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
                             <div>
@@ -224,7 +217,6 @@
                         <p class="text-xs text-slate-500 mt-4">Total acumulado de saídas</p>
                     </div>
 
-                    <!-- PENDÊNCIAS AZULEJO -->
                     <div class="azulejo p-5 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
                             <div>
@@ -239,9 +231,7 @@
                     </div>
                 </div>
 
-                <!-- CHARTS & SUMMARY AZULEJOS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- CHART AZULEJO -->
                     <div class="azulejo p-5 lg:col-span-2">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-bold text-slate-900 text-base">Fluxo de Entradas vs Saídas</h3>
@@ -252,17 +242,15 @@
                         </div>
                     </div>
 
-                    <!-- QUICK TRANSACTIONS LIST AZULEJO -->
                     <div class="azulejo p-5 flex flex-col">
                         <h3 class="font-bold text-slate-900 text-base mb-3">Últimas Movimentações</h3>
                         <div id="dash-recent-list" class="flex-1 space-y-3 overflow-y-auto max-h-64 pr-1">
-                            <!-- Populated via JS -->
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO 2: EMPRESAS (CADASTRO E GESTÃO) -->
+            <!-- SEÇÃO 2: EMPRESAS -->
             <section id="sec-companies" class="space-y-6 hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
@@ -274,9 +262,7 @@
                     </button>
                 </div>
 
-                <!-- GRID DE EMPRESAS -->
                 <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Populated via JS -->
                 </div>
             </section>
 
@@ -292,7 +278,6 @@
                     </button>
                 </div>
 
-                <!-- LISTA AZULEJO -->
                 <div class="azulejo overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs sm:text-sm">
@@ -307,7 +292,6 @@
                                 </tr>
                             </thead>
                             <tbody id="incomes-table-body" class="divide-y divide-slate-100">
-                                <!-- Populated via JS -->
                             </tbody>
                         </table>
                     </div>
@@ -326,7 +310,6 @@
                     </button>
                 </div>
 
-                <!-- LISTA AZULEJO -->
                 <div class="azulejo overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs sm:text-sm">
@@ -337,10 +320,10 @@
                                     <th class="p-3 sm:p-4">Vencimento</th>
                                     <th class="p-3 sm:p-4">Valor</th>
                                     <th class="p-3 sm:p-4">Status</th>
-                                    <th class="p-3 sm:p-4 text-right                                </tr>
+                                    <th class="p-3 sm:p-4 text-right">Ações</th>
+                                </tr>
                             </thead>
                             <tbody id="expenses-table-body" class="divide-y divide-slate-100">
-                                <!-- Populated via JS -->
                             </tbody>
                         </table>
                     </div>
@@ -350,8 +333,6 @@
             <!-- SEÇÃO 5: CONTAS A PAGAR / RECEBER -->
             <section id="sec-payables" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <!-- CONTAS A RECEBER -->
                     <div class="azulejo p-5 space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                             <h3 class="font-bold text-slate-900 flex items-center gap-2">
@@ -360,11 +341,9 @@
                             <span id="total-receivables" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
                         </div>
                         <div id="receivables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                            <!-- Populated via JS -->
                         </div>
                     </div>
 
-                    <!-- CONTAS A PAGAR -->
                     <div class="azulejo p-5 space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                             <h3 class="font-bold text-slate-900 flex items-center gap-2">
@@ -373,10 +352,8 @@
                             <span id="total-payables" class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
                         </div>
                         <div id="payables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                            <!-- Populated via JS -->
                         </div>
                     </div>
-
                 </div>
             </section>
 
@@ -393,7 +370,6 @@
                 </div>
 
                 <div id="loans-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <!-- Populated via JS -->
                 </div>
             </section>
 
@@ -405,7 +381,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- ATIVOS -->
                     <div class="azulejo p-5 space-y-4">
                         <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
                             <span>ATIVOS (Bens e Direitos)</span>
@@ -431,7 +406,6 @@
                         </div>
                     </div>
 
-                    <!-- PASSIVOS & PL -->
                     <div class="azulejo p-5 space-y-4">
                         <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
                             <span>PASSIVOS & PATRIMÔNIO LÍQUIDO</span>
@@ -475,7 +449,6 @@
                     </button>
                 </div>
 
-                <!-- DRE SHEET AZULEJO -->
                 <div class="azulejo p-6 sm:p-8 space-y-4 max-w-3xl mx-auto">
                     <div class="border-b border-slate-200 pb-4 text-center">
                         <h2 id="dre-company-name" class="text-xl font-bold text-slate-900">NOME DA EMPRESA</h2>
@@ -502,7 +475,7 @@
         </main>
     </div>
 
-    <!-- MODAL: CADASTRO DE EMPRESA -->
+    <!-- MODAIS -->
     <div id="modal-company" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="azulejo w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
@@ -530,7 +503,6 @@
         </div>
     </div>
 
-    <!-- MODAL: RECEITA -->
     <div id="modal-income" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="azulejo w-full max-w-md p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -578,7 +550,6 @@
         </div>
     </div>
 
-    <!-- MODAL: DESPESA -->
     <div id="modal-expense" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="azulejo w-full max-w-md p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -628,7 +599,6 @@
         </div>
     </div>
 
-    <!-- MODAL: SOLICITAR EMPRÉSTIMO -->
     <div id="modal-loan" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="azulejo w-full max-w-md p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -666,7 +636,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         let state = {
             currentRole: 'company',
@@ -741,12 +711,12 @@
             if (target) target.classList.remove('hidden');
 
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-brand-900', 'text-white');
+                btn.classList.remove('bg-brand-900', 'text-white', 'font-semibold');
                 btn.classList.add('text-slate-300');
             });
             const activeBtn = document.getElementById(`nav-${sectionId}`);
             if (activeBtn) {
-                activeBtn.classList.add('bg-brand-900', 'text-white');
+                activeBtn.classList.add('bg-brand-900', 'text-white', 'font-semibold');
                 activeBtn.classList.remove('text-slate-300');
             }
 

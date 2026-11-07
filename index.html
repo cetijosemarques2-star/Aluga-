@@ -95,6 +95,9 @@
                 <button onclick="nav('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
                     <i data-lucide="arrow-down-left" class="w-5 h-5 text-rose-400"></i> Despesas
                 </button>
+                <button onclick="nav('investments')" id="nav-investments" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-amber-400"></i> Investimentos & Lucro
+                </button>
                 <button onclick="nav('payables')" id="nav-payables" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
                     <i data-lucide="receipt" class="w-5 h-5 text-brand-500"></i> Contas a Pagar / Receber
                 </button>
@@ -115,7 +118,7 @@
                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar Simulação
             </button>
             <div class="text-center text-[10px] text-slate-500">
-                ADM v2.0 • Modelo Educacional
+                ADM v2.5 • Módulo Investimentos
             </div>
         </div>
     </aside>
@@ -137,7 +140,6 @@
 
             <!-- CONTROLS: PERFIL & EMPRESA SELEÇÃO -->
             <div class="flex items-center gap-2 sm:gap-3">
-                <!-- SELETOR DE PERFIL -->
                 <div class="bg-slate-100 p-1 rounded-xl flex border border-slate-200">
                     <button onclick="setRole('company')" id="btn-role-company" class="px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm">
                         Admin Empresa
@@ -147,7 +149,6 @@
                     </button>
                 </div>
 
-                <!-- SELETOR DE EMPRESA -->
                 <div class="relative min-w-[140px] sm:min-w-[180px]">
                     <select id="company-selector" onchange="changeActiveCompany(this.value)" class="w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-slate-800">
                     </select>
@@ -224,7 +225,7 @@
                                 <h3 id="dash-loans-due" class="text-2xl sm:text-3xl font-bold mt-1 text-amber-600">R$ 0,00</h3>
                             </div>
                             <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
-                                <i data-lucide="building-bank" class="w-6 h-6"></i>
+                                <i data-lucide="landmark" class="w-6 h-6"></i>
                             </div>
                         </div>
                         <p class="text-xs text-slate-500 mt-4">Passivos bancários em aberto</p>
@@ -257,13 +258,11 @@
                         <h3 class="text-lg font-bold text-slate-900">Empresas Cadastradas</h3>
                         <p class="text-xs text-slate-500">Gerencie e cadastre empresas no simulador</p>
                     </div>
-                    <button onclick="toggleCompanyModal(true)" class="btn-role-general-only w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                    <button onclick="toggleCompanyModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Nova Empresa
                     </button>
                 </div>
-
-                <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                </div>
+                <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
             </section>
 
             <!-- SEÇÃO 3: RECEITAS -->
@@ -277,7 +276,6 @@
                         <i data-lucide="plus" class="w-4 h-4"></i> Nova Receita
                     </button>
                 </div>
-
                 <div class="azulejo overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs sm:text-sm">
@@ -291,8 +289,7 @@
                                     <th class="p-3 sm:p-4 text-right">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="incomes-table-body" class="divide-y divide-slate-100">
-                            </tbody>
+                            <tbody id="incomes-table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -309,7 +306,6 @@
                         <i data-lucide="plus" class="w-4 h-4"></i> Nova Despesa
                     </button>
                 </div>
-
                 <div class="azulejo overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs sm:text-sm">
@@ -323,14 +319,28 @@
                                     <th class="p-3 sm:p-4 text-right">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="expenses-table-body" class="divide-y divide-slate-100">
-                            </tbody>
+                            <tbody id="expenses-table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO 5: CONTAS A PAGAR / RECEBER -->
+            <!-- SEÇÃO 5: INVESTIMENTOS & LUCRO -->
+            <section id="sec-investments" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Proetos de Investimento & Retorno</h3>
+                        <p class="text-xs text-slate-500">Aporte capital em qualquer valor, projete custos associados e acompanhe o lucro líquido</p>
+                    </div>
+                    <button onclick="toggleInvestmentModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> Novo Investimento
+                    </button>
+                </div>
+
+                <div id="investments-container" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+            </section>
+
+            <!-- SEÇÃO 6: CONTAS A PAGAR / RECEBER -->
             <section id="sec-payables" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="azulejo p-5 space-y-4">
@@ -340,8 +350,7 @@
                             </h3>
                             <span id="total-receivables" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
                         </div>
-                        <div id="receivables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                        </div>
+                        <div id="receivables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
                     </div>
 
                     <div class="azulejo p-5 space-y-4">
@@ -351,13 +360,12 @@
                             </h3>
                             <span id="total-payables" class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
                         </div>
-                        <div id="payables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
-                        </div>
+                        <div id="payables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- SEÇÃO 6: EMPRÉSTIMOS -->
+            <!-- SEÇÃO 7: EMPRÉSTIMOS -->
             <section id="sec-loans" class="space-y-6 hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
@@ -368,25 +376,21 @@
                         <i data-lucide="landmark" class="w-4 h-4"></i> Simular/Solicitar Empréstimo
                     </button>
                 </div>
-
-                <div id="loans-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                </div>
+                <div id="loans-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
             </section>
 
-            <!-- SEÇÃO 7: PATRIMÔNIO -->
+            <!-- SEÇÃO 8: PATRIMÔNIO -->
             <section id="sec-equity" class="space-y-6 hidden">
                 <div>
                     <h3 class="text-lg font-bold text-slate-900">Balanço Patrimonial</h3>
                     <p class="text-xs text-slate-500">Demonstração de bens (Ativos), obrigações (Passivos) e Patrimônio Líquido</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="azulejo p-5 space-y-4">
                         <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
                             <span>ATIVOS (Bens e Direitos)</span>
                             <span id="bp-total-assets">R$ 0,00</span>
                         </h4>
-
                         <div class="space-y-3 text-xs sm:text-sm">
                             <div class="font-semibold text-slate-700">Ativo Circulante</div>
                             <div class="flex justify-between pl-3 text-slate-600">
@@ -397,7 +401,6 @@
                                 <span>Contas a Receber</span>
                                 <span id="bp-receivables" class="font-medium">R$ 0,00</span>
                             </div>
-
                             <div class="font-semibold text-slate-700 pt-2">Ativo Não Circulante</div>
                             <div class="flex justify-between pl-3 text-slate-600">
                                 <span>Imobilizado & Máquinas (Estimado)</span>
@@ -411,7 +414,6 @@
                             <span>PASSIVOS & PATRIMÔNIO LÍQUIDO</span>
                             <span id="bp-total-liabilities-equity">R$ 0,00</span>
                         </h4>
-
                         <div class="space-y-3 text-xs sm:text-sm">
                             <div class="font-semibold text-slate-700">Passivo Circulante</div>
                             <div class="flex justify-between pl-3 text-slate-600">
@@ -422,7 +424,6 @@
                                 <span>Empréstimos Bancários</span>
                                 <span id="bp-loans" class="font-medium">R$ 0,00</span>
                             </div>
-
                             <div class="font-semibold text-slate-700 pt-2 border-t border-slate-100">Patrimônio Líquido</div>
                             <div class="flex justify-between pl-3 text-slate-600">
                                 <span>Capital Social Integralizado</span>
@@ -437,7 +438,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO 8: RELATÓRIOS (DRE) -->
+            <!-- SEÇÃO 9: RELATÓRIOS (DRE) -->
             <section id="sec-reports" class="space-y-6 hidden">
                 <div class="flex justify-between items-center no-print">
                     <div>
@@ -448,13 +449,11 @@
                         <i data-lucide="printer" class="w-4 h-4"></i> Imprimir DRE
                     </button>
                 </div>
-
                 <div class="azulejo p-6 sm:p-8 space-y-4 max-w-3xl mx-auto">
                     <div class="border-b border-slate-200 pb-4 text-center">
                         <h2 id="dre-company-name" class="text-xl font-bold text-slate-900">NOME DA EMPRESA</h2>
                         <p class="text-xs text-slate-500">Relatório Financeiro Operacional • DRE</p>
                     </div>
-
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between font-bold text-slate-800 border-b pb-1">
                             <span>(+) Receita Bruta de Vendas / Serviços</span>
@@ -599,6 +598,49 @@
         </div>
     </div>
 
+    <!-- MODAL DE INVESTIMENTO -->
+    <div id="modal-investment" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="azulejo w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Novo Projeto de Investimento</h3>
+                <button onclick="toggleInvestmentModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="form-investment" onsubmit="handleSaveInvestment(event)" class="space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nome do Investimento / Projeto</label>
+                    <input type="text" id="inv-name" required placeholder="Ex: Expansão da Linha de Produção, Nova Filial, etc." class="w-full p-2.5 border border-slate-300 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Valor do Aporte (R$)</label>
+                        <input type="number" step="0.01" id="inv-amount" required placeholder="Ex: 5000.00" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-amber-600">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Custos Iniciais Extras (R$)</label>
+                        <input type="number" step="0.01" id="inv-cost" value="0" placeholder="Ex: 500.00" class="w-full p-2.5 border border-slate-300 rounded-xl text-rose-600">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Receita Esperada (R$)</label>
+                        <input type="number" step="0.01" id="inv-return" required placeholder="Ex: 8500.00" class="w-full p-2.5 border border-slate-300 rounded-xl text-emerald-600 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Data Prevista</label>
+                        <input type="date" id="inv-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 italic bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    💡 Ao criar o investimento, serão geradas automaticamente as <b>Contas a Pagar</b> (Aporte + Custos) e a <b>Conta a Receber</b> (Retorno previsto). Após quitar os custos e receber o valor, o <b>Lucro Líquido</b> será consolidado no balanço!
+                </p>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="toggleInvestmentModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md">Simular & Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-loan" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
         <div class="azulejo w-full max-w-md p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -643,7 +685,8 @@
             activeCompanyId: null,
             companies: [],
             transactions: [],
-            loans: []
+            loans: [],
+            investments: []
         };
 
         let chartInstance = null;
@@ -659,7 +702,8 @@
                 { id: 'tx_1', companyId: 'comp_1', type: 'income', description: 'Venda de Software SaaS', amount: 5000.00, category: 'Vendas', date: new Date().toISOString().split('T')[0], status: 'received' },
                 { id: 'tx_2', companyId: 'comp_1', type: 'expense', description: 'Aluguel de Escritório', amount: 1500.00, category: 'Aluguel', date: new Date().toISOString().split('T')[0], status: 'paid' }
             ],
-            loans: []
+            loans: [],
+            investments: []
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -673,7 +717,7 @@
         });
 
         function loadState() {
-            const saved = localStorage.getItem('ADM_APP_STATE_V2');
+            const saved = localStorage.getItem('ADM_APP_STATE_V3');
             if (saved) {
                 try { state = JSON.parse(saved); } catch(e) { state = DEFAULT_STATE; }
             } else {
@@ -683,12 +727,12 @@
         }
 
         function saveState() {
-            localStorage.setItem('ADM_APP_STATE_V2', JSON.stringify(state));
+            localStorage.setItem('ADM_APP_STATE_V3', JSON.stringify(state));
         }
 
         function resetData() {
             if (confirm("Tem certeza que deseja resetar todos os dados da simulação?")) {
-                localStorage.removeItem('ADM_APP_STATE_V2');
+                localStorage.removeItem('ADM_APP_STATE_V3');
                 state = DEFAULT_STATE;
                 saveState();
                 render();
@@ -756,6 +800,7 @@
             renderCompaniesGrid();
             renderIncomesTable();
             renderExpensesTable();
+            renderInvestments();
             renderPayablesReceivables();
             renderLoans();
             renderEquity(company);
@@ -852,7 +897,6 @@
         function renderCompaniesGrid() {
             const grid = document.getElementById('companies-grid');
             grid.innerHTML = '';
-
             state.companies.forEach(c => {
                 const metrics = getCompanyMetrics(c.id);
                 const isSelected = c.id === state.activeCompanyId;
@@ -866,7 +910,6 @@
                         </div>
                         ${isSelected ? '<span class="text-[10px] bg-brand-100 text-brand-800 font-bold px-2 py-1 rounded-full">Ativa</span>' : ''}
                     </div>
-
                     <div class="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                         <div class="flex justify-between">
                             <span>Saldo em Caixa:</span>
@@ -877,7 +920,6 @@
                             <span>${formatBRL(c.initialCapital)}</span>
                         </div>
                     </div>
-
                     <div class="pt-2">
                         <button onclick="changeActiveCompany('${c.id}')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl text-xs font-bold transition">
                             ${isSelected ? 'Empresa Selecionada' : 'Gerenciar Empresa'}
@@ -892,12 +934,10 @@
             const tbody = document.getElementById('incomes-table-body');
             tbody.innerHTML = '';
             const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'income');
-
             if (txs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma receita registrada.</td></tr>';
                 return;
             }
-
             txs.forEach(t => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -924,12 +964,10 @@
             const tbody = document.getElementById('expenses-table-body');
             tbody.innerHTML = '';
             const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'expense');
-
             if (txs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma despesa registrada.</td></tr>';
                 return;
             }
-
             txs.forEach(t => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition";
@@ -949,6 +987,87 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+        }
+
+        function renderInvestments() {
+            const container = document.getElementById('investments-container');
+            container.innerHTML = '';
+            const invs = state.investments.filter(i => i            invs.forEach((inv, index) => {
+                const totalCost = inv.amount + inv.cost;
+                const netProfit = inv.return - totalCost;
+                const isProfitable = netProfit >= 0;
+
+                const div = document.createElement('div');
+                div.className = "azulejo p-5 space-y-4";
+                div.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-base">${inv.name}</h4>
+                            <span class="text-[10px] text-slate-400">Data do Projeto: ${inv.date}</span>
+                        </div>
+                        <span class="px-2.5 py-1 text-[10px] font-bold rounded-lg ${isProfitable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                            ${isProfitable ? 'Lucrativo' : 'Prejuízo Previsto'}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block">Aporte Inicial</span>
+                            <span class="font-bold text-amber-600">${formatBRL(inv.amount)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Custos Extras</span>
+                            <span class="font-bold text-rose-600">${formatBRL(inv.cost)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Receita Esperada</span>
+                            <span class="font-bold text-emerald-600">${formatBRL(inv.return)}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Lucro Líquido Estimado</span>
+                            <span class="font-bold ${isProfitable ? 'text-emerald-700' : 'text-rose-600'}">${formatBRL(netProfit)}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="h-40 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                            <canvas id="invChart_${index}"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="pt-1 flex justify-between items-center text-xs text-slate-500">
+                        <span>Status das Contas Vinculadas</span>
+                        <button onclick="deleteInvestment('${inv.id}')" class="text-rose-500 hover:underline font-semibold flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Excluir Projeto
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+
+                setTimeout(() => {
+                    const ctx = document.getElementById(`invChart_${index}`).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Total Investido/Custos', 'Receita Prevista', 'Lucro Líquido'],
+                            datasets: [{
+                                data: [totalCost, inv.return, netProfit],
+                                backgroundColor: ['#f43f5e', '#10b981', isProfitable ? '#3b82f6' : '#f59e0b'],
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                }, 50);
             });
         }
 
@@ -1148,6 +1267,7 @@
         function toggleIncomeModal(show) { document.getElementById('modal-income').classList.toggle('hidden', !show); }
         function toggleExpenseModal(show) { document.getElementById('modal-expense').classList.toggle('hidden', !show); }
         function toggleLoanModal(show) { document.getElementById('modal-loan').classList.toggle('hidden', !show); }
+        function toggleInvestmentModal(show) { document.getElementById('modal-investment').classList.toggle('hidden', !show); }
 
         function handleSaveCompany(e) {
             e.preventDefault();
@@ -1201,6 +1321,73 @@
             saveState();
             toggleExpenseModal(false);
             e.target.reset();
+            render();
+        }
+
+        function handleSaveInvestment(e) {
+            e.preventDefault();
+            const name = document.getElementById('inv-name').value;
+            const amount = parseFloat(document.getElementById('inv-amount').value) || 0;
+            const cost = parseFloat(document.getElementById('inv-cost').value) || 0;
+            const returnVal = parseFloat(document.getElementById('inv-return').value) || 0;
+            const date = document.getElementById('inv-date').value;
+
+            const investment = {
+                id: 'inv_' + Date.now(),
+                companyId: state.activeCompanyId,
+                name,
+                amount,
+                cost,
+                return: returnVal,
+                date
+            };
+
+            state.investments.push(investment);
+
+            state.transactions.push({
+                id: 'tx_inv_aport_' + Date.now(),
+                companyId: state.activeCompanyId,
+                type: 'expense',
+                description: `Aporte: ${name}`,
+                amount: amount,
+                category: 'Investimentos',
+                date: date,
+                status: 'pending'
+            });
+
+            if (cost > 0) {
+                state.transactions.push({
+                    id: 'tx_inv_cost_' + Date.now(),
+                    companyId: state.activeCompanyId,
+                    type: 'expense',
+                    description: `Custos Extras: ${name}`,
+                    amount: cost,
+                    category: 'Investimentos',
+                    date: date,
+                    status: 'pending'
+                });
+            }
+
+            state.transactions.push({
+                id: 'tx_inv_ret_' + Date.now(),
+                companyId: state.activeCompanyId,
+                type: 'income',
+                description: `Retorno Esperado: ${name}`,
+                amount: returnVal,
+                category: 'Investimentos',
+                date: date,
+                status: 'pending'
+            });
+
+            saveState();
+            toggleInvestmentModal(false);
+            e.target.reset();
+            render();
+        }
+
+        function deleteInvestment(id) {
+            state.investments = state.investments.filter(i => i.id !== id);
+            saveState();
             render();
         }
 

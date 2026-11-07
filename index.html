@@ -329,7 +329,7 @@
             <section id="sec-investments" class="space-y-6 hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900">Proetos de Investimento & Retorno</h3>
+                        <h3 class="text-lg font-bold text-slate-900">Projetos de Investimento & Retorno</h3>
                         <p class="text-xs text-slate-500">Aporte capital em qualquer valor, projete custos associados e acompanhe o lucro líquido</p>
                     </div>
                     <button onclick="toggleInvestmentModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
@@ -695,15 +695,40 @@
             currentRole: 'company',
             activeCompanyId: 'comp_1',
             companies: [
-                { id: 'comp_1', name: 'Alpha Inovações LTDA', segment: 'Tecnologia', initialCapital: 10000.00, createdAt: new Date().toISOString() },
-                { id: 'comp_2', name: 'Vanguard Comércio S.A.', segment: 'Varejo', initialCapital: 25000.00, createdAt: new Date().toISOString() }
+                { id: 'comp_1', name: 'Alpha Inovações LTDA', segment: 'Tecnologia', initialCapital: 15000.00, createdAt: new Date().toISOString() },
+                { id: 'comp_2', name: 'Vanguard Comércio S.A.', segment: 'Varejo', initialCapital: 30000.00, createdAt: new Date().toISOString() }
             ],
             transactions: [
-                { id: 'tx_1', companyId: 'comp_1', type: 'income', description: 'Venda de Software SaaS', amount: 5000.00, category: 'Vendas', date: new Date().toISOString().split('T')[0], status: 'received' },
-                { id: 'tx_2', companyId: 'comp_1', type: 'expense', description: 'Aluguel de Escritório', amount: 1500.00, category: 'Aluguel', date: new Date().toISOString().split('T')[0], status: 'paid' }
+                { id: 'tx_1', companyId: 'comp_1', type: 'income', description: 'Venda de Licença SaaS Corporativa', amount: 4500.00, category: 'Vendas', date: '2026-11-01', status: 'received' },
+                { id: 'tx_2', companyId: 'comp_1', type: 'expense', description: 'Aluguel do Coworking', amount: 1800.00, category: 'Aluguel', date: '2026-11-02', status: 'paid' },
+                { id: 'tx_3', companyId: 'comp_1', type: 'income', description: 'Consultoria de TI Aplicada', amount: 3200.00, category: 'Serviços', date: '2026-11-05', status: 'pending' },
+                { id: 'tx_4', companyId: 'comp_1', type: 'expense', description: 'Campanha de Marketing Digital', amount: 950.00, category: 'Marketing', date: '2026-11-06', status: 'pending' }
             ],
-            loans: [],
-            investments: []
+            loans: [
+                {
+                    id: 'loan_1',
+                    companyId: 'comp_1',
+                    lender: 'Banco Inova Brasil',
+                    amount: 10000.00,
+                    totalRepayable: 11500.00,
+                    outstanding: 11500.00,
+                    installmentsTotal: 10,
+                    installmentsPaid: 0,
+                    installmentAmount: 1150.00,
+                    date: '2026-10-15'
+                }
+            ],
+            investments: [
+                {
+                    id: 'inv_1',
+                    companyId: 'comp_1',
+                    name: 'Nova Plataforma Mobile',
+                    amount: 6000.00,
+                    cost: 800.00,
+                    return: 12000.00,
+                    date: '2026-11-03'
+                }
+            ]
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -713,7 +738,9 @@
             lucide.createIcons();
             
             const today = new Date().toISOString().split('T')[0];
-            document.querySelectorAll('input[type="date"]').forEach(inp => inp.value = today);
+            document.querySelectorAll('input[type="date"]').forEach(inp => {
+                if (!inp.value) inp.value = today;
+            });
         });
 
         function loadState() {
@@ -731,7 +758,7 @@
         }
 
         function resetData() {
-            if (confirm("Tem certeza que deseja resetar todos os dados da simulação?")) {
+            if (confirm("Tem certeza que deseja resetar a simulação para os dados fictícios iniciais?")) {
                 localStorage.removeItem('ADM_APP_STATE_V3');
                 state = DEFAULT_STATE;
                 saveState();
@@ -952,8 +979,8 @@
                         </span>
                     </td>
                     <td class="p-3 sm:p-4 text-right space-x-1">
-                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
-                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Confirmar Recebimento"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
+                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -974,7 +1001,7 @@
                 tr.innerHTML = `
                     <td class="p-3 sm:p-4 font-semibold text-slate-800">${t.description}</td>
                     <td class="p-3 sm:p-4 text-slate-600">${t.category}</td>
-                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
+                    <td class="                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
                     <td class="p-3 sm:p-4 font-bold text-rose-600">${formatBRL(t.amount)}</td>
                     <td class="p-3 sm:p-4">
                         <span class="px-2 py-1 text-[10px] font-bold rounded-lg ${t.status === 'paid' ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-800'}">
@@ -982,8 +1009,8 @@
                         </span>
                     </td>
                     <td class="p-3 sm:p-4 text-right space-x-1">
-                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
-                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Efetuar Pagamento"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
+                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -993,7 +1020,14 @@
         function renderInvestments() {
             const container = document.getElementById('investments-container');
             container.innerHTML = '';
-            const invs = state.investments.filter(i => i            invs.forEach((inv, index) => {
+            const invs = state.investments.filter(i => i.companyId === state.activeCompanyId);
+
+            if (invs.length === 0) {
+                container.innerHTML = '<div class="col-span-full azulejo p-8 text-center text-xs text-slate-400">Nenhum investimento cadastrado. Clique em "Novo Investimento" para começar.</div>';
+                return;
+            }
+
+            invs.forEach((inv, index) => {
                 const totalCost = inv.amount + inv.cost;
                 const netProfit = inv.return - totalCost;
                 const isProfitable = netProfit >= 0;

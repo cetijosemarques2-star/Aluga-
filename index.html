@@ -1,1505 +1,1395 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-slate-50">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADM — Simulador de Gestão Empresarial</title>
-    <!-- Tailwind CSS -->
+    <title>CONECTA VB — Várzea Branca, Piauí</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                            950: '#0f172a',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js -->
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para o Painel Financeiro -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .azulejo {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            border-radius: 1rem;
-            transition: all 0.2s ease-in-out;
+        .gradient-brand {
+            background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
         }
-        .azulejo:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-        }
-        .azulejo-primary {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-            color: #ffffff;
-            border-radius: 1rem;
-        }
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; color: black; }
-            .azulejo { border: 1px solid #ccc; box-shadow: none; }
+        .text-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
-<body class="h-full text-slate-800 flex flex-col md:flex-row overflow-x-hidden bg-slate-50">
+<body class="bg-white text-gray-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- OVERLAY BACKDROP FOR MOBILE MENU -->
-    <div id="sidebar-backdrop" onclick="closeSidebar()" class="fixed inset-0 bg-slate-900/60 z-40 hidden md:hidden transition-opacity"></div>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-200%] transition-transform duration-300">
+        <div class="bg-gray-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-medium">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <span id="toast-msg">Ação realizada com sucesso!</span>
+        </div>
+    </div>
 
-    <!-- SIDEBAR DRAWER -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-brand-950 text-white transform -translate-x-full md:translate-x-0 md:static md:w-64 transition-transform duration-300 ease-in-out flex flex-col justify-between shadow-xl">
-        <div>
-            <!-- BRANDING -->
-            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-brand-500/30">
-                        ADM
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight tracking-wide text-white">ADM SIMULADOR</h1>
-                        <p class="text-xs text-brand-200">Gestão & Empreendedorismo</p>
-                    </div>
+    <!-- HEADER / NAVBAR -->
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('inicio')">
+                <div class="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center text-white text-xl font-black shadow-md">
+                    VB
                 </div>
-                <button onclick="closeSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+                <div>
+                    <h1 class="font-black text-xl tracking-tight text-gray-900">CONECTA <span class="text-gradient">VB</span></h1>
+                    <p class="text-xs text-gray-500 font-medium">Várzea Branca — Piauí</p>
+                </div>
             </div>
 
-            <!-- NAVIGATION ITEMS -->
-            <nav class="p-3 space-y-1 text-sm font-medium">
-                <button onclick="nav('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white bg-brand-900 font-semibold">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-brand-500"></i> Visão Geral
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center space-x-1">
+                <button onclick="switchTab('inicio')" id="nav-btn-inicio" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 transition-all">Início</button>
+                <button onclick="switchTab('catalogo')" id="nav-btn-catalogo" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:text-emerald-700 hover:bg-gray-50 transition-all">Comércio Local</button>
+                <button onclick="switchTab('favoritos')" id="nav-btn-favoritos" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:text-emerald-700 hover:bg-gray-50 transition-all relative">
+                    Favoritos <span id="fav-badge" class="ml-1 bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
                 </button>
-                <button onclick="nav('companies')" id="nav-companies" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="building-2" class="w-5 h-5 text-brand-500"></i> Empresas
-                </button>
-                <button onclick="nav('incomes')" id="nav-incomes" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="arrow-up-right" class="w-5 h-5 text-emerald-400"></i> Receitas
-                </button>
-                <button onclick="nav('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="arrow-down-left" class="w-5 h-5 text-rose-400"></i> Despesas
-                </button>
-                <button onclick="nav('investments')" id="nav-investments" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="trending-up" class="w-5 h-5 text-amber-400"></i> Investimentos & Lucro
-                </button>
-                <button onclick="nav('payables')" id="nav-payables" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="receipt" class="w-5 h-5 text-brand-500"></i> Contas a Pagar / Receber
-                </button>
-                <button onclick="nav('loans')" id="nav-loans" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="landmark" class="w-5 h-5 text-brand-500"></i> Empréstimos
-                </button>
-                <button onclick="nav('equity')" id="nav-equity" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i> Patrimônio
-                </button>
-                <button onclick="nav('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-slate-300 hover:bg-brand-900 hover:text-white">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-brand-500"></i> Relatórios (DRE)
+                <button onclick="checkAdminAccess()" class="gradient-brand text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:opacity-95 transition-all ml-2">
+                    <i class="fa-solid fa-store mr-2"></i> Sou Comerciante
                 </button>
             </nav>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-gray-600 p-2"><i class="fa-solid fa-bars text-xl"></i></button>
         </div>
 
-        <div class="p-4 border-t border-slate-800 space-y-3">
-            <button onclick="resetData()" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-950/40 rounded-lg border border-rose-900/50 transition">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar Simulação
-            </button>
-            <div class="text-center text-[10px] text-slate-500">
-                ADM v2.5 • Módulo Investimentos
+        <!-- Mobile Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-2 border-t border-gray-100 bg-white">
+            <button onclick="switchTab('inicio'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">Início</button>
+            <button onclick="switchTab('catalogo'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">Comércio Local</button>
+            <button onclick="switchTab('favoritos'); toggleMobileMenu();" class="block w-full text-left px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">Favoritos</button>
+            <button onclick="checkAdminAccess(); toggleMobileMenu();" class="w-full gradient-brand text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm">Área do Comerciante</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- 1. SEÇÃO INÍCIO -->
+        <section id="tab-inicio" class="space-y-12">
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl gradient-brand text-white p-8 sm:p-12 overflow-hidden shadow-xl">
+                <div class="relative z-10 max-w-2xl space-y-6">
+                    <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Desenvolvimento Local & Comércio</span>
+                    <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">Fortalecendo os Negócios de Várzea Branca — PI</h2>
+                    <p class="text-white/90 text-sm sm:text-base leading-relaxed">Divulgue seus produtos, conecte-se com clientes pelo WhatsApp, gerencie suas finanças e simule o crescimento do seu empreendimento em um só lugar.</p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <button onclick="switchTab('catalogo')" class="bg-white text-blue-700 font-extrabold px-6 py-3 rounded-2xl shadow-lg hover:bg-gray-50 transition-all text-sm">
+                            <i class="fa-solid fa-store mr-2"></i> Explorar Vitrine
+                        </button>
+                        <button onclick="checkAdminAccess()" class="bg-blue-900/40 backdrop-blur-md border border-white/30 text-white font-bold px-6 py-3 rounded-2xl hover:bg-blue-900/60 transition-all text-sm">
+                            <i class="fa-solid fa-chart-line mr-2"></i> Acessar Painel
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </aside>
 
-    <!-- MAIN WRAPPER -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        
-        <!-- TOP HEADER NAVBAR -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 flex items-center justify-between gap-4 no-print shadow-sm">
-            <div class="flex items-center gap-3">
-                <button onclick="openSidebar()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-                    <i data-lucide="menu" class="w-6 h-6"></i>
-                </button>
+            <!-- Quick Features -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">Vitrine Digital</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Encontre produtos artesanais, alimentação e serviços locais com contato direto via WhatsApp.</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">Gestão Financeira</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Controle custos, despesas, margens de lucro e exporte relatórios comerciais práticos.</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">Simulador de Viabilidade</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed">Calcule ponto de equilíbrio, preços de venda e analise cenários de lucro para o seu negócio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SEÇÃO CATÁLOGO PÚBLICO -->
+        <section id="tab-catalogo" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 id="page-title" class="text-lg font-bold text-slate-900 leading-tight">Visão Geral</h2>
-                    <p id="page-subtitle" class="text-xs text-slate-500 hidden sm:block">Painel principal da empresa</p>
+                    <h2 class="text-2xl font-black text-gray-900">Vitrine do Comércio Local</h2>
+                    <p class="text-sm text-gray-500">Conectando compradores e comerciantes em Várzea Branca.</p>
                 </div>
-            </div>
-
-            <!-- CONTROLS: PERFIL & EMPRESA SELEÇÃO -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <div class="bg-slate-100 p-1 rounded-xl flex border border-slate-200">
-                    <button onclick="setRole('company')" id="btn-role-company" class="px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm">
-                        Admin Empresa
-                    </button>
-                    <button onclick="setRole('general')" id="btn-role-general" class="px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900">
-                        Admin Geral
-                    </button>
-                </div>
-
-                <div class="relative min-w-[140px] sm:min-w-[180px]">
-                    <select id="company-selector" onchange="changeActiveCompany(this.value)" class="w-full pl-3 pr-8 py-1.5 text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-slate-800">
+                <div class="flex flex-wrap items-center gap-3">
+                    <input type="text" id="catalog-search" oninput="renderCatalog()" placeholder="Buscar produtos..." class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                    <select id="catalog-category" onchange="renderCatalog()" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Vestuário">Vestuário</option>
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Serviços">Serviços</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                    <select id="catalog-sort" onchange="renderCatalog()" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        <option value="recentes">Mais Recentes</option>
+                        <option value="menor-preco">Menor Preço</option>
+                        <option value="maior-preco">Maior Preço</option>
                     </select>
                 </div>
             </div>
-        </header>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+            <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injetado via JS -->
+            </div>
+        </section>
 
-            <!-- ALERT BENCHMARK / IA BANNER -->
-            <div id="ai-insight-banner" class="azulejo p-4 sm:p-5 flex items-start gap-4 border-l-4 border-brand-600">
-                <div class="p-2.5 bg-brand-50 text-brand-600 rounded-xl flex-shrink-0">
-                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+        <!-- 3. SEÇÃO FAVORITOS -->
+        <section id="tab-favoritos" class="hidden space-y-8">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900">Meus Produtos Favoritos</h2>
+                <p class="text-sm text-gray-500">Lista rápida dos itens que você salvou para conferir depois.</p>
+            </div>
+            <div id="favorites-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injetado via JS -->
+            </div>
+        </section>
+
+        <!-- 4. PAINEL DO COMERCIANTE -->
+        <section id="tab-painel" class="hidden space-y-8">
+            <!-- Header do Painel -->
+            <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 rounded-2xl gradient-brand text-white flex items-center justify-center text-2xl font-bold shadow-md">
+                        <i class="fa-solid fa-shop"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black text-gray-900" id="merchant-welcome-name">Painel do Comerciante</h2>
+                        <p class="text-xs text-gray-500">Gerencie estoque, finanças e simule vendas.</p>
+                    </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        Diagnóstico Financeiro
-                        <span id="insight-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Saudável</span>
-                    </h4>
-                    <p id="insight-text" class="text-xs sm:text-sm text-slate-600 mt-1">Carregando análise...</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openProfileModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all"><i class="fa-solid fa-gear mr-1"></i> Configurações</button>
+                    <button onclick="logoutAdmin()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold px-4 py-2 rounded-xl text-xs transition-all"><i class="fa-solid fa-right-from-bracket mr-1"></i> Sair</button>
                 </div>
             </div>
 
-            <!-- SEÇÃO 1: DASHBOARD -->
-            <section id="sec-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                    <div class="azulejo-primary p-5 flex flex-col justify-between relative overflow-hidden shadow-md">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs uppercase tracking-wider text-brand-100 font-semibold">Saldo Atual</span>
-                                <h3 id="dash-balance" class="text-2xl sm:text-3xl font-extrabold mt-1">R$ 0,00</h3>
-                            </div>
-                            <div class="p-2 bg-white/10 rounded-xl backdrop-blur-md">
-                                <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs text-brand-100">
-                            <span>Capital Inicial</span>
-                            <span id="dash-initial-capital" class="font-bold">R$ 0,00</span>
-                        </div>
-                    </div>
-
-                    <div class="azulejo p-5 flex flex-col justify-between">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Receitas</span>
-                                <h3 id="dash-incomes" class="text-2xl sm:text-3xl font-bold mt-1 text-emerald-600">R$ 0,00</h3>
-                            </div>
-                            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                                <i data-lucide="trending-up" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-4">Total acumulado de entradas</p>
-                    </div>
-
-                    <div class="azulejo p-5 flex flex-col justify-between">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Despesas</span>
-                                <h3 id="dash-expenses" class="text-2xl sm:text-3xl font-bold mt-1 text-rose-600">R$ 0,00</h3>
-                            </div>
-                            <div class="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
-                                <i data-lucide="trending-down" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-4">Total acumulado de saídas</p>
-                    </div>
-
-                    <div class="azulejo p-5 flex flex-col justify-between">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Saldo Devedor Empréstimos</span>
-                                <h3 id="dash-loans-due" class="text-2xl sm:text-3xl font-bold mt-1 text-amber-600">R$ 0,00</h3>
-                            </div>
-                            <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
-                                <i data-lucide="landmark" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-4">Passivos bancários em aberto</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="azulejo p-5 lg:col-span-2">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-slate-900 text-base">Fluxo de Entradas vs Saídas</h3>
-                            <span class="text-xs text-slate-400">Comparativo Operacional</span>
-                        </div>
-                        <div class="h-64">
-                            <canvas id="financeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="azulejo p-5 flex flex-col">
-                        <h3 class="font-bold text-slate-900 text-base mb-3">Últimas Movimentações</h3>
-                        <div id="dash-recent-list" class="flex-1 space-y-3 overflow-y-auto max-h-64 pr-1">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 2: EMPRESAS -->
-            <section id="sec-companies" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Empresas Cadastradas</h3>
-                        <p class="text-xs text-slate-500">Gerencie e cadastre empresas no simulador</p>
-                    </div>
-                    <button onclick="toggleCompanyModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Cadastrar Nova Empresa
-                    </button>
-                </div>
-                <div id="companies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-            </section>
-
-            <!-- SEÇÃO 3: RECEITAS -->
-            <section id="sec-incomes" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Gestão de Receitas</h3>
-                        <p class="text-xs text-slate-500">Registre todas as vendas, serviços prestados e entradas</p>
-                    </div>
-                    <button onclick="toggleIncomeModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Nova Receita
-                    </button>
-                </div>
-                <div class="azulejo overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
-                            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3 sm:p-4">Descrição</th>
-                                    <th class="p-3 sm:p-4">Categoria</th>
-                                    <th class="p-3 sm:p-4">Data</th>
-                                    <th class="p-3 sm:p-4">Valor</th>
-                                    <th class="p-3 sm:p-4">Status</th>
-                                    <th class="p-3 sm:p-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="incomes-table-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 4: DESPESAS -->
-            <section id="sec-expenses" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Gestão de Despesas</h3>
-                        <p class="text-xs text-slate-500">Controle de saídas, fornecedores, salários e contas operacionais</p>
-                    </div>
-                    <button onclick="toggleExpenseModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Nova Despesa
-                    </button>
-                </div>
-                <div class="azulejo overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
-                            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3 sm:p-4">Descrição</th>
-                                    <th class="p-3 sm:p-4">Categoria</th>
-                                    <th class="p-3 sm:p-4">Vencimento</th>
-                                    <th class="p-3 sm:p-4">Valor</th>
-                                    <th class="p-3 sm:p-4">Status</th>
-                                    <th class="p-3 sm:p-4 text-right">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expenses-table-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 5: INVESTIMENTOS & LUCRO -->
-            <section id="sec-investments" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Projetos de Investimento & Retorno</h3>
-                        <p class="text-xs text-slate-500">Aporte capital em qualquer valor, projete custos associados e acompanhe o lucro líquido</p>
-                    </div>
-                    <button onclick="toggleInvestmentModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-                        <i data-lucide="trending-up" class="w-4 h-4"></i> Novo Investimento
-                    </button>
-                </div>
-
-                <div id="investments-container" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
-            </section>
-
-            <!-- SEÇÃO 6: CONTAS A PAGAR / RECEBER -->
-            <section id="sec-payables" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="azulejo p-5 space-y-4">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                                <i data-lucide="arrow-down-left" class="w-5 h-5 text-emerald-600"></i> Contas a Receber
-                            </h3>
-                            <span id="total-receivables" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
-                        </div>
-                        <div id="receivables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
-                    </div>
-
-                    <div class="azulejo p-5 space-y-4">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                                <i data-lucide="arrow-up-right" class="w-5 h-5 text-rose-600"></i> Contas a Pagar
-                            </h3>
-                            <span id="total-payables" class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">R$ 0,00</span>
-                        </div>
-                        <div id="payables-list" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 7: EMPRÉSTIMOS -->
-            <section id="sec-loans" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Empréstimos & Financiamentos</h3>
-                        <p class="text-xs text-slate-500">Solicite e administre empréstimos simulados com regras bancárias reais</p>
-                    </div>
-                    <button onclick="toggleLoanModal(true)" class="w-full sm:w-auto px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition">
-                        <i data-lucide="landmark" class="w-4 h-4"></i> Simular/Solicitar Empréstimo
-                    </button>
-                </div>
-                <div id="loans-container" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
-            </section>
-
-            <!-- SEÇÃO 8: PATRIMÔNIO -->
-            <section id="sec-equity" class="space-y-6 hidden">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-900">Balanço Patrimonial</h3>
-                    <p class="text-xs text-slate-500">Demonstração de bens (Ativos), obrigações (Passivos) e Patrimônio Líquido</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="azulejo p-5 space-y-4">
-                        <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
-                            <span>ATIVOS (Bens e Direitos)</span>
-                            <span id="bp-total-assets">R$ 0,00</span>
-                        </h4>
-                        <div class="space-y-3 text-xs sm:text-sm">
-                            <div class="font-semibold text-slate-700">Ativo Circulante</div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Caixa / Saldo em Conta</span>
-                                <span id="bp-cash" class="font-medium">R$ 0,00</span>
-                            </div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Contas a Receber</span>
-                                <span id="bp-receivables" class="font-medium">R$ 0,00</span>
-                            </div>
-                            <div class="font-semibold text-slate-700 pt-2">Ativo Não Circulante</div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Imobilizado & Máquinas (Estimado)</span>
-                                <span id="bp-fixed-assets" class="font-medium">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="azulejo p-5 space-y-4">
-                        <h4 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2 text-brand-700 flex justify-between">
-                            <span>PASSIVOS & PATRIMÔNIO LÍQUIDO</span>
-                            <span id="bp-total-liabilities-equity">R$ 0,00</span>
-                        </h4>
-                        <div class="space-y-3 text-xs sm:text-sm">
-                            <div class="font-semibold text-slate-700">Passivo Circulante</div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Contas a Pagar</span>
-                                <span id="bp-payables" class="font-medium">R$ 0,00</span>
-                            </div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Empréstimos Bancários</span>
-                                <span id="bp-loans" class="font-medium">R$ 0,00</span>
-                            </div>
-                            <div class="font-semibold text-slate-700 pt-2 border-t border-slate-100">Patrimônio Líquido</div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Capital Social Integralizado</span>
-                                <span id="bp-capital" class="font-medium">R$ 0,00</span>
-                            </div>
-                            <div class="flex justify-between pl-3 text-slate-600">
-                                <span>Lucros / Prejuízos Acumulados</span>
-                                <span id="bp-retained-earnings" class="font-medium">R$ 0,00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 9: RELATÓRIOS (DRE) -->
-            <section id="sec-reports" class="space-y-6 hidden">
-                <div class="flex justify-between items-center no-print">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900">Demonstrativo do Resultado do Exercício (DRE)</h3>
-                        <p class="text-xs text-slate-500">Relatório de desempenho financeiro acumulado</p>
-                    </div>
-                    <button onclick="window.print()" class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-brand-700 transition">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Imprimir DRE
-                    </button>
-                </div>
-                <div class="azulejo p-6 sm:p-8 space-y-4 max-w-3xl mx-auto">
-                    <div class="border-b border-slate-200 pb-4 text-center">
-                        <h2 id="dre-company-name" class="text-xl font-bold text-slate-900">NOME DA EMPRESA</h2>
-                        <p class="text-xs text-slate-500">Relatório Financeiro Operacional • DRE</p>
-                    </div>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between font-bold text-slate-800 border-b pb-1">
-                            <span>(+) Receita Bruta de Vendas / Serviços</span>
-                            <span id="dre-gross-revenue" class="text-emerald-600">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between text-slate-600 pl-4 border-b border-dashed pb-1">
-                            <span>(-) Custos Operacionais e Despesas Diretas</span>
-                            <span id="dre-operating-expenses" class="text-rose-600">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between font-extrabold text-base text-slate-900 bg-slate-100 p-2 rounded-lg">
-                            <span>(=) Resultado Operacional (Lucro / Prejuízo)</span>
-                            <span id="dre-operating-result">R$ 0,00</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- MODAIS -->
-    <div id="modal-company" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="azulejo w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-900 text-base">Nova Empresa Fictícia</h3>
-                <button onclick="toggleCompanyModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <!-- Subtabs Nav -->
+            <div class="flex flex-wrap gap-2 border-b border-gray-200 pb-4">
+                <button onclick="switchSubTab('produtos')" id="subtab-btn-produtos" class="subtab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">Meus Produtos & Estoque</button>
+                <button onclick="switchSubTab('financeiro')" id="subtab-btn-financeiro" class="subtab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-600 hover:bg-gray-50 transition-all">Gestão Financeira & Gráficos</button>
+                <button onclick="switchSubTab('calendario')" id="subtab-btn-calendario" class="subtab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-600 hover:bg-gray-50 transition-all">Registro de Vendas</button>
+                <button onclick="switchSubTab('calculadora')" id="subtab-btn-calculadora" class="subtab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-600 hover:bg-gray-50 transition-all">Calculadora Comercial</button>
+                <button onclick="switchSubTab('simulador')" id="subtab-btn-simulador" class="subtab-btn px-5 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-600 hover:bg-gray-50 transition-all">Simulador de Negócios</button>
             </div>
-            <form id="form-company" onsubmit="handleSaveCompany(event)" class="space-y-3 text-xs sm:text-sm">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nome Empresarial</label>
-                    <input type="text" id="comp-name" required placeholder="Ex: Tech Solutions LTDA" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+
+            <!-- SUBTAB: PRODUTOS -->
+            <div id="subtab-produtos" class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-900">Gerenciamento de Produtos</h3>
+                    <button onclick="openProductModal()" class="gradient-brand text-white font-semibold px-5 py-2.5 rounded-xl shadow-md hover:opacity-95 transition-all text-xs">
+                        <i class="fa-solid fa-plus mr-1"></i> Cadastrar Produto
+                    </button>
+                </div>
+                <div id="merchant-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Injetado via JS -->
+                </div>
+            </div>
+
+            <!-- SUBTAB: FINANCEIRO -->
+            <div id="subtab-financeiro" class="hidden space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Receita Geral</p>
+                        <h4 class="text-2xl font-extrabold text-emerald-600" id="kpi-receita">R$ 0,00</h4>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Custos Totais</p>
+                        <h4 class="text-2xl font-extrabold text-amber-600" id="kpi-custos">R$ 0,00</h4>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Despesas Operacionais</p>
+                        <h4 class="text-2xl font-extrabold text-rose-600" id="kpi-despesas">R$ 0,00</h4>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lucro Líquido</p>
+                        <h4 class="text-2xl font-extrabold text-blue-600" id="kpi-lucro">R$ 0,00</h4>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Capital Inicial</p>
+                        <h4 class="text-2xl font-extrabold text-gray-900" id="kpi-capital">R$ 0,00</h4>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                        <h4 class="font-bold text-gray-900 mb-4">Fluxo Financeiro (Receitas x Gastos)</h4>
+                        <div class="h-64"><canvas id="financeChart1"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                        <h4 class="font-bold text-gray-900 mb-4">Composição de Custos e Despesas</h4>
+                        <div class="h-64"><canvas id="financeChart2"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Lançamentos Table -->
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <span class="font-bold text-gray-900">Histórico de Lançamentos</span>
+                        <div class="flex gap-2">
+                            <button onclick="openExpenseModal()" class="gradient-brand text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs"><i class="fa-solid fa-plus mr-1"></i> Novo Lançamento</button>
+                            <button onclick="exportFinancialPDF()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-4 py-2 rounded-xl"><i class="fa-solid fa-download mr-1"></i> Exportar Relatório</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Tipo</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3">Valor</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenses-table-body" class="divide-y divide-gray-200">
+                                <!-- Injetado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBTAB: REGISTRO DE VENDAS -->
+            <div id="subtab-calendario" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Registrar Nova Venda</h3>
+                    <form onsubmit="handleSaleSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Data da Venda</label>
+                            <input type="date" id="sale-date" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Produto</label>
+                            <select id="sale-product" required class="w-full bg-gray-50 border border-gray-select id="sale-product" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                                <!-- Preenchido via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Quantidade</label>
+                            <input type="number" id="sale-qty" min="1" value="1" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Valor Total Recebido (R$)</label>
+                            <input type="number" step="0.01" id="sale-total" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição / Cliente</label>
+                            <input type="text" id="sale-desc" placeholder="Ex: Venda à vista para João" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div class="sm:col-span-2 flex items-end">
+                            <button type="submit" class="w-full gradient-brand text-white font-semibold px-6 py-2.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">
+                                <i class="fa-solid fa-cart-plus mr-2"></i> Registrar Venda (Baixa Automática no Estoque)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Histórico de Vendas -->
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <span class="font-bold text-gray-900">Histórico de Vendas Registradas</span>
+                        <select id="sales-filter-period" onchange="renderSales()" class="bg-gray-50 border border-gray-300 rounded-xl px-3 py-1.5 text-xs text-gray-900">
+                            <option value="todos">Todos os períodos</option>
+                            <option value="mes">Este mês</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-3">Data</th>
+                                    <th class="px-6 py-3">Produto</th>
+                                    <th class="px-6 py-3">Qtd</th>
+                                    <th class="px-6 py-3">Valor Total</th>
+                                    <th class="px-6 py-3">Descrição</th>
+                                    <th class="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body" class="divide-y divide-gray-200">
+                                <!-- Injetado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SUBTAB: CALCULADORA -->
+            <div id="subtab-calculadora" class="hidden space-y-6">
+                <div class="max-w-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 text-center">Calculadora Comercial</h3>
+                        <div class="mb-4">
+                            <input type="text" id="calc-screen" readonly class="w-full bg-gray-900 text-white text-right text-3xl font-mono px-4 py-4 rounded-2xl shadow-inner tracking-wider" value="0">
+                        </div>
+                        <div class="grid grid-cols-4 gap-3">
+                            <button onclick="calcClear()" class="bg-rose-100 text-rose-700 font-bold py-3.5 rounded-xl hover:bg-rose-200 transition-all">C</button>
+                            <button onclick="calcAppend('%')" class="bg-gray-100 text-gray-700 font-bold py-3.5 rounded-xl hover:bg-gray-200 transition-all">%</button>
+                            <button onclick="calcAppend('/')" class="bg-gray-100 text-gray-700 font-bold py-3.5 rounded-xl hover:bg-gray-200 transition-all">÷</button>
+                            <button onclick="calcAppend('*')" class="bg-blue-100 text-blue-700 font-bold py-3.5 rounded-xl hover:bg-blue-200 transition-all">×</button>
+
+                            <button onclick="calcAppend('7')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">7</button>
+                            <button onclick="calcAppend('8')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">8</button>
+                            <button onclick="calcAppend('9')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">9</button>
+                            <button onclick="calcAppend('-')" class="bg-blue-100 text-blue-700 font-bold py-3.5 rounded-xl hover:bg-blue-200 transition-all">-</button>
+
+                            <button onclick="calcAppend('4')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">4</button>
+                            <button onclick="calcAppend('5')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">5</button>
+                            <button onclick="calcAppend('6')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">6</button>
+                            <button onclick="calcAppend('+')" class="bg-blue-100 text-blue-700 font-bold py-3.5 rounded-xl hover:bg-blue-200 transition-all">+</button>
+
+                            <button onclick="calcAppend('1')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">1</button>
+                            <button onclick="calcAppend('2')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">2</button>
+                            <button onclick="calcAppend('3')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">3</button>
+                            <button onclick="calcCompute()" class="row-span-2 gradient-brand text-white font-bold py-3.5 rounded-xl shadow-md hover:opacity-95 transition-all flex items-center justify-center">=</button>
+
+                            <button onclick="calcAppend('0')" class="col-span-2 bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">0</button>
+                            <button onclick="calcAppend('.')" class="bg-gray-50 text-gray-800 font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-all">.</button>
+                        </div>
+                    </div>
+
+                    <!-- Histórico da Calculadora -->
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-bold text-gray-900">Histórico de Cálculos</h4>
+                            <button onclick="clearCalcHistory()" class="text-xs text-rose-600 hover:underline">Limpar</button>
+                        </div>
+                        <div id="calc-history-list" class="flex-grow space-y-2 overflow-y-auto max-h-80 text-sm font-mono text-gray-600">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. SUBTAB: SIMULADOR DE INVESTIMENTOS -->
+            <div id="subtab-simulador" class="hidden space-y-8">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Simulador de Viabilidade de Negócios</h3>
+                    <form onsubmit="handleSimulation(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Capital Disponível (R$)</label>
+                            <input type="number" step="0.01" id="sim-capital" value="1000" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Custo de Ingredientes/Matéria (R$)</label>
+                            <input type="number" step="0.01" id="sim-custo-unit" value="5.00" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Embalagens por Unidade (R$)</label>
+                            <input type="number" step="0.01" id="sim-embalagem" value="1.00" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Despesas Fixas Adicionais (R$)</label>
+                            <input type="number" step="0.01" id="sim-despesas" value="150.00" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Qtd. que Pretende Produzir</label>
+                            <input type="number" id="sim-qtd-produzir" value="200" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Preço de Venda Unitário (R$)</label>
+                            <input type="number" step="0.01" id="sim-preco-venda" value="15.00" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Qtd. Estimada de Vendas</label>
+                            <input type="number" id="sim-qtd-vendas" value="180" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full gradient-brand text-white font-semibold px-6 py-2.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">
+                                <i class="fa-solid fa-chart-line mr-2"></i> Simular Cenário
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Simulation Results -->
+                <div id="sim-results" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Investimento Necessário</p>
+                            <h4 class="text-2xl font-extrabold text-gray-900" id="res-investimento">R$ 0,00</h4>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Custo por Unidade</p>
+                            <h4 class="text-2xl font-extrabold text-amber-600" id="res-custo-unit">R$ 0,00</h4>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Receita Projetada</p>
+                            <h4 class="text-2xl font-extrabold text-emerald-600" id="res-receita">R$ 0,00</h4>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Lucro / Prejuízo</p>
+                            <h4 class="text-2xl font-extrabold" id="res-lucro">R$ 0,00</h4>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Margem de Lucro</p>
+                            <h4 class="text-xl font-extrabold text-blue-600" id="res-margem">0%</h4>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Ponto de Equilíbrio (Break-even)</p>
+                            <h4 class="text-xl font-extrabold text-purple-600" id="res-breakeven">0 unidades</h4>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Viabilidade</p>
+                            <h4 class="text-xl font-extrabold" id="res-status">-</h4>
+                        </div>
+                    </div>
+
+                    <!-- Cenários -->
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                        <h4 class="text-base font-bold text-gray-900 mb-4">Análise Comparativa de Cenários</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="scenarios-grid">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-100 mt-12 py-8 text-center text-sm text-gray-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-bold text-gray-700">CONECTA VB — Várzea Branca, Piauí</p>
+            <p class="mt-1">Plataforma de Comércio Local e Gestão Financeira para Empreendedores.</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: LOGIN / CADASTRO -->
+    <div id="auth-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-2xl gradient-brand text-white flex items-center justify-center text-2xl mx-auto mb-3 shadow-md">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-gray-900" id="auth-title">Área do Comerciante</h3>
+                <p class="text-gray-500 text-xs mt-1" id="auth-subtitle">Informe suas credenciais ou cadastre-se</p>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="auth-name-group" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Negócio / Comerciante</label>
+                    <input type="text" id="auth-input-name" placeholder="Ex: Loja da Maria" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Ramo de Atividade</label>
-                    <input type="text" id="comp-segment" required placeholder="Ex: Tecnologia, Comércio, Serviços" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Usuário / Login (ex: adm)</label>
+                    <input type="text" id="auth-input-user" required placeholder="Ex: adm" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Capital Inicial (R$)</label>
-                    <input type="number" step="0.01" id="comp-capital" required placeholder="10000.00" class="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Senha (ex: 123)</label>
+                    <input type="password" id="auth-input-pass" required placeholder="••••••" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                 </div>
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="toggleCompanyModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600 hover:bg-slate-50">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md">Salvar Empresa</button>
-                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full gradient-brand text-white font-bold py-3.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">Entrar no Painel</button>
             </form>
+
+            <div class="mt-6 text-center">
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs font-semibold text-blue-600 hover:underline">Não tem conta? Cadastre-se agora</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal-income" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="azulejo w-full max-w-md p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-900 text-base">Lançar Nova Receita</h3>
-                <button onclick="toggleIncomeModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <form id="form-income" onsubmit="handleSaveIncome(event)" class="space-y-3 text-xs sm:text-sm">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Descrição</label>
-                    <input type="text" id="inc-desc" required placeholder="Ex: Venda de produtos #102" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
+    <!-- MODAL: PRODUTO -->
+    <div id="product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl relative my-8">
+            <button onclick="closeProductModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-xl font-extrabold text-gray-900 mb-6" id="product-modal-title">Cadastrar Novo Produto</h3>
+
+            <form onsubmit="handleProductSubmit(event)" class="space-y-4">
+                <input type="hidden" id="prod-edit-id">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Valor (R$)</label>
-                        <input type="number" step="0.01" id="inc-amount" required placeholder="500.00" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Produto</label>
+                        <input type="text" id="prod-name" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Categoria</label>
-                        <select id="inc-category" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                            <option value="Vendas">Vendas</option>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria</label>
+                        <select id="prod-cat" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Vestuário">Vestuário</option>
+                            <option value="Eletrônicos">Eletrônicos</option>
                             <option value="Serviços">Serviços</option>
-                            <option value="Investimentos">Investimentos</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Data</label>
-                        <input type="date" id="inc-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" id="prod-price" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
-                        <select id="inc-status" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                            <option value="received">Recebido (Caixa)</option>
-                            <option value="pending">Pendente (A Receber)</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Qtd. em Estoque</label>
+                        <input type="number" id="prod-stock" min="0" value="10" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Localização</label>
+                        <input type="text" id="prod-location" value="Várzea Branca - PI" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                     </div>
                 </div>
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="toggleIncomeModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md">Confirmar Entrada</button>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Foto de Capa (Selecione do Dispositivo)</label>
+                    <input type="file" id="prod-img-file" accept="image/*" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 text-gray-900">
                 </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Link do WhatsApp para Contato (com DDD)</label>
+                    <input type="text" id="prod-whatsapp" placeholder="Ex: 5589999999999" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição Completa</label>
+                    <textarea id="prod-desc" rows="3" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"></textarea>
+                </div>
+
+                <button type="submit" class="w-full gradient-brand text-white font-bold py-3.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">Salvar Produto</button>
             </form>
         </div>
     </div>
 
-    <div id="modal-expense" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="azulejo w-full max-w-md p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-900 text-base">Lançar Nova Despesa</h3>
-                <button onclick="toggleExpenseModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <form id="form-expense" onsubmit="handleSaveExpense(event)" class="space-y-3 text-xs sm:text-sm">
+    <!-- MODAL: DADOS COMERCIAIS -->
+    <div id="profile-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+            <button onclick="closeProfileModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-xl font-extrabold text-gray-900 mb-6">Configurações Comerciais</h3>
+
+            <form onsubmit="handleProfileSubmit(event)" class="space-y-4">
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Descrição</label>
-                    <input type="text" id="exp-desc" required placeholder="Ex: Pagamento de Fornecedor" class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Negócio</label>
+                    <input type="text" id="prof-name" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Valor (R$)</label>
-                        <input type="number" step="0.01" id="exp-amount" required placeholder="250.00" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Categoria</label>
-                        <select id="exp-category" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                            <option value="Aluguel">Aluguel</option>
-                            <option value="Salários">Salários</option>
-                            <option value="Fornecedores">Fornecedores</option>
-                            <option value="Energia/Água">Energia/Água</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Horário de Funcionamento</label>
+                    <input type="text" id="prof-hours" placeholder="Ex: Seg a Sex, 08h às 18h" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Vencimento</label>
-                        <input type="date" id="exp-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
-                        <select id="exp-status" class="w-full p-2.5 border border-slate-300 rounded-xl">
-                            <option value="paid">Pago (Debitar Caixa)</option>
-                            <option value="pending">Pendente (A Pagar)</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">WhatsApp Principal</label>
+                    <input type="text" id="prof-whatsapp" placeholder="Ex: 5589999999999" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="toggleExpenseModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md">Confirmar Despesa</button>
-                </div>
+                <button type="submit" class="w-full gradient-brand text-white font-bold py-3.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">Salvar Alterações</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL DE INVESTIMENTO -->
-    <div id="modal-investment" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="azulejo w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-900 text-base">Novo Projeto de Investimento</h3>
-                <button onclick="toggleInvestmentModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <form id="form-investment" onsubmit="handleSaveInvestment(event)" class="space-y-3 text-xs sm:text-sm">
+    <!-- MODAL: LANÇAMENTO FINANCEIRO -->
+    <div id="expense-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
+            <button onclick="closeExpenseModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-xl font-extrabold text-gray-900 mb-6">Registrar Lançamento Financeiro</h3>
+
+            <form onsubmit="handleExpenseSubmit(event)" class="space-y-4">
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nome do Investimento / Projeto</label>
-                    <input type="text" id="inv-name" required placeholder="Ex: Expansão da Linha de Produção, Nova Filial, etc." class="w-full p-2.5 border border-slate-300 rounded-xl">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Lançamento</label>
+                    <select id="exp-type" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
+                        <option value="Custo">Custo (Gastos diretos com produtos)</option>
+                        <option value="Despesa">Despesa (Gastos operacionais do negócio)</option>
+                        <option value="Capital">Capital Inicial (Valor investido)</option>
+                    </select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Valor do Aporte (R$)</label>
-                        <input type="number" step="0.01" id="inv-amount" required placeholder="Ex: 5000.00" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-amber-600">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Custos Iniciais Extras (R$)</label>
-                        <input type="number" step="0.01" id="inv-cost" value="0" placeholder="Ex: 500.00" class="w-full p-2.5 border border-slate-300 rounded-xl text-rose-600">
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Data</label>
+                    <input type="date" id="exp-date" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Receita Esperada (R$)</label>
-                        <input type="number" step="0.01" id="inv-return" required placeholder="Ex: 8500.00" class="w-full p-2.5 border border-slate-300 rounded-xl text-emerald-600 font-bold">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Data Prevista</label>
-                        <input type="date" id="inv-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Descrição</label>
+                    <input type="text" id="exp-desc" placeholder="Ex: Compra de matéria-prima, Aluguel..." required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
-                <p class="text-[11px] text-slate-500 italic bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-                    💡 Ao criar o investimento, serão geradas automaticamente as <b>Contas a Pagar</b> (Aporte + Custos) e a <b>Conta a Receber</b> (Retorno previsto). Após quitar os custos e receber o valor, o <b>Lucro Líquido</b> será consolidado no balanço!
-                </p>
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="toggleInvestmentModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md">Simular & Cadastrar</button>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Valor (R$)</label>
+                    <input type="number" step="0.01" id="exp-val" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900">
                 </div>
+                <button type="submit" class="w-full gradient-brand text-white font-bold py-3.5 rounded-xl shadow-md hover:opacity-95 transition-all text-sm">Salvar Lançamento</button>
             </form>
         </div>
     </div>
 
-    <div id="modal-loan" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="azulejo w-full max-w-md p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-900 text-base">Solicitar / Registrar Empréstimo</h3>
-                <button onclick="toggleLoanModal(false)" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <form id="form-loan" onsubmit="handleSaveLoan(event)" class="space-y-3 text-xs sm:text-sm">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Instituição Credora</label>
-                    <input type="text" id="loan-lender" required placeholder="Ex: Banco Financeiro S.A." class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Valor Solicitado (R$)</label>
-                    <input type="number" step="0.01" id="loan-amount" required placeholder="Ex: 5000.00" class="w-full p-2.5 border border-slate-300 rounded-xl font-bold text-brand-700">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Taxa de Juros Total (%)</label>
-                        <input type="number" step="0.1" id="loan-rate" value="10" required class="w-full p-2.5 border border-slate-300 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Nº de Parcelas</label>
-                        <input type="number" id="loan-installments" value="6" min="1" required class="w-full p-2.5 border border-slate-300 rounded-xl">
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Data de Contratação</label>
-                    <input type="date" id="loan-date" required class="w-full p-2.5 border border-slate-300 rounded-xl">
-                </div>
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="toggleLoanModal(false)" class="w-1/2 py-2.5 border border-slate-300 rounded-xl font-bold text-slate-600">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md">Contratar Empréstimo</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT APP LOGIC -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        let state = {
-            currentRole: 'company',
-            activeCompanyId: null,
-            companies: [],
-            transactions: [],
-            loans: [],
-            investments: []
+        let db = JSON.parse(localStorage.getItem('conecta_vb_db_v3')) || {
+            currentUser: null,
+            isAuthModeRegister: false,
+            merchants: [
+                { user: 'adm', pass: '123', name: 'Comércio Exemplo VB', hours: 'Seg a Sáb, 08h às 18h', whatsapp: '5589999999999' }
+            ],
+            products: [
+                { id: '1', user: 'adm', name: 'Bolo Artesanal de Chocolate', cat: 'Alimentação', price: 45.00, stock: 12, location: 'Várzea Branca - PI', whatsapp: '5589999999999', desc: 'Bolo caseiro fresquinho, feito com ingredientes selecionados.', img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80' },
+                { id: '2', user: 'adm', name: 'Artesanato em Barro Regional', cat: 'Outros', price: 60.00, stock: 4, location: 'Várzea Branca - PI', whatsapp: '5589999999999', desc: 'Peça decorativa artesanal feita por ceramistas locais.', img: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=600&q=80' }
+            ],
+            sales: [
+                { id: '1', user: 'adm', date: '2026-11-01', product: 'Bolo Artesanal de Chocolate', qty: 2, total: 90.00, desc: 'Encomenda festiva' }
+            ],
+            expenses: [
+                { id: '1', user: 'adm', type: 'Capital', date: '2026-10-01', desc: 'Capital inicial investido', val: 1000.00 },
+                { id: '2', user: 'adm', type: 'Custo', date: '2026-11-02', desc: 'Ingredientes para bolos', val: 150.00 },
+                { id: '3', user: 'adm', type: 'Despesa', date: '2026-11-05', desc: 'Embalagens e sacolas', val: 60.00 }
+            ],
+            favorites: [],
+            calcHistory: []
         };
 
-        let chartInstance = null;
+        function saveDB() {
+            localStorage.setItem('conecta_vb_db_v3', JSON.stringify(db));
+        }
 
-        const DEFAULT_STATE = {
-            currentRole: 'company',
-            activeCompanyId: 'comp_1',
-            companies: [
-                { id: 'comp_1', name: 'Alpha Inovações LTDA', segment: 'Tecnologia', initialCapital: 15000.00, createdAt: new Date().toISOString() },
-                { id: 'comp_2', name: 'Vanguard Comércio S.A.', segment: 'Varejo', initialCapital: 30000.00, createdAt: new Date().toISOString() }
-            ],
-            transactions: [
-                { id: 'tx_1', companyId: 'comp_1', type: 'income', description: 'Venda de Licença SaaS Corporativa', amount: 4500.00, category: 'Vendas', date: '2026-11-01', status: 'received' },
-                { id: 'tx_2', companyId: 'comp_1', type: 'expense', description: 'Aluguel do Coworking', amount: 1800.00, category: 'Aluguel', date: '2026-11-02', status: 'paid' },
-                { id: 'tx_3', companyId: 'comp_1', type: 'income', description: 'Consultoria de TI Aplicada', amount: 3200.00, category: 'Serviços', date: '2026-11-05', status: 'pending' },
-                { id: 'tx_4', companyId: 'comp_1', type: 'expense', description: 'Campanha de Marketing Digital', amount: 950.00, category: 'Marketing', date: '2026-11-06', status: 'pending' }
-            ],
-            loans: [
-                {
-                    id: 'loan_1',
-                    companyId: 'comp_1',
-                    lender: 'Banco Inova Brasil',
-                    amount: 10000.00,
-                    totalRepayable: 11500.00,
-                    outstanding: 11500.00,
-                    installmentsTotal: 10,
-                    installmentsPaid: 0,
-                    installmentAmount: 1150.00,
-                    date: '2026-10-15'
-                }
-            ],
-            investments: [
-                {
-                    id: 'inv_1',
-                    companyId: 'comp_1',
-                    name: 'Nova Plataforma Mobile',
-                    amount: 6000.00,
-                    cost: 800.00,
-                    return: 12000.00,
-                    date: '2026-11-03'
-                }
-            ]
-        };
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-[-200%]');
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-200%]');
+            }, 3000);
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            initChart();
-            render();
-            lucide.createIcons();
-            
-            const today = new Date().toISOString().split('T')[0];
-            document.querySelectorAll('input[type="date"]').forEach(inp => {
-                if (!inp.value) inp.value = today;
+        // --- NAVIGATION TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(!btn.id.includes('favoritos')) {
+                    btn.classList.remove('bg-blue-50', 'text-blue-700');
+                    btn.classList.add('text-gray-600');
+                }
             });
+            if(tabId !== 'painel' && tabId !== 'favoritos') {
+                const activeBtn = document.getElementById('nav-btn-' + tabId);
+                if(activeBtn) {
+                    activeBtn.classList.add('bg-blue-50', 'text-blue-700');
+                    activeBtn.classList.remove('text-gray-600');
+                }
+            }
+
+            if(tabId === 'catalogo') renderCatalog();
+            if(tabId === 'favoritos') renderFavorites();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchSubTab(subId) {
+            document.querySelectorAll('#tab-painel > div:not(:first-child):not(.flex)').forEach(el => el.classList.add('hidden'));
+            document.getElementById('subtab-' + subId).classList.remove('hidden');
+
+            document.querySelectorAll('.subtab-btn').forEach(btn => {
+                btn.classList.remove('gradient-brand', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-white', 'text-gray-600');
+            });
+            const activeBtn = document.getElementById('subtab-btn-' + subId);
+            activeBtn.classList.add('gradient-brand', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('bg-white', 'text-gray-600');
+
+            if(subId === 'produtos') renderMerchantProducts();
+            if(subId === 'financeiro') { renderFinancials(); initCharts(); }
+            if(subId === 'calendario') renderSales();
+            if(subId === 'calculadora') renderCalcHistory();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- AUTH SYSTEM ---
+        function checkAdminAccess() {
+            if(!db.currentUser) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+            } else {
+                switchTab('painel');
+                switchSubTab('produtos');
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            db.isAuthModeRegister = !db.isAuthModeRegister;
+            const title = document.getElementById('auth-title');
+            const sub = document.getElementById('auth-subtitle');
+            const nameGrp = document.getElementById('auth-name-group');
+            const btn = document.getElementById('auth-submit-btn');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+
+            if(db.isAuthModeRegister) {
+                title.innerText = 'Cadastro de Comerciante';
+                sub.innerText = 'Crie sua conta para gerenciar seu negócio';
+                nameGrp.classList.remove('hidden');
+                btn.innerText = 'Cadastrar e Entrar';
+                toggleBtn.innerText = 'Já tem uma conta? Faça login';
+            } else {
+                title.innerText = 'Área do Comerciante';
+                sub.innerText = 'Informe suas credenciais ou cadastre-se';
+                nameGrp.classList.add('hidden');
+                btn.innerText = 'Entrar no Painel';
+                toggleBtn.innerText = 'Não tem conta? Cadastre-se agora';
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const user = document.getElementById('auth-input-user').value.trim();
+            const pass = document.getElementById('auth-input-pass').value.trim();
+            const name = document.getElementById('auth-input-name').value.trim();
+
+            if(db.isAuthModeRegister) {
+                if(db.merchants.some(m => m.user === user)) {
+                    alert('Este usuário já existe. Escolha outro.');
+                    return;
+                }
+                db.merchants.push({ user, pass, name: name || user, hours: 'Seg a Sex, 08h às 18h', whatsapp: '5589999999999' });
+                db.currentUser = user;
+                saveDB();
+                closeAuthModal();
+                showToast('Conta criada com sucesso!');
+                switchTab('painel');
+                switchSubTab('produtos');
+            } else {
+                const found = db.merchants.find(m => m.user === user && m.pass === pass);
+                if(found) {
+                    db.currentUser = user;
+                    saveDB();
+                    closeAuthModal();
+                    showToast('Bem-vindo de volta!');
+                    switchTab('painel');
+                    switchSubTab('produtos');
+                } else {
+                    alert('Usuário ou senha incorretos.');
+                }
+            }
+        }
+
+        function logoutAdmin() {
+            db.currentUser = null;
+            saveDB();
+            switchTab('inicio');
+            showToast('Sessão encerrada.');
+        }
+
+        // --- PUBLIC CATALOG, FAVORITES & SHARING ---
+        function toggleFavorite(id) {
+            if(db.favorites.includes(id)) {
+                db.favorites = db.favorites.filter(favId => favId !== id);
+                showToast('Removido dos favoritos.');
+            } else {
+                db.favorites.push(id);
+                showToast('Adicionado aos favoritos!');
+            }
+            saveDB();
+            updateFavBadge();
+            if(!document.getElementById('tab-catalogo').classList.contains('hidden')) renderCatalog();
+            if(!document.getElementById('tab-favoritos').classList.contains('hidden')) renderFavorites();
+        }
+
+        function updateFavBadge() {
+            document.getElementById('fav-badge').innerText = db.favorites.length;
+        }
+
+        function shareProduct(name, price) {
+            const text = `Confira este produto incrível em Várzea Branca–PI: *${name}* por apenas R$ ${price.toFixed(2)} no CONECTA VB!`;
+            if(navigator.share) {
+                navigator.share({ title: 'CONECTA VB', text: text, url: window.location.href }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(text);
+                showToast('Link e texto copiados para a área de transferência!');
+            }
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('catalog-grid');
+            const search = document.getElementById('catalog-search').value.toLowerCase();
+            const cat = document.getElementById('catalog-category').value;
+            const sort = document.getElementById('catalog-sort').value;
+
+            let filtered = db.products.filter(p => {
+                const matchSearch = p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search);
+                const matchCat = cat === '' || p.cat === cat;
+                return matchSearch && matchCat;
+            });
+
+            if(sort === 'menor-preco') filtered.sort((a,b) => a.price - b.price);
+            if(sort === 'maior-preco') filtered.sort((a,b) => b.price - a.price);
+            if(sort === 'recentes') filtered.sort((a,b) => parseInt(b.id) - parseInt(a.id));
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-open text-4xl mb-3"></i><p>Nenhum produto encontrado.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const isFav = db.favorites.includes(p.id);
+                const isOut = p.stock <= 0;
+                return `
+                    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col relative">
+                        <button onclick="toggleFavorite('${p.id}')" class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-rose-500 shadow-md hover:scale-105 transition-all">
+                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart text-lg"></i>
+                        </button>
+                        <div class="h-48 bg-gray-100 overflow-hidden relative">
+                            <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-bold px-3 py-1 rounded-full text-gray-800">${p.cat}</span>
+                            ${isOut ? '<span class="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold uppercase tracking-wider text-sm">Esgotado</span>' : ''}
+                        </div>
+                        <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-900 text-base line-clamp-1">${p.name}</h3>
+                                    <span class="font-extrabold text-blue-600 text-lg">R$ ${p.price.toFixed(2)}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-gray-500 mb-2">
+                                    <span><i class="fa-solid fa-location-dot mr-1 text-blue-600"></i> ${p.location}</span>
+                                    <span class="${p.stock <= 3 && p.stock > 0 ? 'text-amber-600 font-bold' : ''}Estoque: ${p.stock}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm line-clamp-2">${p.desc}</p>
+                            </div>
+                            <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                                <button onclick="shareProduct('${p.name}', ${p.price})" class="text-gray-500 hover:text-blue-600 text-xs font-semibold flex items-center gap-1" title="Compartilhar">
+                                    <i class="fa-solid fa-share-nodes"></i> Compartilhar
+                                </button>
+                                <a href="https://wa.me/${p.whatsapp}?text=Olá! Vi seu produto ${encodeURIComponent(p.name)} no CONECTA VB e tenho interesse." target="_blank" class="gradient-brand text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 hover:opacity-95">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderFavorites() {
+            const grid = document.getElementById('favorites-grid');
+            const favProducts = db.products.filter(p => db.favorites.includes(p.id));
+
+            if(favProducts.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-regular fa-heart text-4xl mb-3"></i><p>Você ainda não favoritou nenhum produto.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = favProducts.map(p => `
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col relative">
+                    <button onclick="toggleFavorite('${p.id}')" class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-rose-500 shadow-md">
+                        <i class="fa-solid fa-heart text-lg"></i>
+                    </button>
+                    <div class="h-48 bg-gray-100 overflow-hidden">
+                        <img src="${p.img}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="font-bold text-gray-900 text-base">${p.name}</h3>
+                            <span class="font-extrabold text-blue-600 text-lg">R$ ${p.price.toFixed(2)}</span>
+                            <p class="text-gray-600 text-sm line-clamp-2 mt-2">${p.desc}</p>
+                        </div>
+                        <a href="https://wa.me/${p.whatsapp}?text=Olá! Vi seu produto ${encodeURIComponent(p.name)} no CONECTA VB e tenho interesse." target="_blank" class="w-full gradient-brand text-white text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 hover:opacity-95">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> Contatar pelo WhatsApp
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- MERCHANT PRODUCTS CRUD ---
+        let currentImageBase64 = '';
+
+        document.getElementById('prod-img-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentImageBase64 = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         });
 
-        function loadState() {
-            const saved = localStorage.getItem('ADM_APP_STATE_V3');
-            if (saved) {
-                try { state = JSON.parse(saved); } catch(e) { state = DEFAULT_STATE; }
-            } else {
-                state = DEFAULT_STATE;
-                saveState();
-            }
-        }
-
-        function saveState() {
-            localStorage.setItem('ADM_APP_STATE_V3', JSON.stringify(state));
-        }
-
-        function resetData() {
-            if (confirm("Tem certeza que deseja resetar a simulação para os dados fictícios iniciais?")) {
-                localStorage.removeItem('ADM_APP_STATE_V3');
-                state = DEFAULT_STATE;
-                saveState();
-                render();
-            }
-        }
-
-        function openSidebar() {
-            document.getElementById('sidebar').classList.remove('-translate-x-full');
-            document.getElementById('sidebar-backdrop').classList.remove('hidden');
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-            document.getElementById('sidebar-backdrop').classList.add('hidden');
-        }
-
-        function nav(sectionId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            const target = document.getElementById(`sec-${sectionId}`);
-            if (target) target.classList.remove('hidden');
-
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-brand-900', 'text-white', 'font-semibold');
-                btn.classList.add('text-slate-300');
-            });
-            const activeBtn = document.getElementById(`nav-${sectionId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-brand-900', 'text-white', 'font-semibold');
-                activeBtn.classList.remove('text-slate-300');
-            }
-
-            closeSidebar();
-            render();
-        }
-
-        function setRole(role) {
-            state.currentRole = role;
-            const btnCompany = document.getElementById('btn-role-company');
-            const btnGeneral = document.getElementById('btn-role-general');
-
-            if (role === 'company') {
-                btnCompany.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm";
-                btnGeneral.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900";
-            } else {
-                btnGeneral.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition bg-white text-brand-700 shadow-sm";
-                btnCompany.className = "px-2 sm:px-3 py-1 rounded-lg text-xs font-semibold transition text-slate-600 hover:text-slate-900";
-            }
-
-            saveState();
-            render();
-        }
-
-        function changeActiveCompany(id) {
-            state.activeCompanyId = id;
-            saveState();
-            render();
-        }
-
-        function render() {
-            populateCompanySelector();
-            const company = state.companies.find(c => c.id === state.activeCompanyId) || state.companies[0];
-            if (!company) return;
-
-            renderDashboard(company);
-            renderCompaniesGrid();
-            renderIncomesTable();
-            renderExpensesTable();
-            renderInvestments();
-            renderPayablesReceivables();
-            renderLoans();
-            renderEquity(company);
-            renderReports(company);
-            renderAIBenchmark(company);
-
-            lucide.createIcons();
-        }
-
-        function populateCompanySelector() {
-            const selector = document.getElementById('company-selector');
-            selector.innerHTML = '';
-            state.companies.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.name;
-                if (c.id === state.activeCompanyId) opt.selected = true;
-                selector.appendChild(opt);
-            });
-        }
-
-        function getCompanyMetrics(companyId) {
-            const company = state.companies.find(c => c.id === companyId);
-            const initialCapital = company ? company.initialCapital : 0;
-
-            const compTxs = state.transactions.filter(t => t.companyId === companyId);
-            const compLoans = state.loans.filter(l => l.companyId === companyId);
-
-            const receivedIncomes = compTxs.filter(t => t.type === 'income' && t.status === 'received').reduce((s, t) => s + t.amount, 0);
-            const pendingIncomes = compTxs.filter(t => t.type === 'income' && t.status === 'pending').reduce((s, t) => s + t.amount, 0);
-
-            const paidExpenses = compTxs.filter(t => t.type === 'expense' && t.status === 'paid').reduce((s, t) => s + t.amount, 0);
-            const pendingExpenses = compTxs.filter(t => t.type === 'expense' && t.status === 'pending').reduce((s, t) => s + t.amount, 0);
-
-            const totalLoanPrincipalReceived = compLoans.reduce((s, l) => s + l.amount, 0);
-            const totalLoanOutstanding = compLoans.reduce((s, l) => s + l.outstanding, 0);
-
-            const currentCash = initialCapital + receivedIncomes + totalLoanPrincipalReceived - paidExpenses;
-            const operatingResult = receivedIncomes - paidExpenses;
-
-            return {
-                initialCapital,
-                receivedIncomes,
-                pendingIncomes,
-                paidExpenses,
-                pendingExpenses,
-                totalLoanOutstanding,
-                currentCash,
-                operatingResult
-            };
-        }
-
-        function renderDashboard(company) {
-            const metrics = getCompanyMetrics(company.id);
-
-            document.getElementById('dash-balance').textContent = formatBRL(metrics.currentCash);
-            document.getElementById('dash-initial-capital').textContent = formatBRL(metrics.initialCapital);
-            document.getElementById('dash-incomes').textContent = formatBRL(metrics.receivedIncomes);
-            document.getElementById('dash-expenses').textContent = formatBRL(metrics.paidExpenses);
-            document.getElementById('dash-loans-due').textContent = formatBRL(metrics.totalLoanOutstanding);
-
-            updateChart(metrics.receivedIncomes, metrics.paidExpenses);
-
-            const recentList = document.getElementById('dash-recent-list');
-            recentList.innerHTML = '';
-            const txs = state.transactions.filter(t => t.companyId === company.id).slice(-4).reverse();
-
-            if (txs.length === 0) {
-                recentList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhuma movimentação registrada.</p>';
-            } else {
-                txs.forEach(t => {
-                    const isInc = t.type === 'income';
-                    const div = document.createElement('div');
-                    div.className = "flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs";
-                    div.innerHTML = `
-                        <div class="flex items-center gap-2.5">
-                            <div class="p-2 rounded-lg ${isInc ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                                <i data-lucide="${isInc ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-slate-800">${t.description}</p>
-                                <p class="text-[10px] text-slate-400">${t.date}</p>
-                            </div>
-                        </div>
-                        <span class="font-bold ${isInc ? 'text-emerald-600' : 'text-rose-600'}">
-                            ${isInc ? '+' : '-'} ${formatBRL(t.amount)}
-                        </span>
-                    `;
-                    recentList.appendChild(div);
-                });
-            }
-        }
-
-        function renderCompaniesGrid() {
-            const grid = document.getElementById('companies-grid');
-            grid.innerHTML = '';
-            state.companies.forEach(c => {
-                const metrics = getCompanyMetrics(c.id);
-                const isSelected = c.id === state.activeCompanyId;
-                const div = document.createElement('div');
-                div.className = `azulejo p-5 space-y-4 ${isSelected ? 'border-2 border-brand-500' : ''}`;
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-base">${c.name}</h4>
-                            <span class="text-xs px-2 py-0.5 rounded-md bg-slate-100 font-medium text-slate-600">${c.segment}</span>
-                        </div>
-                        ${isSelected ? '<span class="text-[10px] bg-brand-100 text-brand-800 font-bold px-2 py-1 rounded-full">Ativa</span>' : ''}
-                    </div>
-                    <div class="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
-                        <div class="flex justify-between">
-                            <span>Saldo em Caixa:</span>
-                            <span class="font-bold text-slate-900">${formatBRL(metrics.currentCash)}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Capital Inicial:</span>
-                            <span>${formatBRL(c.initialCapital)}</span>
-                        </div>
-                    </div>
-                    <div class="pt-2">
-                        <button onclick="changeActiveCompany('${c.id}')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl text-xs font-bold transition">
-                            ${isSelected ? 'Empresa Selecionada' : 'Gerenciar Empresa'}
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
-        }
-
-        function renderIncomesTable() {
-            const tbody = document.getElementById('incomes-table-body');
-            tbody.innerHTML = '';
-            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'income');
-            if (txs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma receita registrada.</td></tr>';
-                return;
-            }
-            txs.forEach(t => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition";
-                tr.innerHTML = `
-                    <td class="p-3 sm:p-4 font-semibold text-slate-800">${t.description}</td>
-                    <td class="p-3 sm:p-4 text-slate-600">${t.category}</td>
-                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
-                    <td class="p-3 sm:p-4 font-bold text-emerald-600">${formatBRL(t.amount)}</td>
-                    <td class="p-3 sm:p-4">
-                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg ${t.status === 'received' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                            ${t.status === 'received' ? 'Recebido' : 'Pendente'}
-                        </span>
-                    </td>
-                    <td class="p-3 sm:p-4 text-right space-x-1">
-                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Confirmar Recebimento"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
-                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderExpensesTable() {
-            const tbody = document.getElementById('expenses-table-body');
-            tbody.innerHTML = '';
-            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.type === 'expense');
-            if (txs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">Nenhuma despesa registrada.</td></tr>';
-                return;
-            }
-            txs.forEach(t => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition";
-                tr.innerHTML = `
-                    <td class="p-3 sm:p-4 font-semibold text-slate-800">${t.description}</td>
-                    <td class="p-3 sm:p-4 text-slate-600">${t.category}</td>
-                    <td class="                    <td class="p-3 sm:p-4 text-slate-500">${t.date}</td>
-                    <td class="p-3 sm:p-4 font-bold text-rose-600">${formatBRL(t.amount)}</td>
-                    <td class="p-3 sm:p-4">
-                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg ${t.status === 'paid' ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-800'}">
-                            ${t.status === 'paid' ? 'Pago' : 'Pendente'}
-                        </span>
-                    </td>
-                    <td class="p-3 sm:p-4 text-right space-x-1">
-                        ${t.status === 'pending' ? `<button onclick="settleTx('${t.id}')" class="p-1 text-emerald-600 hover:bg-emerald-50 rounded" title="Efetuar Pagamento"><i data-lucide="check-circle" class="w-4 h-4"></i></button>` : ''}
-                        <button onclick="deleteTx('${t.id}')" class="p-1 text-rose-500 hover:bg-rose-50 rounded" title="Excluir"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function renderInvestments() {
-            const container = document.getElementById('investments-container');
-            container.innerHTML = '';
-            const invs = state.investments.filter(i => i.companyId === state.activeCompanyId);
-
-            if (invs.length === 0) {
-                container.innerHTML = '<div class="col-span-full azulejo p-8 text-center text-xs text-slate-400">Nenhum investimento cadastrado. Clique em "Novo Investimento" para começar.</div>';
-                return;
-            }
-
-            invs.forEach((inv, index) => {
-                const totalCost = inv.amount + inv.cost;
-                const netProfit = inv.return - totalCost;
-                const isProfitable = netProfit >= 0;
-
-                const div = document.createElement('div');
-                div.className = "azulejo p-5 space-y-4";
-                div.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-100 pb-3">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-base">${inv.name}</h4>
-                            <span class="text-[10px] text-slate-400">Data do Projeto: ${inv.date}</span>
-                        </div>
-                        <span class="px-2.5 py-1 text-[10px] font-bold rounded-lg ${isProfitable ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                            ${isProfitable ? 'Lucrativo' : 'Prejuízo Previsto'}
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <span class="text-slate-400 block">Aporte Inicial</span>
-                            <span class="font-bold text-amber-600">${formatBRL(inv.amount)}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Custos Extras</span>
-                            <span class="font-bold text-rose-600">${formatBRL(inv.cost)}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Receita Esperada</span>
-                            <span class="font-bold text-emerald-600">${formatBRL(inv.return)}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Lucro Líquido Estimado</span>
-                            <span class="font-bold ${isProfitable ? 'text-emerald-700' : 'text-rose-600'}">${formatBRL(netProfit)}</span>
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <div class="h-40 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                            <canvas id="invChart_${index}"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="pt-1 flex justify-between items-center text-xs text-slate-500">
-                        <span>Status das Contas Vinculadas</span>
-                        <button onclick="deleteInvestment('${inv.id}')" class="text-rose-500 hover:underline font-semibold flex items-center gap-1">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Excluir Projeto
-                        </button>
-                    </div>
-                `;
-                container.appendChild(div);
-
-                setTimeout(() => {
-                    const ctx = document.getElementById(`invChart_${index}`).getContext('2d');
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Total Investido/Custos', 'Receita Prevista', 'Lucro Líquido'],
-                            datasets: [{
-                                data: [totalCost, inv.return, netProfit],
-                                backgroundColor: ['#f43f5e', '#10b981', isProfitable ? '#3b82f6' : '#f59e0b'],
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                                x: { grid: { display: false } }
-                            }
-                        }
-                    });
-                }, 50);
-            });
-        }
-
-        function renderPayablesReceivables() {
-            const recList = document.getElementById('receivables-list');
-            const payList = document.getElementById('payables-list');
-            recList.innerHTML = '';
-            payList.innerHTML = '';
-
-            const txs = state.transactions.filter(t => t.companyId === state.activeCompanyId && t.status === 'pending');
-            const receivables = txs.filter(t => t.type === 'income');
-            const payables = txs.filter(t => t.type === 'expense');
-
-            document.getElementById('total-receivables').textContent = formatBRL(receivables.reduce((s, t) => s + t.amount, 0));
-            document.getElementById('total-payables').textContent = formatBRL(payables.reduce((s, t) => s + t.amount, 0));
-
-            if (receivables.length === 0) {
-                recList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhum recebimento pendente.</p>';
-            } else {
-                receivables.forEach(t => {
-                    const div = document.createElement('div');
-                    div.className = "p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex justify-between items-center text-xs";
-                    div.innerHTML = `
-                        <div>
-                            <p class="font-bold text-slate-800">${t.description}</p>
-                            <p class="text-[10px] text-slate-500">Vencimento: ${t.date}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-emerald-700">${formatBRL(t.amount)}</p>
-                            <button onclick="settleTx('${t.id}')" class="text-[10px] text-emerald-600 font-bold hover:underline">Confirmar Recebimento</button>
-                        </div>
-                    `;
-                    recList.appendChild(div);
-                });
-            }
-
-            if (payables.length === 0) {
-                payList.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Nenhum pagamento pendente.</p>';
-            } else {
-                payables.forEach(t => {
-                    const div = document.createElement('div');
-                    div.className = "p-3 bg-rose-50/50 border border-rose-100 rounded-xl flex justify-between items-center text-xs";
-                    div.innerHTML = `
-                        <div>
-                            <p class="font-bold text-slate-800">${t.description}</p>
-                            <p class="text-[10px] text-slate-500">Vencimento: ${t.date}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-rose-700">${formatBRL(t.amount)}</p>
-                            <button onclick="settleTx('${t.id}')" class="text-[10px] text-rose-600 font-bold hover:underline">Dar Baixa (Pagar)</button>
-                        </div>
-                    `;
-                    payList.appendChild(div);
-                });
-            }
-        }
-
-        function renderLoans() {
-            const container = document.getElementById('loans-container');
-            container.innerHTML = '';
-            const loans = state.loans.filter(l => l.companyId === state.activeCompanyId);
-
-            if (loans.length === 0) {
-                container.innerHTML = '<div class="col-span-full azulejo p-8 text-center text-xs text-slate-400">Nenhum empréstimo ativado para esta empresa.</div>';
-                return;
-            }
-
-            loans.forEach(l => {
-                const div = document.createElement('div');
-                div.className = "azulejo p-5 space-y-4";
-                div.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-100 pb-3">
-                        <div>
-                            <h4 class="font-bold text-slate-900 text-base">${l.lender}</h4>
-                            <span class="text-[10px] text-slate-400">Contratado em ${l.date}</span>
-                        </div>
-                        <span class="px-2 py-1 text-[10px] font-bold rounded-lg bg-amber-100 text-amber-800">Em Aberto</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <span class="text-slate-400 block">Valor Original</span>
-                            <span class="font-bold text-slate-800">${formatBRL(l.amount)}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Saldo Devedor</span>
-                            <span class="font-bold text-rose-600">${formatBRL(l.outstanding)}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Parcelas</span>
-                            <span class="font-semibold text-slate-700">${l.installmentsPaid} / ${l.installmentsTotal}</span>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 block">Valor Parcela</span>
-                            <span class="font-semibold text-slate-700">${formatBRL(l.installmentAmount)}</span>
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <button onclick="payLoanInstallment('${l.id}')" ${l.outstanding <= 0 ? 'disabled' : ''} class="w-full py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                            Amortizar / Pagar Parcela (${formatBRL(l.installmentAmount)})
-                        </button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function renderEquity(company) {
-            const metrics = getCompanyMetrics(company.id);
-
-            document.getElementById('bp-cash').textContent = formatBRL(metrics.currentCash);
-            document.getElementById('bp-receivables').textContent = formatBRL(metrics.pendingIncomes);
-            document.getElementById('bp-fixed-assets').textContent = formatBRL(0);
-
-            const totalAssets = metrics.currentCash + metrics.pendingIncomes;
-            document.getElementById('bp-total-assets').textContent = formatBRL(totalAssets);
-
-            document.getElementById('bp-payables').textContent = formatBRL(metrics.pendingExpenses);
-            document.getElementById('bp-loans').textContent = formatBRL(metrics.totalLoanOutstanding);
+        function renderMerchantProducts() {
+            const grid = document.getElementById('merchant-products-grid');
+            const myProducts = db.products.filter(p => p.user === db.currentUser);
             
-            document.getElementById('bp-capital').textContent = formatBRL(metrics.initialCapital);
-            document.getElementById('bp-retained-earnings').textContent = formatBRL(metrics.operatingResult);
+            const merchantObj = db.merchants.find(m => m.user === db.currentUser);
+            if(merchantObj) {
+                document.getElementById('merchant-welcome-name').innerText = 'Painel de ' + merchantObj.name;
+            }
 
-            const totalLiabilitiesEquity = metrics.pendingExpenses + metrics.totalLoanOutstanding + metrics.initialCapital + metrics.operatingResult;
-            document.getElementById('bp-total-liabilities-equity').textContent = formatBRL(totalLiabilitiesEquity);
+            if(myProducts.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400"><i class="fa-solid fa-box-archive text-4xl mb-3"></i><p>Você ainda não cadastrou nenhum produto.</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = myProducts.map(p => `
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
+                    <div class="h-40 bg-gray-100 relative">
+                        <img src="${p.img}" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 bg-white/90 text-xs font-bold px-2.5 py-1 rounded-full">${p.cat}</span>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                        <div>
+                            <h4 class="font-bold text-gray-900">${p.name}</h4>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-blue-600 font-extrabold text-sm">R$ ${p.price.toFixed(2)}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-md font-bold ${p.stock <= 3 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'}">Estoque: ${p.stock} un.</span>
+                            </div>
+                            <p class="text-gray-500 text-xs line-clamp-2 mt-1">${p.desc}</p>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                            <button onclick="editProduct('${p.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                            <button onclick="deleteProduct('${p.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1.5 rounded-lg"><i class="fa-solid fa-trash mr-1"></i> Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const prodSelect = document.getElementById('sale-product');
+            prodSelect.innerHTML = myProducts.map(p => `<option value="${p.name}">${p.name} (Estoque: ${p.stock})</option>`).join('');
         }
 
-        function renderReports(company) {
-            const metrics = getCompanyMetrics(company.id);
-            document.getElementById('dre-company-name').textContent = company.name.toUpperCase();
-            document.getElementById('dre-gross-revenue').textContent = formatBRL(metrics.receivedIncomes);
-            document.getElementById('dre-operating-expenses').textContent = formatBRL(metrics.paidExpenses);
-
-            const opResultEl = document.getElementById('dre-operating-result');
-            opResultEl.textContent = formatBRL(metrics.operatingResult);
-            opResultEl.className = metrics.operatingResult >= 0 ? "text-emerald-600 font-extrabold" : "text-rose-600 font-extrabold";
-        }
-
-        function renderAIBenchmark(company) {
-            const metrics = getCompanyMetrics(company.id);
-            const badge = document.getElementById('insight-badge');
-            const text = document.getElementById('insight-text');
-
-            if (metrics.currentCash < 0) {
-                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800";
-                badge.textContent = "Alerta de Caixa Negativo";
-                text.textContent = "Sua empresa está com saldo de caixa negativo. Considere reduzir custos ou antecipar recebíveis.";
-            } else if (metrics.totalLoanOutstanding > metrics.initialCapital * 1.5) {
-                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800";
-                badge.textContent = "Alerta de Endividamento";
-                text.textContent = "O passivo bancário está elevado em relação ao capital. Recomenda-se amortizar parcelas.";
-            } else if (metrics.operatingResult > 0) {
-                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
-                badge.textContent = "Operação Lucrativa";
-                text.textContent = "Excelente! As receitas estão superando as despesas operacionais.";
+        function openProductModal(editId = null) {
+            document.getElementById('product-modal').classList.remove('hidden');
+            currentImageBase64 = '';
+            if(editId) {
+                document.getElementById('product-modal-title').innerText = 'Editar Produto & Estoque';
+                const p = db.products.find(item => item.id === editId);
+                document.getElementById('prod-edit-id').value = p.id;
+                document.getElementById('prod-name').value = p.name;
+                document.getElementById('prod-cat').value = p.cat;
+                document.getElementById('prod-price').value = p.price;
+                document.getElementById('prod-stock').value = p.stock;
+                document.getElementById('prod-location').value = p.location;
+                document.getElementById('prod-whatsapp').value = p.whatsapp;
+                document.getElementById('prod-desc').value = p.desc;
+                currentImageBase64 = p.img;
             } else {
-                badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700";
-                badge.textContent = "Operação Estável";
-                text.textContent = "Continue monitorando os vencimentos e lançamentos.";
+                document.getElementById('product-modal-title').innerText = 'Cadastrar Novo Produto';
+                document.getElementById('prod-edit-id').value = '';
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-price').value = '';
+                document.getElementById('prod-stock').value = '10';
+                document.getElementById('prod-whatsapp').value = '';
+                document.getElementById('prod-desc').value = '';
+                document.getElementById('prod-img-file').value = '';
             }
         }
 
-        function initChart() {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
+        function closeProductModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('prod-edit-id').value;
+            const name = document.getElementById('prod-name').value;
+            const cat = document.getElementById('prod-cat').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const location = document.getElementById('prod-location').value;
+            const whatsapp = document.getElementById('prod-whatsapp').value;
+            const desc = document.getElementById('prod-desc').value;
+            const img = currentImageBase64 || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80';
+
+            if(editId) {
+                const p = db.products.find(item => item.id === editId);
+                p.name = name; p.cat = cat; p.price = price; p.stock = stock; p.location = location; p.whatsapp = whatsapp; p.desc = desc; p.img = img;
+                showToast('Produto e estoque atualizados!');
+            } else {
+                const newP = { id: Date.now().toString(), user: db.currentUser, name, cat, price, stock, location, whatsapp, desc, img };
+                db.products.push(newP);
+                showToast('Produto cadastrado com sucesso!');
+            }
+
+            saveDB();
+            closeProductModal();
+            renderMerchantProducts();
+        }
+
+        function editProduct(id) { openProductModal(id); }
+        function deleteProduct(id) {
+            if(confirm('Tem certeza que deseja excluir este produto?')) {
+                db.products = db.products.filter(p => p.id !== id);
+                saveDB();
+                renderMerchantProducts();
+                showToast('Produto excluído.');
+            }
+        }
+
+        // --- PROFILE MODAL ---
+        function openProfileModal() {
+            document.getElementById('profile-modal').classList.remove('hidden');
+            const m = db.merchants.find(item => item.user === db.currentUser);
+            if(m) {
+                document.getElementById('prof-name').value = m.name;
+                document.getElementById('prof-hours').value = m.hours || '';
+                document.getElementById('prof-whatsapp').value = m.whatsapp || '';
+            }
+        }
+        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
+        function handleProfileSubmit(e) {
+            e.preventDefault();
+            const m = db.merchants.find(item => item.user === db.currentUser);
+            if(m) {
+                m.name = document.getElementById('prof-name').value;
+                m.hours = document.getElementById('prof-hours').value;
+                m.whatsapp = document.getElementById('prof-whatsapp').value;
+                saveDB();
+                closeProfileModal();
+                showToast('Dados comerciais atualizados!');
+                renderMerchantProducts();
+            }
+        }
+
+        // --- FINANCIAL MANAGEMENT & EXPORT ---
+        function openExpenseModal() {
+            document.getElementById('expense-modal').classList.remove('hidden');
+            document.getElementById('exp-date').valueAsDate = new Date();
+        }
+        function closeExpenseModal() { document.getElementById('expense-modal').classList.add('hidden'); }
+
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            const type = document.getElementById('exp-type').value;
+            const date = document.getElementById('exp-date').value;
+            const desc = document.getElementById('exp-desc').value;
+            const val = parseFloat(document.getElementById('exp-val').value);
+
+            db.expenses.push({ id: Date.now().toString(), user: db.currentUser, type, date, desc, val });
+            saveDB();
+            closeExpenseModal();
+            renderFinancials();
+            initCharts();
+            showToast('Lançamento salvo com sucesso!');
+        }
+
+        function deleteExpense(id) {
+            db.expenses = db.expenses.filter(e => e.id !== id);
+            saveDB();
+            renderFinancials();
+            initCharts();
+            showToast('Lançamento removido.');
+        }
+
+        function exportFinancialPDF() {
+            const mySales = db.sales.filter(s => s.user === db.currentUser);
+            const myExpenses = db.expenses.filter(e => e.user === db.currentUser);
+            const totalReceita = mySales.reduce((acc, s) => acc + s.total, 0);
+            const totalCustos = myExpenses.filter(e => e.type === 'Custo').reduce((acc, e) => acc + e.val, 0);
+            const totalDespesas = myExpenses.filter(e => e.type === 'Despesa').reduce((acc, e) => acc + e.val, 0);
+            const lucro = totalReceita - (totalCustos + totalDespesas);
+
+            let content = `CONECTA VB - RELATÓRIO FINANCEIRO\n====================================\n\n`;
+            content += `Receita Geral: R$ ${totalReceita.toFixed(2)}\n`;
+            content += `Custos: R$ ${totalCustos.toFixed(2)}\n`;
+            content += `Despesas: R$ ${totalDespesas.toFixed(2)}\n`;
+            content += `Lucro Líquido: R$ ${lucro.toFixed(2)}\n\nLANÇAMENTOS:\n`;
+            
+            myExpenses.forEach(e => {
+                content += `[${e.date}] ${e.type}: ${e.desc} - R$ ${e.val.toFixed(2)}\n`;
+            });
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_Financeiro_ConectaVB.txt';
+            a.click();
+            showToast('Relatório exportado com sucesso!');
+        }
+
+        function renderFinancials() {
+            const mySales = db.sales.filter(s => s.user === db.currentUser);
+            const myExpenses = db.expenses.filter(e => e.user === db.currentUser);
+
+            const totalReceita = mySales.reduce((acc, s) => acc + s.total, 0);
+            const totalCustos = myExpenses.filter(e => e.type === 'Custo').reduce((acc, e) => acc + e.val, 0);
+            const totalDespesas = myExpenses.filter(e => e.type === 'Despesa').reduce((acc, e) => acc + e.val, 0);
+            const totalCapital = myExpenses.filter(e => e.type === 'Capital').reduce((acc, e) => acc + e.val, 0);
+            const lucroLiquido = totalReceita - (totalCustos + totalDespesas);
+
+            document.getElementById('kpi-receita').innerText = `R$ ${totalReceita.toFixed(2)}`;
+            document.getElementById('kpi-custos').innerText = `R$ ${totalCustos.toFixed(2)}`;
+            document.getElementById('kpi-despesas').innerText = `R$ ${totalDespesas.toFixed(2)}`;
+            const kpiLucro = document.getElementById('kpi-lucro');
+            kpiLucro.innerText = `R$ ${lucroLiquido.toFixed(2)}`;
+            kpiLucro.className = `text-2xl font-extrabold ${lucroLiquido >= 0 ? 'text-blue-600' : 'text-rose-600'}`;
+            document.getElementById('kpi-capital').innerText = `R$ ${totalCapital.toFixed(2)}`;
+
+            const tbody = document.getElementById('expenses-table-body');
+            const allItems = [
+                ...mySales.map(s => ({ id: s.id, date: s.date, type: 'Venda (Receita)', desc: s.product + ' (' + s.qty + 'x)', val: s.total, isSale: true })),
+                ...myExpenses.map(e => ({ id: e.id, date: e.date, type: e.type, desc: e.desc, val: e.val, isSale: false }))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if(allItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">Nenhum lançamento financeiro registrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = allItems.map(item => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium text-gray-900">${item.date}</td>
+                    <td class="px-6 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.isSale ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}">${item.type}</span></td>
+                    <td class="px-6 py-3 text-gray-600">${item.desc}</td>
+                    <td class="px-6 py-3 font-bold ${item.isSale ? 'text-blue-600' : 'text-rose-600'}">${item.isSale ? '+' : '-'} R$ ${item.val.toFixed(2)}</td>
+                    <td class="px-6 py-3 text-right">
+                        ${!item.isSale ? `<button onclick="deleteExpense('${item.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        let chart1Instance = null;
+        let chart2Instance = null;
+
+        function initCharts() {
+            const mySales = db.sales.filter(s => s.user === db.currentUser);
+            const myExpenses = db.expenses.filter(e => e.user === db.currentUser);
+
+            const totalReceita = mySales.reduce((acc, s) => acc + s.total, 0);
+            const totalCustos = myExpenses.filter(e => e.type === 'Custo').reduce((acc, e) => acc + e.val, 0);
+            const totalDespesas = myExpenses.filter(e => e.type === 'Despesa').reduce((acc, e) => acc + e.val, 0);
+
+            const ctx1 = document.getElementById('financeChart1').getContext('2d');
+            if(chart1Instance) chart1Instance.destroy();
+            chart1Instance = new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: ['Receitas Efetivadas', 'Despesas Pagas'],
+                    labels: ['Receita Geral', 'Custos', 'Despesas'],
                     datasets: [{
-                        label: 'Valores (R$)',
-                        data: [0, 0],
-                        backgroundColor: ['#10b981', '#f43f5e'],
-                        borderRadius: 8
+                        label: 'Valores em R$',
+                        data: [totalReceita, totalCustos, totalDespesas],
+                        backgroundColor: ['#2563eb', '#d97706', '#e11d48'],
+                        borderRadius: 12
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                        x: { grid: { display: false } }
-                    }
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const ctx2 = document.getElementById('financeChart2').getContext('2d');
+            if(chart2Instance) chart2Instance.destroy();
+            chart2Instance = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Custos de Produtos', 'Despesas Operacionais'],
+                    datasets: [{
+                        data: [totalCustos, totalDespesas],
+                        backgroundColor: ['#d97706', '#e11d48'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
 
-        function updateChart(inc, exp) {
-            if (chartInstance) {
-                chartInstance.data.datasets[0].data = [inc, exp];
-                chartInstance.update();
-            }
-        }
-
-        function toggleCompanyModal(show) { document.getElementById('modal-company').classList.toggle('hidden', !show); }
-        function toggleIncomeModal(show) { document.getElementById('modal-income').classList.toggle('hidden', !show); }
-        function toggleExpenseModal(show) { document.getElementById('modal-expense').classList.toggle('hidden', !show); }
-        function toggleLoanModal(show) { document.getElementById('modal-loan').classList.toggle('hidden', !show); }
-        function toggleInvestmentModal(show) { document.getElementById('modal-investment').classList.toggle('hidden', !show); }
-
-        function handleSaveCompany(e) {
+        // --- CALENDAR & SALES ---
+        function handleSaleSubmit(e) {
             e.preventDefault();
-            const newComp = {
-                id: 'comp_' + Date.now(),
-                name: document.getElementById('comp-name').value,
-                segment: document.getElementById('comp-segment').value,
-                initialCapital: parseFloat(document.getElementById('comp-capital').value) || 0,
-                createdAt: new Date().toISOString()
-            };
-            state.companies.push(newComp);
-            state.activeCompanyId = newComp.id;
-            saveState();
-            toggleCompanyModal(false);
-            e.target.reset();
-            render();
-        }
+            const date = document.getElementById('sale-date').value;
+            const productName = document.getElementById('sale-product').value;
+            const qty = parseInt(document.getElementById('sale-qty').value);
+            const total = parseFloat(document.getElementById('sale-total').value);
+            const desc = document.getElementById('sale-desc').value;
 
-        function handleSaveIncome(e) {
-            e.preventDefault();
-            const tx = {
-                id: 'tx_' + Date.now(),
-                companyId: state.activeCompanyId,
-                type: 'income',
-                description: document.getElementById('inc-desc').value,
-                amount: parseFloat(document.getElementById('inc-amount').value) || 0,
-                category: document.getElementById('inc-category').value,
-                date: document.getElementById('inc-date').value,
-                status: document.getElementById('inc-status').value
-            };
-            state.transactions.push(tx);
-            saveState();
-            toggleIncomeModal(false);
-            e.target.reset();
-            render();
-        }
-
-        function handleSaveExpense(e) {
-            e.preventDefault();
-            const tx = {
-                id: 'tx_' + Date.now(),
-                companyId: state.activeCompanyId,
-                type: 'expense',
-                description: document.getElementById('exp-desc').value,
-                amount: parseFloat(document.getElementById('exp-amount').value) || 0,
-                category: document.getElementById('exp-category').value,
-                date: document.getElementById('exp-date').value,
-                status: document.getElementById('exp-status').value
-            };
-            state.transactions.push(tx);
-            saveState();
-            toggleExpenseModal(false);
-            e.target.reset();
-            render();
-        }
-
-        function handleSaveInvestment(e) {
-            e.preventDefault();
-            const name = document.getElementById('inv-name').value;
-            const amount = parseFloat(document.getElementById('inv-amount').value) || 0;
-            const cost = parseFloat(document.getElementById('inv-cost').value) || 0;
-            const returnVal = parseFloat(document.getElementById('inv-return').value) || 0;
-            const date = document.getElementById('inv-date').value;
-
-            const investment = {
-                id: 'inv_' + Date.now(),
-                companyId: state.activeCompanyId,
-                name,
-                amount,
-                cost,
-                return: returnVal,
-                date
-            };
-
-            state.investments.push(investment);
-
-            state.transactions.push({
-                id: 'tx_inv_aport_' + Date.now(),
-                companyId: state.activeCompanyId,
-                type: 'expense',
-                description: `Aporte: ${name}`,
-                amount: amount,
-                category: 'Investimentos',
-                date: date,
-                status: 'pending'
-            });
-
-            if (cost > 0) {
-                state.transactions.push({
-                    id: 'tx_inv_cost_' + Date.now(),
-                    companyId: state.activeCompanyId,
-                    type: 'expense',
-                    description: `Custos Extras: ${name}`,
-                    amount: cost,
-                    category: 'Investimentos',
-                    date: date,
-                    status: 'pending'
-                });
-            }
-
-            state.transactions.push({
-                id: 'tx_inv_ret_' + Date.now(),
-                companyId: state.activeCompanyId,
-                type: 'income',
-                description: `Retorno Esperado: ${name}`,
-                amount: returnVal,
-                category: 'Investimentos',
-                date: date,
-                status: 'pending'
-            });
-
-            saveState();
-            toggleInvestmentModal(false);
-            e.target.reset();
-            render();
-        }
-
-        function deleteInvestment(id) {
-            state.investments = state.investments.filter(i => i.id !== id);
-            saveState();
-            render();
-        }
-
-        function handleSaveLoan(e) {
-            e.preventDefault();
-            const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
-            const rate = parseFloat(document.getElementById('loan-rate').value) || 0;
-            const installments = parseInt(document.getElementById('loan-installments').value) || 1;
-
-            const totalRepayable = amount * (1 + (rate / 100));
-            const installmentAmount = totalRepayable / installments;
-
-            const loan = {
-                id: 'loan_' + Date.now(),
-                companyId: state.activeCompanyId,
-                lender: document.getElementById('loan-lender').value,
-                amount: amount,
-                totalRepayable: totalRepayable,
-                outstanding: totalRepayable,
-                installmentsTotal: installments,
-                installmentsPaid: 0,
-                installmentAmount: installmentAmount,
-                date: document.getElementById('loan-date').value
-            };
-
-            state.loans.push(loan);
-            saveState();
-            toggleLoanModal(false);
-            e.target.reset();
-            render();
-        }
-
-        function settleTx(id) {
-            const tx = state.transactions.find(t => t.id === id);
-            if (tx) {
-                tx.status = tx.type === 'income' ? 'received' : 'paid';
-                saveState();
-                render();
-            }
-        }
-
-        function deleteTx(id) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
-            saveState();
-            render();
-        }
-
-        function payLoanInstallment(loanId) {
-            const loan = state.loans.find(l => l.id === loanId);
-            if (loan && loan.outstanding > 0) {
-                const metrics = getCompanyMetrics(loan.companyId);
-                if (metrics.currentCash < loan.installmentAmount) {
-                    alert("Saldo em caixa insuficiente para pagar esta parcela de empréstimo.");
+            const prod = db.products.find(p => p.name === productName && p.user === db.currentUser);
+            if(prod) {
+                if(prod.stock < qty) {
+                    alert(`Estoque insuficiente! Restam apenas ${prod.stock} unidades de ${prod.name}.`);
                     return;
                 }
+                prod.stock -= qty;
+            }
 
-                state.transactions.push({
-                    id: 'tx_' + Date.now(),
-                    companyId: loan.companyId,
-                    type: 'expense',
-                    description: `Parcela Empréstimo - ${loan.lender}`,
-                    amount: loan.installmentAmount,
-                    category: 'Outros',
-                    date: new Date().toISOString().split('T')[0],
-                    status: 'paid'
-                });
+            db.sales.push({ id: Date.now().toString(), user: db.currentUser, date, product: productName, qty, total, desc });
+            saveDB();
+            renderSales();
+            showToast('Venda registrada e estoque atualizado!');
+            e.target.reset();
+            document.getElementById('sale-date').valueAsDate = new Date();
+        }
 
-                loan.outstanding = Math.max(0, loan.outstanding - loan.installmentAmount);
-                loan.installmentsPaid += 1;
+        function deleteSale(id) {
+            db.sales = db.sales.filter(s => s.id !== id);
+            saveDB();
+            renderSales();
+            showToast('Venda removida.');
+        }
 
-                saveState();
-                render();
+        function renderSales() {
+            const tbody = document.getElementById('sales-table-body');
+            const periodFilter = document.getElementById('sales-filter-period').value;
+            let mySales = db.sales.filter(s => s.user === db.currentUser);
+
+            if(periodFilter === 'mes') {
+                const currentMonth = new Date().toISOString().slice(0, 7);
+                mySales = mySales.filter(s => s.date.startsWith(currentMonth));
+            }
+
+            mySales.sort((a,b) => new Date(b.date) - new Date(a.date));
+            document.getElementById('sale-date').valueAsDate = new Date();
+
+            if(mySales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-gray-400">Nenhuma venda encontrada.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = mySales.map(s => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-3 font-medium text-gray-900">${s.date}</td>
+                    <td class="px-6 py-3 text-gray-800 font-semibold">${s.product}</td>
+                    <td class="px-6 py-3 text-gray-600">${s.qty}</td>
+                    <td class="px-6 py-3 font-bold text-blue-600">R$ ${s.total.toFixed(2)}</td>
+                    <td class="px-6 py-3 text-gray-500">${s.desc || '-'}</td>
+                    <td class="px-6 py-3 text-right">
+                        <button onclick="deleteSale('${s.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- CALCULATOR ---
+        let calcValue = '0';
+
+        function calcAppend(val) {
+            if(calcValue === '0' && !['+', '-', '*', '/', '%', '.'].includes(val)) {
+                calcValue = val;
+            } else {
+                calcValue += val;
+            }
+            document.getElementById('calc-screen').value = calcValue;
+        }
+
+        function calcClear() {
+            calcValue = '0';
+            document.getElementById('calc-screen').value = calcValue;
+        }
+
+        function calcCompute() {
+            try {
+                let expr = calcValue.replace(/%/g, '/100');
+                let res = eval(expr);
+                const operation = `${calcValue} = ${res}`;
+                calcValue = res.toString();
+                document.getElementById('calc-screen').value = calcValue;
+
+                db.calcHistory.unshift(operation);
+                if(db.calcHistory.length > 20) db.calcHistory.pop();
+                saveDB();
+                renderCalcHistory();
+            } catch(err) {
+                document.getElementById('calc-screen').value = 'Erro';
+                calcValue = '0';
             }
         }
 
-        function formatBRL(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+        function clearCalcHistory() {
+            db.calcHistory = [];
+            saveDB();
+            renderCalcHistory();
         }
+
+        function renderCalcHistory() {
+            const list = document.getElementById('calc-history-list');
+            if(db.calcHistory.length === 0) {
+                list.innerHTML = `<p class="text-gray-400 text-center py-4">Nenhum cálculo recente.</p>`;
+                return;
+            }
+            list.innerHTML = db.calcHistory.map(item => `<div class="p-2 bg-gray-50 rounded-lg border border-gray-100">${item}</div>`).join('');
+        }
+
+        // --- SIMULATOR ---
+        function handleSimulation(e) {
+            e.preventDefault();
+            const capital = parseFloat(document.getElementById('sim-capital').value);
+            const custoUnit = parseFloat(document.getElementById('sim-custo-unit').value);
+            const embalagem = parseFloat(document.getElementById('sim-embalagem').value);
+            const despesas = parseFloat(document.getElementById('sim-despesas').value);
+            const qtdProduzir = parseInt(document.getElementById('sim-qtd-produzir').value);
+            const precoVenda = parseFloat(document.getElementById('sim-preco-venda').value);
+            const qtdVendas = parseInt(document.getElementById('sim-qtd-vendas').value);
+
+            const totalCustoUnitario = custoUnit + embalagem;
+            const investimentoNecessario = (totalCustoUnitario * qtdProduzir) + despesas;
+            const receitaProjetada = precoVenda * qtdVendas;
+            const custoTotalVendas = (totalCustoUnitario * qtdVendas) + despesas;
+            const lucroLiquido = receitaProjetada - custoTotalVendas;
+            const margemLucro = receitaProjetada > 0 ? (lucroLiquido / receitaProjetada) * 100 : 0;
+            
+            const margemContribuicaoUnit = precoVenda - totalCustoUnitario;
+            const breakEven = margemContribuicaoUnit > 0 ? Math.ceil(despesas / margemContribuicaoUnit) : 0;
+
+            document.getElementById('res-investimento').innerText = `R$ ${investimentoNecessario.toFixed(2)}`;
+            document.getElementById('res-custo-unit').innerText = `R$ ${totalCustoUnitario.toFixed(2)}`;
+            document.getElementById('res-receita').innerText = `R$ ${receitaProjetada.toFixed(2)}`;
+            
+            const resLucro = document.getElementById('res-lucro');
+            resLucro.innerText = `R$ ${lucroLiquido.toFixed(2)}`;
+            resLucro.className = `text-2xl font-extrabold ${lucroLiquido >= 0 ? 'text-blue-600' : 'text-rose-600'}`;
+
+            document.getElementById('res-margem').innerText = `${margemLucro.toFixed(1)}%`;
+            document.getElementById('res-breakeven').innerText = `${breakEven} unidades`;
+
+            const resStatus = document.getElementById('res-status');
+            if(lucroLiquido > 0) {
+                resStatus.innerText = 'Altamente Viável';
+                resStatus.className = 'text-xl font-extrabold text-blue-600';
+            } else {
+                resStatus.innerText = 'Ajustar Preços / Custos';
+                resStatus.className = 'text-xl font-extrabold text-rose-600';
+            }
+
+            const otimistaQtd = Math.round(qtdVendas * 1.2);
+            const otimistaLucro = (precoVenda * otimistaQtd) - ((totalCustoUnitario * otimistaQtd) + despesas);
+
+            const moderadoQtd = qtdVendas;
+            const moderadoLucro = lucroLiquido;
+
+            const conservadorQtd = Math.round(qtdVendas * 0.8);
+            const conservadorLucro = (precoVenda * conservadorQtd) - ((totalCustoUnitario * conservadorQtd) + despesas);
+
+            document.getElementById('scenarios-grid').innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <h5 class="font-bold text-blue-800 mb-1"><i class="fa-solid fa-arrow-trend-up mr-1"></i> Otimista (+20%)</h5>
+                    <p class="text-xs text-gray-600">Vendas: ${otimistaQtd} un.</p>
+                    <p class="text-sm font-extrabold text-blue-700 mt-2">Lucro: R$ ${otimistaLucro.toFixed(2)}</p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                    <h5 class="font-bold text-indigo-800 mb-1"><i class="fa-solid fa-scale-balanced mr-1"></i> Moderado (Esperado)</h5>
+                    <p class="text-xs text-gray-600">Vendas: ${moderadoQtd} un.</p>
+                    <p class="text-sm font-extrabold text-indigo-700 mt-2">Lucro: R$ ${moderadoLucro.toFixed(2)}</p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <h5 class="font-bold text-amber-800 mb-1"><i class="fa-solid fa-arrow-trend-down mr-1"></i> Conservador (-20%)</h5>
+                    <p class="text-xs text-gray-600">Vendas: ${conservadorQtd} un.</p>
+                    <p class="text-sm font-extrabold text-amber-700 mt-2">Lucro: R$ ${conservadorLucro.toFixed(2)}</p>
+                </div>
+            `;
+
+            document.getElementById('sim-results').classList.remove('hidden');
+        }
+
+        // Inicialização
+        updateFavBadge();
+        renderCatalog();
     </script>
 </body>
 </html>
+    
